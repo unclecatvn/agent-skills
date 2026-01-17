@@ -1,3 +1,21 @@
+---
+name: odoo-18-controller
+description: Complete reference for Odoo 18 HTTP controllers, routing, authentication types, and request/response handling.
+topics:
+  - Controller basics (class structure, request object)
+  - @route decorator (URL parameters, route options, multiroute)
+  - Authentication types (auth='user', 'public', 'none')
+  - Request/Response types (type='http', type='json')
+  - CSRF handling (protection, disable, tokens)
+  - Common patterns (JSON endpoints, file download, website pages, API endpoints, error handling)
+when_to_use:
+  - Writing HTTP controllers
+  - Creating API endpoints
+  - Building website pages
+  - Handling webhooks
+  - Implementing file downloads
+---
+
 # Odoo 18 Controller Guide
 
 Complete reference for Odoo 18 HTTP controllers, routing, and request handling.

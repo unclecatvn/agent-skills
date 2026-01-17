@@ -1,3 +1,23 @@
+---
+name: odoo-18-decorator
+description: Complete reference for Odoo 18 API decorators (@api.model, @api.depends, @api.constrains, @api.onchange, @api.ondelete, @api.returns) and their proper usage patterns.
+topics:
+  - @api.model (model-level methods)
+  - @api.depends (computed fields)
+  - @api.depends_context (context-dependent computed fields)
+  - @api.constrains (data validation)
+  - @api.onchange (form UI updates)
+  - @api.ondelete (delete validation, Odoo 18)
+  - @api.returns (return type specification)
+  - Decorator combinations and decision tree
+when_to_use:
+  - Writing computed fields
+  - Implementing data validation
+  - Creating form onchange handlers
+  - Preventing record deletion
+  - Defining model methods
+---
+
 # Odoo 18 Decorator Guide
 
 Complete reference for Odoo 18 API decorators and their proper usage.
@@ -459,7 +479,107 @@ def _check_code_format(self):
 
 ---
 
-## Decorator Decision Tree
+## @api.model_create_multi (Odoo 18)
+
+**Purpose**: Decorate batch create method. The method expects a list of dicts and can be called with either a single dict or a list.
+
+```python
+from odoo import api
+
+@api.model_create_multi
+def create(self, vals_list):
+    """Batch create - receives list of vals, returns recordset"""
+    # Add default values
+    for vals in vals_list:
+        vals.setdefault('state', 'draft')
+        vals.setdefault('date', fields.Datetime.now())
+
+    records = super().create(vals_list)
+
+    # Post-processing
+    for record in records:
+        record._compute_something()
+
+    return records
+
+# Usage:
+# record = model.create({'name': 'Test'})      # Single dict
+# records = model.create([{'name': 'A'}, ...]) # List of dicts
+```
+
+**Note**: If you override `create()` without `@api.model_create_multi`, Odoo 18 will show a deprecation warning.
+
+---
+
+## @api.readonly
+
+**Purpose**: Decorate a method where `self.env.cr` can be a readonly cursor.
+
+```python
+@api.readonly
+def get_statistics(self):
+    """This method can be called with readonly cursor"""
+    self.env.cr.execute("SELECT COUNT(*) FROM my_table WHERE ...")
+    return self.env.cr.fetchone()[0]
+```
+
+Use this decorator for methods that only read from database and don't need write access.
+
+---
+
+## @api.private
+
+**Purpose**: Decorate a method to indicate it cannot be called using RPC.
+
+```python
+@api.private
+def _internal_method(self):
+    """This method cannot be called over RPC"""
+    # Only callable internally from Python code
+    pass
+```
+
+**Best practice**: Prefix business methods that should not be called over RPC with `_` instead of using this decorator.
+
+---
+
+## @api.autovacuum
+
+**Purpose**: Decorate a method to be called by the daily vacuum cron job (model `ir.autovacuum`).
+
+```python
+@api.autovacuum
+def _gc_expired_records(self):
+    """Called daily to clean up old records"""
+    expired_date = fields.Datetime.now() - relativedelta(days=30)
+    self.search([('create_date', '<', expired_date)]).unlink()
+```
+
+**Requirements**:
+- Method name must start with `_` (private)
+- Use for garbage-collection-like tasks that don't deserve a specific cron job
+
+---
+
+## All API Decorators Reference
+
+| Decorator | Purpose | Odoo Version |
+|----------|---------|--------------|
+| `@api.model` | Model-level method (self not relevant) | All |
+| `@api.depends` | Computed field dependencies | All |
+| `@api.depends_context` | Context dependencies | All |
+| `@api.constrains` | Data validation | All |
+| `@api.onchange` | Form UI updates | All |
+| `@api.ondelete` | Delete validation (Odoo 18) | **18+** |
+| `@api.returns` | Return type specification | All |
+| `@api.model_create_multi` | Batch create | **18+** |
+| `@api.readonly` | Readonly cursor | **18+** |
+| `@api.private` | Non-RPC callable | **18+** |
+| `@api.autovacuum` | Daily vacuum job | **18+** |
+
+---
+
+## Decorator Decision Tree (Updated for Odoo 18)
 
 ```
 Need to define field behavior?

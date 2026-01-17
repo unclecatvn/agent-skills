@@ -1,3 +1,21 @@
+---
+name: odoo-18-model
+description: Complete reference for Odoo 18 ORM model methods, CRUD operations, domain syntax, and recordset handling. Use this guide when writing model methods, ORM queries, search operations, or working with recordsets.
+topics:
+  - Recordset basics (browse, exists, empty)
+  - Search methods (search, search_read, search_count, read_group)
+  - CRUD operations (create, read, write, unlink)
+  - Domain syntax (operators, logical, relational)
+  - Environment context (with_context, with_user, with_company)
+  - Recordset iteration patterns
+when_to_use:
+  - Writing ORM queries
+  - Performing CRUD operations
+  - Building domain filters
+  - Iterating over recordsets
+  - Using environment context
+---
+
 # Odoo 18 Model Guide
 
 Complete reference for Odoo 18 ORM model methods, CRUD operations, and recordset handling.
@@ -141,7 +159,113 @@ result = self.read_group(
 )
 ```
 
-**Supported aggregates**: `sum`, `avg`, `min`, `max`, `count`, `count_distinct`, `bool_and`, `bool_or`, `array_agg`
+---
+
+## read_group Internals (Odoo 18)
+
+### READ_GROUP Constants
+
+```python
+# Time granularity (date_trunc)
+READ_GROUP_TIME_GRANULARITY = {
+    'hour', 'day', 'week', 'month', 'quarter', 'year'
+}
+
+# Number granularity (date_part)
+READ_GROUP_NUMBER_GRANULARITY = {
+    'year_number': 'year',
+    'quarter_number': 'quarter',
+    'month_number': 'month',
+    'iso_week_number': 'week',
+    'day_of_year': 'doy',
+    'day_of_month': 'day',
+    'day_of_week': 'dow',
+    'hour_number': 'hour',
+    'minute_number': 'minute',
+    'second_number': 'second',
+}
+
+# All granularities
+READ_GROUP_ALL_TIME_GRANULARITY = READ_GROUP_TIME_GRANULARITY | READ_GROUP_NUMBER_GRANULARITY
+
+# Supported aggregate functions
+READ_GROUP_AGGREGATE = {
+    'sum', 'avg', 'max',', 'min',
+    'bool_and', 'bool_or',
+    'array_agg', 'recordset',
+    'count', 'count_distinct',
+}
+```
+
+### Aggregate Specification Format
+
+```
+<field_name>:<aggregate>    # e.g., "amount:sum", "quantity:avg"
+<field_name>:<granularity>   # e.g., "date:month", "date:year"
+<field_name>.<property>:<granularity>  # e.g., "date_deadline:month"
+```
+
+### _read_group_select (Odoo 18)
+
+Internal method to generate SQL for aggregation.
+
+```python
+# Odoo uses this internally
+sql_expr = self._read_group_select('amount:sum', query)
+# Returns: SQL('SUM(%s)', sql_field)
+```
+
+### _read_group_groupby (Odoo 18)
+
+Internal method to generate SQL for groupby.
+
+```python
+# Date with granularity
+sql_expr = self._read_group_groupby('date:month', query)
+# Returns: date_trunc('month', sql_field::timestamp)
+
+# Number granularity
+sql_expr = self._read_group_groupby('date:day_of_month', query)
+# Returns: date_part('day', sql_field)::int
+```
+
+### read_group Result Format
+
+```python
+result = self.read_group(
+    [('state', '!=', False)],
+    ['amount:sum', 'count'],
+    ['state', 'date:month'],
+)
+# Result:
+# [
+#     {
+#         'state': 'draft',
+#         'date:month': datetime(2024, 1, 1),
+#         'amount': 15000.0,
+#         'count': 10,
+#         '__domain': [(('state', '=', 'draft'), ...)],
+#     },
+#     ...
+# ]
+```
+
+### group_expand Parameter (Odoo 18)
+
+Expand groups to include all possible values.
+
+```python
+# Field with group_expand function
+state = fields.Selection(
+    selection=lambda self: self._get_states(),
+    group_expand='_read_group_expand_states',
+)
+
+@api.model
+def _read_group_expand_states(self, values, domain):
+    # Return all possible states to show empty groups
+    return ['draft', 'confirmed', 'done', 'cancel']
+```
 
 ---
 
@@ -345,6 +469,185 @@ records.with_company(company_id).read(['amount'])
 # In multi-company context
 records.with_company(main_company).action_process()
 ```
+
+---
+
+## Environment Methods (Odoo 18)
+
+### New SQL Query Methods (Odoo 18)
+
+```python
+from odoo.tools import SQL
+
+# execute_query_dict - returns list of dicts, auto-flushes
+query = SQL("""
+    SELECT id, name, amount
+    FROM sale_order
+    WHERE state = %s
+""", 'done')
+
+results = self.env.execute_query_dict(query)
+# Returns: [{'id': 1, 'name': 'SO001', 'amount': 100.0}, ...]
+
+# execute_query - returns list of tuples, auto-flushes
+results = self.env.execute_query(query)
+# Returns: [(1, 'SO001', 100.0), ...]
+```
+
+### Environment Check Methods (Odoo 18)
+
+```python
+# Check if in superuser mode
+if self.env.is_superuser():
+    # Running as superuser (sudo mode)
+    pass
+
+# Check if current user is admin (has "Access Rights" group)
+if self.env.is_admin():
+    # User has admin rights
+    pass
+
+# Check if current user has system settings rights
+if self.env.is_system():
+    # User can access settings
+    pass
+```
+
+### Environment Properties (Odoo 18)
+
+```python
+# Get current user (as record, sudoed)
+user = self.env.user
+
+# Get current company
+company = self.env.company
+
+# Get enabled companies (recordset)
+companies = self.env.companies
+
+# Get current language
+lang = self.env.lang
+
+# Get translation method
+translated = self.env._("Hello World")
+```
+
+### flush_query (Odoo 18)
+
+```python
+from odoo.tools import SQL
+
+# Flush specific fields before query
+query = SQL("SELECT ...")
+query.to_flush = [self._fields['amount']]  # Mark fields to flush
+self.env.flush_query(query)
+self.env.cr.execute(query)
+```
+
+---
+
+## Recordset Utility Methods (Odoo 18)
+
+### mapped() - Extract Field Values
+
+Apply function or get field values from all records.
+
+```python
+# Get field values as list
+names = records.mapped('name')        # ['A', 'B', 'C']
+partner_ids = records.mapped('partner_id')  # recordset of partners
+
+# Nested path - returns union of related records
+banks = records.mapped('partner_id.bank_ids')  # recordset, duplicates removed
+
+# With lambda function
+amounts = records.mapped(lambda r: r.amount_total * 1.1)
+
+# Multi-level dotted path
+emails = records.mapped('partner_id.email')
+```
+
+### filtered() - Filter Records
+
+Return records satisfying a condition.
+
+```python
+# With lambda
+done_orders = orders.filtered(lambda r: r.state == 'done')
+
+# With field name (short syntax)
+companies = records.filtered('partner_id.is_company')
+
+# With dotted path - checks if ANY related record satisfies
+# records.filtered("partner_id.bank_ids")  # True if has any banks
+```
+
+### filtered_domain() - Filter by Domain (Odoo 18)
+
+Filter records by domain while keeping order.
+
+```python
+# Filter by domain (keeps original order)
+done_orders = orders.filtered_domain([('state', '=', 'done')])
+
+# Complex domain
+urgent = orders.filtered_domain([
+    '&',
+    ('state', '=', 'draft'),
+    '|',
+    ('priority', '=', '2'),
+    ('date', '<', fields.Date.today()),
+])
+```
+
+### grouped() - Group Records (Odoo 18)
+
+Group records by key without aggregation overhead.
+
+```python
+# Group by field name
+groups = records.grouped('state')
+# Returns: {'draft': recordset1, 'done': recordset2, ...}
+
+# Group by callable
+groups = records.grouped(lambda r: r.company_id)
+
+# Process groups
+for company, company_records in groups.items():
+    print(f"{company.name}: {len(company_records)} records")
+
+# All recordsets share the same prefetch set for efficiency
+```
+
+**Note**: Unlike `itertools.groupby`, `grouped()` doesn't require pre-sorting.
+
+### sorted() - Sort Records
+
+Return records sorted by key.
+
+```python
+# Sort by field name
+sorted_records = records.sorted('name')
+
+# Sort by lambda
+sorted_records = records.sorted(key=lambda r: r.amount_total)
+
+# Reverse sort
+sorted_records = records.sorted(key=lambda r: r.amount_total, reverse=True)
+
+# Sort by model default order (if key=None)
+sorted_records = records.sorted()  # Uses model's _order
+```
+
+### Method Comparison
+
+| Method | Returns | Use Case |
+|--------|---------|----------|
+| `mapped()` | list or recordset | Extract values from all records |
+| `filtered()` | recordset | Keep records matching condition |
+| `filtered_domain()` | recordset | Filter by domain (keeps order) |
+| `grouped()` | dict | Group by key (no aggregation) |
+| `sorted()` | recordset | Sort records by key |
 
 ---
 

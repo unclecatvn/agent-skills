@@ -1,3 +1,26 @@
+---
+name: odoo-18-development
+description: Complete guide for Odoo 18 module development covering manifest structure, security, reports, wizards, data files, hooks, and exception handling.
+topics:
+  - Module structure (folders and files)
+  - __manifest__.py (all fields, assets, external dependencies)
+  - Security (access rights CSV, record rules, groups)
+  - Reports (qweb-pdf, qweb-html, report actions, templates)
+  - Wizards & TransientModel (structure, views, multi-step)
+  - Data files (records, cron jobs, server actions)
+  - Hooks (post_init, pre_init, uninstall)
+  - Exception handling (UserError, AccessError, ValidationError, etc.)
+  - Complete module examples
+when_to_use:
+  - Creating new Odoo modules
+  - Configuring security and access rights
+  - Building reports
+  - Creating wizards/transient models
+  - Setting up cron jobs and server actions
+  - Writing module hooks
+  - Handling exceptions properly
+---
+
 # Odoo 18 Development Guide
 
 Complete guide for Odoo 18 module development: manifest structure, reports, security, wizards, and advanced patterns.
@@ -1032,4 +1055,141 @@ access_my_model_manager,my.model.manager,model_my_model,group_my_module_manager,
     src_model="my.model"
     multi="False"
 />
+```
+
+---
+
+## Exception Reference
+
+### Exception Hierarchy (Odoo 18)
+
+```
+Exception
+├── UserError (Base exception for client errors)
+│   ├── AccessDenied (Login/password error - no traceback)
+│   ├── AccessError (Access rights error)
+│   ├── MissingError (Record not found / deleted)
+│   ├── RedirectWarning (Warning with redirect option)
+│   └── ValidationError (Constraint violation)
+└── CacheMiss (Missing value in cache)
+```
+
+### UserError
+
+**Purpose**: Generic error managed by the client. When the user tries to do something that doesn't make sense.
+
+```python
+from odoo.exceptions import UserError
+
+def action_confirm(self):
+    for order in self:
+        if not order.line_ids:
+            raise UserError("Cannot confirm an order without lines.")
+```
+
+### AccessDenied
+
+**Purpose**: Login/password error. No traceback is shown.
+
+```python
+from odoo.exceptions import AccessDenied
+
+def check_password(self, password):
+    if not self.env.user._check_password(password):
+        raise AccessDenied("Incorrect password")
+```
+
+### AccessError
+
+**Purpose**: Access rights error. When user tries to access records they're not allowed to.
+
+```python
+from odoo.exceptions import AccessError
+
+def action_delete(self):
+    if not self.env.user.has_group('base.group_system'):
+        raise AccessError("Only administrators can delete records.")
+```
+
+### MissingError
+
+**Purpose**: Record not found or deleted.
+
+```python
+from odoo.exceptions import MissingError
+
+def action_update(self):
+    record = self.browse(self.id)
+    if not record.exists():
+        raise MissingError(_("This record has been deleted"))
+```
+
+### ValidationError
+
+**Purpose**: Violation of Python constraints.
+
+```python
+from odoo.exceptions import ValidationError
+
+@api.constrains('email')
+def _check_email(self):
+    for record in self:
+        if record.email and '@' not in record.email:
+            raise ValidationError("Email must contain '@'")
+```
+
+### RedirectWarning
+
+**Purpose**: Warning with option to redirect user to another action.
+
+```python
+from odoo.exceptions import RedirectWarning
+
+def action_check_config(self):
+    if not self.company_id.payment_term_id:
+        raise RedirectWarning(
+            _("Please configure a default payment term"),
+            action=self.env.ref('account.action_payment_term_form').id,
+            button_text=_("Configure Payment Terms"),
+        )
+```
+
+### CacheMiss
+
+**Purpose**: Missing value in cache. Usually raised internally by ORM.
+
+```python
+from odoo.exceptions import CacheMiss
+
+try:
+    value = self.env.cache.get(record, field)
+except CacheMiss:
+    # Value not in cache, need to fetch
+    value = record._fetch_field(field)
+```
+
+### Exception Usage Guidelines
+
+| Exception | When to Use | Behavior |
+|-----------|-------------|----------|
+| `UserError` | Generic business logic errors | Shows modal to user |
+| `AccessDenied` | Wrong login/password | No traceback, login error |
+| `AccessError` | Insufficient permissions | Shows error to user |
+| `MissingError` | Record deleted/not found | Shows error to user |
+| `ValidationError` | Data validation fails | Shows error to user |
+| `RedirectWarning` | Need to redirect user | Shows dialog with button |
+| `CacheMiss` | Cache lookup (internal) | Handled by ORM |
+
+### Import Statement
+
+```python
+from odoo.exceptions import (
+    UserError,
+    AccessDenied,
+    AccessError,
+    MissingError,
+    ValidationError,
+    RedirectWarning,
+    CacheMiss,
+)
 ```

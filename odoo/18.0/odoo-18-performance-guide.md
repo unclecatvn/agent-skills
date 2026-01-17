@@ -1,3 +1,22 @@
+---
+name: odoo-18-performance
+description: Complete guide for writing performant Odoo 18 code, focusing on N+1 query prevention, batch operations, and optimization patterns.
+topics:
+  - Prefetch mechanism (how it works, understanding groups)
+  - N+1 query prevention patterns
+  - Batch operations (create, write, unlink)
+  - Field selection optimization (search_read, load, bin_size)
+  - Compute field optimization (store, precompute, avoiding recursion)
+  - SQL optimization (when to use, execute_query, SQL class)
+  - Clean code patterns (mapped, filtered, sorted)
+when_to_use:
+  - Optimizing slow code
+  - Preventing N+1 queries
+  - Writing batch operations
+  - Optimizing computed fields
+  - Using direct SQL for aggregations
+---
+
 # Odoo 18 Performance Guide
 
 Complete guide for writing performant Odoo 18 code, focusing on N+1 query prevention and clean patterns.
@@ -501,4 +520,91 @@ for record in records:
 data = self.search_read([('state', '=', 'done')], ['name'])
 for row in data:
     print(row['name'])
+```
+
+---
+
+## Flush & Recompute (Odoo 18)
+
+### Understanding Flush
+
+Odoo 18 uses lazy writes - changes are cached and flushed to database later.
+
+```python
+# Flush specific fields to database
+self.flush_model(['amount_total', 'state'])
+
+# Flush current recordset only
+self.flush_recordset(['amount'])
+
+# Flush before direct SQL query
+self.flush_model()  # Flush all pending changes
+self.env.cr.execute("SELECT ...")
+```
+
+### flush_model() vs flush_recordset()
+
+```python
+# flush_model - flush for entire model (all records)
+self.env['sale.order'].flush_model(['amount_total'])
+
+# flush_recordset - flush only current records
+orders.flush_recordset(['amount_total'])
+```
+
+### Recompute Control
+
+```python
+# Manual recompute of stored computed fields
+self._recompute_model(['amount_total'])      # Entire model
+self._recompute_recordset(['amount_total'])  # Current records
+self._recompute_field(self._fields['amount_total'])  # Specific field
+
+# Recompute with specific ids
+self._recompute_field(field, ids=[1, 2, 3])
+```
+
+### Batch Recompute Optimization
+
+```python
+# GOOD: Let Odoo handle recomputation automatically
+orders.write({'state': 'done'})
+# amount_total will be recomputed in batch automatically
+
+# AVOID: Manual recomputation in loop
+for order in orders:
+    order.write({'state': 'done'})
+    order.amount_total  # Triggers individual recomputation
+```
+
+### Flush Before SQL Query (Odoo 18)
+
+```python
+from odoo.tools import SQL
+
+# Mark fields to flush before SQL query
+query = SQL("""
+    SELECT id, amount
+    FROM sale_order
+    WHERE state = %s
+""", 'done')
+
+# Option 1: Mark fields to flush (auto-flushes those fields)
+query.to_flush = [self._fields['state']]
+
+# Option 2: Use execute_query_dict (auto-flushes)
+results = self.env.execute_query_dict(query)
+```
+
+### with_context for Performance
+
+```python
+# Disable tracking for bulk operations (faster)
+records.with_context(tracking_disable=True).write({'state': 'done'})
+
+# Use bin_size for binary fields
+attachments.with_context(bin_size=True).read(['datas', 'name'])
+
+# Disable active_test to include archived
+all_records = self.with_context(active_test=False).search([])
 ```

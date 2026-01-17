@@ -1,3 +1,20 @@
+---
+name: odoo-18-field
+description: Complete reference for Odoo 18 field types, parameters, and when to use each. Use this guide when defining model fields, choosing field types, or configuring field parameters.
+topics:
+  - Simple fields (Char, Text, Html, Boolean, Integer, Float, Monetary, Date, Datetime, Binary, Selection, Reference)
+  - Relational fields (Many2one, One2many, Many2many)
+  - Computed fields (compute, store, search, inverse)
+  - Related fields
+  - Field parameters (index, default, copy, store, groups, company_dependent, tracking)
+when_to_use:
+  - Defining new model fields
+  - Choosing appropriate field types
+  - Configuring computed fields
+  - Setting up relational fields
+  - Optimizing field parameters
+---
+
 # Odoo 18 Field Guide
 
 Complete reference for Odoo 18 field types, parameters, and when to use each.
@@ -540,6 +557,98 @@ payment_term_id = fields.Many2one(
 
 # Access for specific company
 record.with_context(company_id=1).payment_term_id
+```
+
+---
+
+## Odoo 18 Field Parameters
+
+### aggregator (Odoo 18)
+
+**Replaces**: `group_operator` (deprecated since Odoo 18)
+
+```python
+# Odoo 18+ - use aggregator
+amount = fields.Float(
+    string='Amount',
+    aggregator='sum',  # NEW in Odoo 18
+)
+
+# Supported aggregators (from READ_GROUP_AGGREGATE):
+# - sum, avg, max, min
+# - bool_and, bool_or
+# - array_agg, recordset
+# - count, count_distinct
+```
+
+### precompute (Odoo 18)
+
+Compute field before record insertion.
+
+```python
+sequence = fields.Integer(
+    string='Sequence',
+    compute='_compute_sequence',
+    precompute=True,  # Compute at form init
+    store=False,
+)
+
+@api.depends('date_order')
+def _compute_sequence(self):
+    for order in self:
+        if order.date_order:
+            order.sequence = self.env['ir.sequence'].next_by_code(...)
+```
+
+**Warning**: `precompute=True` can be counterproductive for:
+- Statistics fields (count, sum over search)
+- Fields that require database reads
+- One-off record creation (not batch)
+
+### recursive (Odoo 18)
+
+For fields with recursive dependencies like `parent_id.X`.
+
+```python
+# Field has dependency like parent_id.X
+total = fields.Float(
+    string='Total',
+    compute='_compute_total',
+    store=True,
+    recursive=True,  # Declare recursive dependency explicitly
+)
+```
+
+### compute_sudo (Odoo 18)
+
+Whether field should be recomputed as superuser.
+
+```python
+# Default: True for stored fields, False for non-stored
+amount = fields.Float(
+    string='Amount',
+    compute='_compute_amount',
+    store=True,
+    compute_sudo=True,  # Compute as admin (default for stored)
+)
+
+price = fields.Float(
+    string='Price',
+    compute='_compute_price',
+    compute_sudo=False,  # Compute as current user (default for non-stored)
+)
+```
+
+### group_operator (Deprecated)
+
+**Deprecated in Odoo 18**: Use `aggregator` instead.
+
+```python
+# OLD (deprecated)
+amount = fields.Float(group_operator='sum')
+
+# NEW (Odoo 18+)
+amount = fields.Float(aggregator='sum')
 ```
 
 ---

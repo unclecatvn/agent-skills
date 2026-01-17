@@ -1,3 +1,24 @@
+---
+name: odoo-18-view
+description: Complete reference for Odoo 18 XML views, actions, menus, and QWeb templates. Covers list, form, search, kanban, graph, pivot, calendar views and Odoo 18 changes.
+topics:
+  - View types (list, form, search, kanban, graph, pivot, calendar, activity)
+  - List view features (editable, decoration, optional fields, widgets)
+  - Form view structure (sheet, button box, notebook, chatter)
+  - Search view features (fields, filters, group by)
+  - Kanban view (color, progress, templates)
+  - Actions (window, server, client, report)
+  - Menus (structure, attributes)
+  - View inheritance (xpath, position, shorthand)
+  - QWeb templates
+when_to_use:
+  - Writing XML views
+  - Creating actions and menus
+  - Implementing view inheritance
+  - Building QWeb templates
+  - Migrating from Odoo 17 to 18
+---
+
 # Odoo 18 View Guide
 
 Complete reference for Odoo 18 XML views, actions, menus, and QWeb templates.
