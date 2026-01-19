@@ -4,9 +4,9 @@ description: Complete reference for Odoo 18 HTTP controllers, routing, authentic
 globs: "**/controllers/**/*.py"
 topics:
   - Controller basics (class structure, request object)
-  - @route decorator (URL parameters, route options, multiroute)
-  - Authentication types (auth='user', 'public', 'none')
-  - Request/Response types (type='http', type='json')
+  - route decorator (URL parameters, route options, multiroute)
+  - Authentication types (auth types, user, public, none)
+  - Request/Response types (http, json)
   - CSRF handling (protection, disable, tokens)
   - Common patterns (JSON endpoints, file download, website pages, API endpoints, error handling)
 when_to_use:

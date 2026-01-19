@@ -1,15 +1,15 @@
 ---
 name: odoo-18-decorator
-description: Complete reference for Odoo 18 API decorators (@api.model, @api.depends, @api.constrains, @api.onchange, @api.ondelete, @api.returns) and their proper usage patterns.
+description: "Complete reference for Odoo 18 API decorators (@api.model, @api.depends, @api.constrains, @api.onchange, @api.ondelete, @api.returns) and their proper usage patterns."
 globs: "**/models/**/*.py"
 topics:
-  - @api.model (model-level methods)
-  - @api.depends (computed fields)
-  - @api.depends_context (context-dependent computed fields)
-  - @api.constrains (data validation)
-  - @api.onchange (form UI updates)
-  - @api.ondelete (delete validation, Odoo 18)
-  - @api.returns (return type specification)
+  - api.model (model-level methods)
+  - api.depends (computed fields)
+  - api.depends_context (context-dependent computed fields)
+  - api.constrains (data validation)
+  - api.onchange (form UI updates)
+  - api.ondelete (delete validation, Odoo 18)
+  - api.returns (return type specification)
   - Decorator combinations and decision tree
 when_to_use:
   - Writing computed fields
