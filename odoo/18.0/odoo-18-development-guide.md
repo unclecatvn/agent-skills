@@ -1,7 +1,7 @@
 ---
 name: odoo-18-development
 description: Complete guide for Odoo 18 module development covering manifest structure, security, reports, wizards, data files, hooks, and exception handling.
-globs: **/*.{py,xml,csv}
+globs: "**/*.{py,xml,csv}"
 topics:
   - Module structure (folders and files)
   - __manifest__.py (all fields, assets, external dependencies)

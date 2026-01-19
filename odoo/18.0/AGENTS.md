@@ -112,7 +112,7 @@ cp -r docs/odoo/18.0 /your-project/docs/odoo/
 ```yaml
 ---
 description: What this guide covers
-globs: **/*.py
+globs: "**/*.py"
 alwaysApply: true
 ---
 
@@ -187,7 +187,7 @@ OpenCode reads markdown files with YAML frontmatter, using the `description` and
 ---
 name: odoo-18-model
 description: Complete reference for Odoo 18 ORM...
-globs: **/models/**/*.py
+globs: "**/models/**/*.py"
 topics:
   - Recordset basics
   - Search methods
@@ -334,7 +334,7 @@ Create a `.mdc` file in your project root:
 ```yaml
 ---
 description: Project-specific Odoo 18 rules and conventions
-globs: **/*.{py,xml}
+globs: "**/*.{py,xml}"
 ---
 
 # Project Specific Rules
@@ -358,7 +358,7 @@ To override a specific rule, create a new `.mdc` with a more specific `globs` pa
 ```yaml
 ---
 description: Override for specific module
-globs: **/models/specific_model.py
+globs: "**/models/specific_model.py"
 ---
 
 # This overrides general rules for specific_model.py only

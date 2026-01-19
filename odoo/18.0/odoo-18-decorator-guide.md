@@ -1,7 +1,7 @@
 ---
 name: odoo-18-decorator
 description: Complete reference for Odoo 18 API decorators (@api.model, @api.depends, @api.constrains, @api.onchange, @api.ondelete, @api.returns) and their proper usage patterns.
-globs: **/models/**/*.py
+globs: "**/models/**/*.py"
 topics:
   - @api.model (model-level methods)
   - @api.depends (computed fields)

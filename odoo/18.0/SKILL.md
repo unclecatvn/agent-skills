@@ -1,7 +1,7 @@
 ---
 name: odoo-18
 description: Complete skill guide for AI agents to write proper Odoo 18 code. This master file references detailed guides for each topic including models, fields, decorators, views, performance optimization, controllers, and development best practices. Use this skill when writing, reviewing, or refactoring Odoo 18 code to ensure proper ORM patterns, API usage, and performance optimization.
-globs: **/*.{py,xml}
+globs: "**/*.{py,xml}"
 license: MIT
 author: UncleCat
 version: 1.0.0

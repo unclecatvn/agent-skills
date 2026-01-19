@@ -1,7 +1,7 @@
 ---
 name: odoo-18-view
 description: Complete reference for Odoo 18 XML views, actions, menus, and QWeb templates. Covers list, form, search, kanban, graph, pivot, calendar views and Odoo 18 changes.
-globs: **/views/**/*.xml
+globs: "**/views/**/*.xml"
 topics:
   - View types (list, form, search, kanban, graph, pivot, calendar, activity)
   - List view features (editable, decoration, optional fields, widgets)

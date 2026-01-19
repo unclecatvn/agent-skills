@@ -1,7 +1,7 @@
 ---
 name: odoo-18-performance
 description: Complete guide for writing performant Odoo 18 code, focusing on N+1 query prevention, batch operations, and optimization patterns.
-globs: **/*.{py,xml}
+globs: "**/*.{py,xml}"
 topics:
   - Prefetch mechanism (how it works, understanding groups)
   - N+1 query prevention patterns
