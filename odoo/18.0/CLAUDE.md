@@ -18,7 +18,6 @@ docs/odoo/18.0/
 ├── odoo-18-performance-guide.md    # N+1 prevention, optimization
 ├── odoo-18-controller-guide.md     # HTTP controllers, routing
 ├── odoo-18-development-guide.md    # Manifest, reports, security, wizards
-└── odoo-18.mdc                     # Cursor-compatible rules file
 ```
 
 ## Key Odoo 18 Changes
