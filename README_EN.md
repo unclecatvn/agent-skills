@@ -151,14 +151,30 @@ Need to define method behavior?
 └── Normal record method → no decorator needed
 ```
 
+## AI IDE Setup
+
+> **See [odoo/18.0/AGENTS.md](odoo/18.0/AGENTS.md)** for instructions on using this documentation with Cursor, Claude Code, OpenCode, GitHub Copilot, etc.
+
+### Quick Setup (Cursor - Remote Rules)
+
+1. `Settings` → `Rules` → `Add Remote Rule`
+2. URL: `git@github.com:unclecatvn/agent-skills.git`
+3. Branch: `odoo/18.0`
+
+Done! Rules auto-apply to ALL your projects.
+
 ## Source Reference
 
 All guides are based on analysis of Odoo 18 base source code:
-- `/Users/unclecat/dtg/odoo/odoo/models.py` - ORM implementation
-- `/Users/unclecat/dtg/odoo/odoo/fields.py` - Field types
-- `/Users/unclecat/dtg/odoo/odoo/api.py` - Decorators
-- `/Users/unclecat/dtg/odoo/odoo/http.py` - HTTP layer
-- `/Users/unclecat/dtg/odoo/odoo/exceptions.py` - Exception types
+- `odoo/models.py` - ORM implementation
+- `odoo/fields.py` - Field types
+- `odoo/api.py` - Decorators
+- `odoo/http.py` - HTTP layer
+- `odoo/exceptions.py` - Exception types
+
+## Repository
+
+`git@github.com:unclecatvn/agent-skills.git`
 
 ## License
 

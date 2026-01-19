@@ -151,14 +151,30 @@ Cần định nghĩa hành vi method?
 └── Method record bình thường → không cần decorator
 ```
 
+## Hướng dẫn cài đặt cho AI IDEs
+
+> **Xem [odoo/18.0/AGENTS.md](odoo/18.0/AGENTS.md)** để biết cách sử dụng tài liệu này với Cursor, Claude Code, OpenCode, GitHub Copilot, v.v.
+
+### Cách nhanh nhất (Cursor - Remote Rules)
+
+1. `Settings` → `Rules` → `Add Remote Rule`
+2. URL: `git@github.com:unclecatvn/agent-skills.git`
+3. Branch: `odoo/18.0`
+
+Done! Rules tự động áp dụng cho TẤT CẢ projects của bạn.
+
 ## Nguồn tài liệu
 
 Tất cả các hướng dẫn được dựa trên phân tích mã nguồn Odoo 18 gốc:
-- `/Users/unclecat/dtg/odoo/odoo/models.py` - ORM implementation
-- `/Users/unclecat/dtg/odoo/odoo/fields.py` - Field types
-- `/Users/unclecat/dtg/odoo/odoo/api.py` - Decorators
-- `/Users/unclecat/dtg/odoo/odoo/http.py` - HTTP layer
-- `/Users/unclecat/dtg/odoo/odoo/exceptions.py` - Exception types
+- `odoo/models.py` - ORM implementation
+- `odoo/fields.py` - Field types
+- `odoo/api.py` - Decorators
+- `odoo/http.py` - HTTP layer
+- `odoo/exceptions.py` - Exception types
+
+## Repository
+
+`git@github.com:unclecatvn/agent-skills.git`
 
 ## Giấy phép
 
