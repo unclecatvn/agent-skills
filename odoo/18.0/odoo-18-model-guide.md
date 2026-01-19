@@ -1,6 +1,7 @@
 ---
 name: odoo-18-model
 description: Complete reference for Odoo 18 ORM model methods, CRUD operations, domain syntax, and recordset handling. Use this guide when writing model methods, ORM queries, search operations, or working with recordsets.
+globs: **/models/**/*.py
 topics:
   - Recordset basics (browse, exists, empty)
   - Search methods (search, search_read, search_count, read_group)

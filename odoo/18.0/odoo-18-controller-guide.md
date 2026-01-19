@@ -1,6 +1,7 @@
 ---
 name: odoo-18-controller
 description: Complete reference for Odoo 18 HTTP controllers, routing, authentication types, and request/response handling.
+globs: **/controllers/**/*.py
 topics:
   - Controller basics (class structure, request object)
   - @route decorator (URL parameters, route options, multiroute)

@@ -1,6 +1,7 @@
 ---
 name: odoo-18
 description: Complete skill guide for AI agents to write proper Odoo 18 code. This master file references detailed guides for each topic including models, fields, decorators, views, performance optimization, controllers, and development best practices. Use this skill when writing, reviewing, or refactoring Odoo 18 code to ensure proper ORM patterns, API usage, and performance optimization.
+globs: **/*.{py,xml}
 license: MIT
 author: UncleCat
 version: 1.0.0
@@ -457,9 +458,13 @@ class MyWizard(models.TransientModel):
 
 ## Base Code Reference (Odoo 18)
 
-All guides are based on analysis of Odoo 18 base code:
-- `/Users/unclecat/dtg/odoo/odoo/models.py` - ORM implementation
-- `/Users/unclecat/dtg/odoo/odoo/fields.py` - Field types
-- `/Users/unclecat/dtg/odoo/odoo/api.py` - Decorators
-- `/Users/unclecat/dtg/odoo/odoo/http.py` - HTTP layer
-- `/Users/unclecat/dtg/odoo/odoo/exceptions.py` - Exception types
+All guides are based on analysis of Odoo 18 base code. To reference in your project:
+- `odoo/models.py` - ORM implementation
+- `odoo/fields.py` - Field types
+- `odoo/api.py` - Decorators
+- `odoo/http.py` - HTTP layer
+- `odoo/exceptions.py` - Exception types
+
+---
+
+**For setup instructions with different AI IDEs, see [AGENTS.md](./AGENTS.md)**

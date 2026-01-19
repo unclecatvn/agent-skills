@@ -1,6 +1,7 @@
 ---
 name: odoo-18-field
 description: Complete reference for Odoo 18 field types, parameters, and when to use each. Use this guide when defining model fields, choosing field types, or configuring field parameters.
+globs: **/models/**/*.py
 topics:
   - Simple fields (Char, Text, Html, Boolean, Integer, Float, Monetary, Date, Datetime, Binary, Selection, Reference)
   - Relational fields (Many2one, One2many, Many2many)
