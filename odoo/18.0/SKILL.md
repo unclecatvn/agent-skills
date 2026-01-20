@@ -20,6 +20,7 @@ Complete skill guide for AI agents to write proper Odoo 18 code. This master fil
 | [API Decorators](#decorator-guide) | `odoo-18-decorator-guide.md` | Using @api decorators |
 | [Views & XML](#view-guide) | `odoo-18-view-guide.md` | Writing XML views, actions, menus |
 | [Performance](#performance-guide) | `odoo-18-performance-guide.md` | Optimizing queries, preventing N+1 |
+| [Transactions](#transaction-guide) | `odoo-18-transaction-guide.md` | Savepoints, UniqueViolation, commit/rollback |
 | [Controllers](#controller-guide) | `odoo-18-controller-guide.md` | HTTP endpoints, routing |
 | [Development](#development-guide) | `odoo-18-development-guide.md` | Manifest, reports, security, wizards |
 
@@ -268,6 +269,75 @@ result = self.read_group(domain, ['amount:sum'], ['category_id'])
 
 ---
 
+## Transaction Guide
+
+**File**: `odoo-18-transaction-guide.md`
+
+**When to read**: Handling database errors, UniqueViolation, savepoints, commit/rollback
+
+### Quick Patterns
+
+```python
+# Savepoint for error isolation
+with self.env.cr.savepoint():
+    try:
+        record = self.create(data)
+    except psycopg2.errors.UniqueViolation:
+        pass  # Transaction still valid
+
+# Batch create with error isolation
+for data in data_list:
+    with self.env.cr.savepoint():
+        record = self.create(data)
+
+# Check for duplicates before creating
+existing = self.search([('email', '=', email)], limit=1)
+if not existing:
+    record = self.create({'email': email})
+```
+
+### PostgreSQL Error Codes
+
+| Code | Name | Odoo Handler |
+|------|------|--------------|
+| 23502 | NOT NULL violation | `convert_pgerror_not_null` |
+| 23505 | UNIQUE violation | `convert_pgerror_unique` |
+| 23514 | CHECK violation | `convert_pgerror_constraint` |
+| 40001 | Serialization failure | Retry with advisory lock |
+| 25P02 | InFailedSqlTransaction | Must rollback |
+
+### Transaction State Flow
+
+```
+Normal → [Error] → Aborted → [rollback] → Normal
+                    ↓
+                 [commit] → ERROR! (cannot commit aborted transaction)
+```
+
+**Key Rule**: Once a transaction enters "aborted" state due to error, all subsequent commands fail until `ROLLBACK`.
+
+### Common Issues
+
+```python
+# BAD: Continuing after UniqueViolation without cleanup
+try:
+    record = self.create({'email': 'duplicate@email.com'})
+except psycopg2.errors.UniqueViolation:
+    pass  # Transaction is now ABORTED
+record = self.create({'email': 'another@email.com'})  # FAILS!
+
+# GOOD: Use savepoint
+with self.env.cr.savepoint():
+    try:
+        record = self.create({'email': 'duplicate@email.com'})
+    except psycopg2.errors.UniqueViolation:
+        pass
+# This now works:
+record = self.create({'email': 'another@email.com'})
+```
+
+---
+
 ## Controller Guide
 
 **File**: `odoo-18-controller-guide.md`
@@ -373,6 +443,7 @@ docs/odoo/18.0/
 ├── odoo-18-decorator-guide.md      # @api decorators
 ├── odoo-18-view-guide.md          # XML views, actions, menus, QWeb
 ├── odoo-18-performance-guide.md    # N+1 prevention, optimization
+├── odoo-18-transaction-guide.md    # Savepoints, UniqueViolation, commit/rollback
 ├── odoo-18-controller-guide.md     # HTTP, routing, controllers
 └── odoo-18-development-guide.md    # Manifest, reports, security, wizards
 ```
