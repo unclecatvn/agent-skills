@@ -46,6 +46,21 @@ agent-skills init --ai all odoo --version 18.0
 agent-skills versions odoo
 ```
 
+### Update CLI
+
+```bash
+# Check for new version
+agent-skills update
+
+# Update to latest version
+npm update -g @unclecat/agent-skills-cli
+
+# Or reinstall latest
+npm install -g @unclecat/agent-skills-cli@latest
+```
+
+> The CLI will automatically notify you when a new version is available.
+
 ## Documentation Structure
 
 ```

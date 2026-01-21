@@ -13,6 +13,11 @@ const EXCLUDED_DIRS = new Set(["bin", "node_modules"]);
 const GITHUB_REPO = "unclecatvn/agent-skills";
 const NPM_PACKAGE = "@unclecat/agent-skills-cli";
 
+// Config file path for storing last update check
+const CONFIG_DIR = path.join(require("os").homedir(), ".agent-skills");
+const UPDATE_CHECK_FILE = path.join(CONFIG_DIR, "update-check.json");
+const UPDATE_CHECK_INTERVAL = 24 * 60 * 60 * 1000; // 24 hours
+
 function printHelp() {
   const text = `
 agent-skills - Install agent skills docs by version
@@ -48,6 +53,74 @@ function getPackageVersion() {
     return pkg.version || "0.0.0";
   } catch {
     return "0.0.0";
+  }
+}
+
+// Get last update check timestamp from config file
+function getLastUpdateCheck() {
+  try {
+    if (fs.existsSync(UPDATE_CHECK_FILE)) {
+      const data = fs.readFileSync(UPDATE_CHECK_FILE, "utf8");
+      const config = JSON.parse(data);
+      return config.lastCheck || 0;
+    }
+  } catch {
+    // Ignore errors
+  }
+  return 0;
+}
+
+// Set last update check timestamp
+function setLastUpdateCheck() {
+  try {
+    if (!fs.existsSync(CONFIG_DIR)) {
+      fs.mkdirSync(CONFIG_DIR, { recursive: true });
+    }
+    fs.writeFileSync(
+      UPDATE_CHECK_FILE,
+      JSON.stringify({ lastCheck: Date.now() }),
+      "utf8"
+    );
+  } catch {
+    // Ignore errors
+  }
+}
+
+// Background update check - runs asynchronously and notifies if update available
+async function checkForUpdatesInBackground() {
+  const lastCheck = getLastUpdateCheck();
+  const now = Date.now();
+
+  // Only check once per day
+  if (now - lastCheck < UPDATE_CHECK_INTERVAL) {
+    return;
+  }
+
+  setLastUpdateCheck();
+
+  try {
+    const currentVersion = getPackageVersion();
+    const npmVersion = await fetchLatestNpmVersion();
+
+    if (npmVersion && npmVersion !== currentVersion) {
+      // Show update notification after a short delay (so it doesn't interfere with command output)
+      setTimeout(() => {
+        console.error(
+          `\n\x1b[33m\x1b[1m╔════════════════════════════════════════╗\x1b[0m`
+        );
+        console.error(
+          `\x1b[33m\x1b[1m║  Update Available ${currentVersion} → ${npmVersion}  ║\x1b[0m`
+        );
+        console.error(
+          `\x1b[33m\x1b[1m╚════════════════════════════════════════╝\x1b[0m`
+        );
+        console.error(
+          `Run \x1b[36mnpm update -g ${NPM_PACKAGE}\x1b[0m to update.\n`
+        );
+      }, 500);
+    }
+  } catch {
+    // Silently ignore errors - background check should never break the CLI
   }
 }
 
@@ -176,9 +249,30 @@ function parseArgs(argv) {
     }
   }
 
-  args.command = tokens[0] || "help";
+  // First pass: collect all non-flag tokens (commands and positionals)
+  const nonFlagTokens = [];
+  for (let i = 0; i < tokens.length; i++) {
+    const token = tokens[i];
+    if (token.startsWith("-")) {
+      // Skip flag and its value
+      if (
+        token === "--ai" ||
+        token === "--skill" ||
+        token === "--version" ||
+        token === "--dest"
+      ) {
+        i++; // Skip next token (flag value)
+      }
+    } else {
+      nonFlagTokens.push(token);
+    }
+  }
 
-  for (let i = 1; i < tokens.length; i += 1) {
+  // Set command from first non-flag token
+  args.command = nonFlagTokens[0] || "help";
+
+  // Second pass: process all flags
+  for (let i = 0; i < tokens.length; i++) {
     const token = tokens[i];
     if (token === "--ai") {
       args.ai = tokens[i + 1];
@@ -215,7 +309,10 @@ function parseArgs(argv) {
     if (token.startsWith("-")) {
       continue;
     }
-    args.positionals.push(token);
+    // Non-flag tokens after command go to positionals
+    if (token !== args.command) {
+      args.positionals.push(token);
+    }
   }
 
   return args;
@@ -426,6 +523,12 @@ async function runUpdate(args) {
 function main() {
   const args = parseArgs(process.argv);
   const cmd = normalize(args.command).toLowerCase();
+
+  // Background update check (async, non-blocking)
+  // Skip for update command and offline mode
+  if (cmd !== "update" && !args.offline) {
+    checkForUpdatesInBackground();
+  }
 
   if (cmd === "skills") {
     listSkills();
