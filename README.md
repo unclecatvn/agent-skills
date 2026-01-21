@@ -6,6 +6,36 @@ Tài liệu phát triển Odoo 18 toàn diện, bao gồm các hướng dẫn v�
 
 Đây là bộ tài liệu tham khảo hoàn chỉnh cho phát triển Odoo 18, được tổ chức thành các module nhỏ có thể sử dụng độc lập hoặc kết hợp. Tài liệu dựa trên phân tích mã nguồn Odoo 18 gốc.
 
+## CLI (odoo-cli)
+
+Cài CLI để install nhanh theo version Odoo và AI assistant:
+
+```bash
+npm install -g odoo-cli
+```
+
+### Ví dụ cài theo Odoo 18.0
+
+```bash
+# Cursor (tạo .cursor/rules/odoo/18.0/*.mdc)
+odoo-cli init --ai cursor --version 18.0
+
+# Claude Code (copy CLAUDE.md + SKILL.md ra root)
+odoo-cli init --ai claude --version 18.0
+
+# Lưu full docs vào docs/odoo/18.0
+odoo-cli init --ai docs --version 18.0
+
+# Cài tất cả
+odoo-cli init --ai all --version 18.0
+```
+
+### Liệt kê version hỗ trợ
+
+```bash
+odoo-cli versions
+```
+
 ## Cấu trúc tài liệu
 
 ```

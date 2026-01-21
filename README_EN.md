@@ -6,6 +6,36 @@ Complete reference documentation for Odoo 18 development, covering models, field
 
 This is a comprehensive reference guide for Odoo 18 development, organized as modular guides that can be used independently or together. Based on analysis of Odoo 18 base source code.
 
+## CLI (odoo-cli)
+
+Install the CLI to set up docs by Odoo version and AI assistant:
+
+```bash
+npm install -g odoo-cli
+```
+
+### Example for Odoo 18.0
+
+```bash
+# Cursor (creates .cursor/rules/odoo/18.0/*.mdc)
+odoo-cli init --ai cursor --version 18.0
+
+# Claude Code (copies CLAUDE.md + SKILL.md to project root)
+odoo-cli init --ai claude --version 18.0
+
+# Full docs to docs/odoo/18.0
+odoo-cli init --ai docs --version 18.0
+
+# Install all
+odoo-cli init --ai all --version 18.0
+```
+
+### List supported versions
+
+```bash
+odoo-cli versions
+```
+
 ## Documentation Structure
 
 ```

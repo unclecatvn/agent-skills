@@ -1,0 +1,20 @@
+{
+  "name": "odoo-cli",
+  "version": "0.1.0",
+  "description": "CLI to install Odoo AI agent docs by version.",
+  "bin": {
+    "odoo-cli": "bin/odoo-cli.js"
+  },
+  "files": [
+    "bin",
+    "odoo",
+    "README.md",
+    "README_EN.md",
+    "LICENSE"
+  ],
+  "license": "MIT",
+  "author": "UncleCat",
+  "engines": {
+    "node": ">=18"
+  }
+}
