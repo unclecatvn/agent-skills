@@ -1,5 +1,9 @@
 # Odoo 18 Development Guides
 
+![npm](https://img.shields.io/badge/npm-%40unclecat--agent--skills--cli-blue?style=flat-square&logo=npm&label=CLI)
+![Node](https://img.shields.io/badge/node-%3E%3D18.0.0-green?style=flat-square&logo=node.js)
+![License](https://img.shields.io/badge/license-MIT-green?style=flat-square)
+
 Complete reference documentation for Odoo 18 development, covering models, fields, decorators, views, performance, controllers, and best practices.
 
 ## Introduction
@@ -11,29 +15,35 @@ This is a comprehensive reference guide for Odoo 18 development, organized as mo
 Install the CLI to set up docs by Odoo version and AI assistant:
 
 ```bash
-npm install -g odoo-cli
+npm install -g @unclecat/agent-skills-cli
 ```
 
 ### Example for Odoo 18.0
 
 ```bash
-# Cursor (creates .cursor/rules/odoo/18.0/*.mdc)
-odoo-cli init --ai cursor --version 18.0
+# Cursor (creates .cursor/commands/odoo.md + .shared/odoo/18.0)
+agent-skills init --ai cursor odoo --version 18.0
 
-# Claude Code (copies CLAUDE.md + SKILL.md to project root)
-odoo-cli init --ai claude --version 18.0
+# Claude Code (.claude/skills/odoo/18.0)
+agent-skills init --ai claude odoo --version 18.0
+
+# Antigravity (.agent/workflows/odoo.md + .shared/odoo/18.0)
+agent-skills init --ai antigravity odoo --version 18.0
+
+# Kiro (.kiro/steering/odoo.md + .shared/odoo/18.0)
+agent-skills init --ai kiro odoo --version 18.0
 
 # Full docs to docs/odoo/18.0
-odoo-cli init --ai docs --version 18.0
+agent-skills init --ai docs odoo --version 18.0
 
 # Install all
-odoo-cli init --ai all --version 18.0
+agent-skills init --ai all odoo --version 18.0
 ```
 
 ### List supported versions
 
 ```bash
-odoo-cli versions
+agent-skills versions odoo
 ```
 
 ## Documentation Structure

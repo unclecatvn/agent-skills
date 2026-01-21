@@ -1,5 +1,9 @@
 # Odoo 18 Development Guides
 
+![npm](https://img.shields.io/badge/npm-%40unclecat--agent--skills--cli-blue?style=flat-square&logo=npm&label=CLI)
+![Node](https://img.shields.io/badge/node-%3E%3D18.0.0-green?style=flat-square&logo=node.js)
+![License](https://img.shields.io/badge/license-MIT-green?style=flat-square)
+
 Tài liệu phát triển Odoo 18 toàn diện, bao gồm các hướng dẫn về model, field, decorator, view, performance, controller và best practices.
 
 ## Giới thiệu
@@ -11,29 +15,35 @@ Tài liệu phát triển Odoo 18 toàn diện, bao gồm các hướng dẫn v�
 Cài CLI để install nhanh theo version Odoo và AI assistant:
 
 ```bash
-npm install -g odoo-cli
+npm install -g @unclecat/agent-skills-cli
 ```
 
 ### Ví dụ cài theo Odoo 18.0
 
 ```bash
-# Cursor (tạo .cursor/rules/odoo/18.0/*.mdc)
-odoo-cli init --ai cursor --version 18.0
+# Cursor (tạo .cursor/commands/odoo.md + .shared/odoo/18.0)
+agent-skills init --ai cursor odoo --version 18.0
 
-# Claude Code (copy CLAUDE.md + SKILL.md ra root)
-odoo-cli init --ai claude --version 18.0
+# Claude Code (.claude/skills/odoo/18.0)
+agent-skills init --ai claude odoo --version 18.0
+
+# Antigravity (.agent/workflows/odoo.md + .shared/odoo/18.0)
+agent-skills init --ai antigravity odoo --version 18.0
+
+# Kiro (.kiro/steering/odoo.md + .shared/odoo/18.0)
+agent-skills init --ai kiro odoo --version 18.0
 
 # Lưu full docs vào docs/odoo/18.0
-odoo-cli init --ai docs --version 18.0
+agent-skills init --ai docs odoo --version 18.0
 
 # Cài tất cả
-odoo-cli init --ai all --version 18.0
+agent-skills init --ai all odoo --version 18.0
 ```
 
 ### Liệt kê version hỗ trợ
 
 ```bash
-odoo-cli versions
+agent-skills versions odoo
 ```
 
 ## Cấu trúc tài liệu

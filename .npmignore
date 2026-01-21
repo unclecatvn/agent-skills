@@ -1,0 +1,30 @@
+# Git
+.git/
+.gitignore
+
+# GitHub
+.github/
+
+# NPM
+node_modules/
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# CI/CD
+.vscode/
+.idea/
+
+# Documentation (keep only main files)
+CLAUDE.md
+
+# Test files
+*.test.js
+test/
+tests/
+
+# Temporary files
+*.log
+.DS_Store
+*.swp
+*.swo
