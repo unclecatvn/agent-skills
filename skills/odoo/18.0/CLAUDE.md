@@ -6,10 +6,10 @@ This file provides guidance to AI agents when working with Odoo 18 code in this 
 
 ## Documentation Structure
 
-The `docs/odoo/18.0/` directory contains modular guides that can be used independently or together:
+The `docs/skills/odoo/18.0/` directory contains modular guides that can be used independently or together:
 
 ```
-docs/odoo/18.0/
+docs/skills/odoo/18.0/
 ├── SKILL.md                       # Master reference - start here
 ├── odoo-18-model-guide.md         # ORM, CRUD operations, domain syntax
 ├── odoo-18-field-guide.md         # Field types, parameters

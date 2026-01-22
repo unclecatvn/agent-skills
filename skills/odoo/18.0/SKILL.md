@@ -436,7 +436,7 @@ def create(self, vals_list):
 ## File Structure
 
 ```
-docs/odoo/18.0/
+docs/skills/odoo/18.0/
 ├── SKILL.md                       # THIS FILE - master reference
 ├── odoo-18-model-guide.md         # ORM, CRUD, search, domain
 ├── odoo-18-field-guide.md         # Field types, parameters

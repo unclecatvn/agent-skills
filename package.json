@@ -1,15 +1,15 @@
 {
   "name": "@unclecat/agent-skills-cli",
   "version": "0.1.0",
-  "description": "CLI to install agent skills docs by version.",
+  "description": "CLI and docs for installing agent skills by version.",
   "bin": {
     "agent-skills": "bin/agent-skills.js"
   },
   "files": [
     "bin",
-    "odoo",
+    "skills",
+    "commands",
     "README.md",
-    "README_EN.md",
     "LICENSE"
   ],
   "license": "MIT",

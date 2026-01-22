@@ -24,18 +24,18 @@ This guide explains how to use the Odoo 18 documentation with different AI codin
 
 2. **Copy to your project:**
    ```bash
-   cp -r odoo/18.0 /your-project/docs/odoo/
+  cp -r skills/odoo/18.0 /your-project/docs/skills/odoo/
    ```
 
 3. **For Claude Code, add symlink:**
    ```bash
-   ln -s docs/odoo/18.0/CLAUDEDE.md ./CLAUDEDE.md
+  ln -s docs/skills/odoo/18.0/CLAUDE.md ./CLAUDE.md
    ```
 
 ## Documentation Structure
 
 ```
-docs/odoo/18.0/
+docs/skills/odoo/18.0/
 ├── SKILL.md                       # Master reference (all agents)
 ├── CLAUDE.md                      # Claude Code specific
 ├── AGENTS.md                      # THIS FILE - setup guide
@@ -86,7 +86,7 @@ Cursor automatically discovers `.mdc` files with YAML frontmatter and applies th
    - Source: `Git Repository`
    - URL: `git@github.com:unclecatvn/agent-skills.git`
    - Branch: `odoo/18.0` (hoặc `main`)
-   - **Optional:** Subfolder: `odoo/18.0/` (nếu có nhiều skills)
+  - **Optional:** Subfolder: `skills/odoo/18.0/` (nếu có nhiều skills)
 
 2. **Done!** Cursor auto-applies rules to ALL your projects
 
@@ -100,7 +100,7 @@ Cursor automatically discovers `.mdc` files with YAML frontmatter and applies th
 
 **Copy documentation to project:**
 ```bash
-cp -r docs/odoo/18.0 /your-project/docs/odoo/
+cp -r docs/skills/odoo/18.0 /your-project/docs/skills/odoo/
 ```
 
 **Use when:**
@@ -152,12 +152,12 @@ Claude Code reads `CLAUDE.md` and `SKILL.md` to understand project-specific patt
 
 1. **Place CLAUDE.md in project root** (or symlink):
    ```bash
-   ln -s docs/odoo/18.0/CLAUDE.md ./CLAUDE.md
+  ln -s docs/skills/odoo/18.0/CLAUDE.md ./CLAUDE.md
    ```
 
 2. **Or copy**:
    ```bash
-   cp docs/odoo/18.0/CLAUDE.md ./CLAUDE.md
+  cp docs/skills/odoo/18.0/CLAUDE.md ./CLAUDE.md
    ```
 
 ### What Claude Code Reads
@@ -209,7 +209,7 @@ Copilot doesn't have built-in documentation reading, but having clear code examp
 1. **Keep documentation in `docs/`** folder
 2. **Reference in comments** when needed:
    ```python
-   # See docs/odoo/18.0/odoo-18-model-guide.md for ORM patterns
+  # See docs/skills/odoo/18.0/odoo-18-model-guide.md for ORM patterns
    ```
 
 ---
@@ -253,25 +253,25 @@ Limited documentation reading. Use inline code comments.
 
 For **Cursor** only:
 ```bash
-cp docs/odoo/18.0/SKILL.md /your-project/
+cp docs/skills/odoo/18.0/SKILL.md /your-project/
 ```
 
 For **Claude Code** only:
 ```bash
-cp docs/odoo/18.0/CLAUDE.md /your-project/
+cp docs/skills/odoo/18.0/CLAUDE.md /your-project/
 ```
 
 For **Both**:
 ```bash
-cp docs/odoo/18.0/SKILL.md /your-project/
-cp docs/odoo/18.0/CLAUDE.md /your-project/
+cp docs/skills/odoo/18.0/SKILL.md /your-project/
+cp docs/skills/odoo/18.0/CLAUDE.md /your-project/
 ```
 
 ### Option 3: Git Submodule (Alternative)
 
 ```bash
 # In your project
-git submodule add git@github.com:unclecatvn/agent-skills.git docs/odoo/18.0
+git submodule add git@github.com:unclecatvn/agent-skills.git docs/skills/odoo/18.0
 ```
 
 ---
