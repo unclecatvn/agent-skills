@@ -44,7 +44,9 @@ docs/skills/odoo/18.0/
 ├── odoo-18-decorator-guide.md      # @api decorators
 ├── odoo-18-view-guide.md          # XML views, actions, menus
 ├── odoo-18-performance-guide.md    # N+1 prevention, optimization
+├── odoo-18-transaction-guide.md   # Savepoints, UniqueViolation, commit/rollback
 ├── odoo-18-controller-guide.md     # HTTP, routing, controllers
+├── odoo-18-owl-guide.md           # OWL components, hooks, services
 └── odoo-18-development-guide.md    # Manifest, reports, security
 ```
 
@@ -58,7 +60,9 @@ docs/skills/odoo/18.0/
 | `odoo-18-decorator-guide.md` | @api decorators usage | Using @api decorators |
 | `odoo-18-view-guide.md` | XML views, actions, menus | Writing view XML |
 | `odoo-18-performance-guide.md` | Performance optimization | Fixing slow code |
+| `odoo-18-transaction-guide.md` | Database transactions, error handling | Savepoints, UniqueViolation |
 | `odoo-18-controller-guide.md` | HTTP controllers, routing | Writing endpoints |
+| `odoo-18-owl-guide.md` | OWL components, hooks, services | Building OWL UI components |
 | `odoo-18-development-guide.md` | Module structure, security | Creating new modules |
 
 ---
@@ -130,6 +134,8 @@ alwaysApply: true
 | `odoo-18-view-guide.md` | `**/views/**/*.xml` | View XML files only |
 | `odoo-18-controller-guide.md` | `**/controllers/**/*.py` | Controller files only |
 | `odoo-18-performance-guide.md` | `**/*.{py,xml}` | All Odoo files |
+| `odoo-18-transaction-guide.md` | `**/models/**/*.py` | Model files only |
+| `odoo-18-owl-guide.md` | `static/src/**/*.{js,xml}` | OWL/JS files only |
 | `odoo-18-development-guide.md` | `**/*.{py,xml,csv}` | All Odoo files |
 
 ### Frontmatter Fields Used by Cursor

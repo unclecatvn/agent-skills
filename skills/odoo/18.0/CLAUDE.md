@@ -17,7 +17,8 @@ docs/skills/odoo/18.0/
 ├── odoo-18-view-guide.md          # XML views, actions, menus
 ├── odoo-18-performance-guide.md    # N+1 prevention, optimization
 ├── odoo-18-controller-guide.md     # HTTP controllers, routing
-├── odoo-18-development-guide.md    # Manifest, reports, security, wizards
+├── odoo-18-owl-guide.md           # OWL components, hooks, services
+└── odoo-18-development-guide.md    # Manifest, reports, security, wizards
 ```
 
 ## Key Odoo 18 Changes
@@ -43,6 +44,7 @@ When reviewing or writing Odoo 18 code, note these breaking changes from earlier
 | Writing XML views | `odoo-18-view-guide.md` |
 | Fixing slow code/N+1 queries | `odoo-18-performance-guide.md` |
 | Creating HTTP endpoints | `odoo-18-controller-guide.md` |
+| Building OWL components | `odoo-18-owl-guide.md` |
 
 ## Critical Anti-Patterns
 
@@ -121,9 +123,17 @@ my_module/
 ├── wizard/
 │   ├── __init__.py
 │   └── my_wizard.py
-└── controllers/
-    ├── __init__.py
-    └── my_controller.py
+├── controllers/
+│   ├── __init__.py
+│   └── my_controller.py
+└── static/
+    └── src/
+        ├── js/
+        │   └── my_component.js
+        ├── xml/
+        │   └── my_component.xml
+        └── scss/
+            └── my_component.scss
 ```
 
 ## Base Code Reference

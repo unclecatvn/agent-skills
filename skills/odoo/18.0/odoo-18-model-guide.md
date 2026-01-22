@@ -160,6 +160,27 @@ result = self.read_group(
 )
 ```
 
+### search_fetch() - Search and Fetch Fields (Odoo 18)
+
+**Use when**: You need to search AND prefetch specific fields to cache in one operation.
+
+```python
+# Search and fetch fields to cache
+records = self.search_fetch(
+    [('state', '=', 'done')],
+    ['name', 'amount_total', 'partner_id'],
+    order='date DESC',
+    limit=10
+)
+# Returns recordset with specified fields already in cache
+
+# Equivalent to but more efficient than:
+records = self.search([('state', '=', 'done')], order='date DESC', limit=10)
+records.fetch(['name', 'amount_total', 'partner_id'])
+```
+
+**Performance**: `search_fetch()` is optimized to fetch specified fields in the same query as the search, minimizing database round trips. Use when you know exactly which fields you'll need.
+
 ---
 
 ## read_group Internals (Odoo 18)
@@ -383,6 +404,8 @@ self.unlink()
 | `=like` | contains (case-sensitive, undefined or equals) | `[('name', '=like', 'test')]` |
 | `child_of` | is child (in hierarchy) | `[('category_id', 'child_of', category_id)]` |
 | `parent_of` | is parent (in hierarchy) | `[('company_id', 'parent_of', company_id)]` |
+| `any` | any related record matches domain | `[('line_ids', 'any', [('state', '=', 'done')])]` |
+| `not any` | no related record matches domain | `[('line_ids', 'not any', [('state', '=', 'done')])]` |
 
 ### Logical Operators
 
@@ -424,6 +447,69 @@ domain = [('line_ids.product_id.categ_id', '=', 1)]
 # Using related field
 domain = [('partner_city', '=', 'New York')]  # if partner_id.city related
 ```
+
+### Relational Domain Operators (Odoo 18)
+
+```python
+# any - matches if ANY related record satisfies the domain
+domain = [
+    ('invoice_status', '=', 'to invoice'),
+    ('order_line', 'any', [('product_id.qty_available', '<=', 0)])  # Has out-of-stock products
+]
+
+# not any - matches if NO related record satisfies the domain
+domain = [
+    ('order_line', 'not any', [('product_id.type', '=', 'service')])  # No service products
+]
+
+# parent_of - is parent in hierarchy (inverse of child_of)
+domain = [
+    ('company_id', 'parent_of', company_id)  # company_id is parent of specified company
+]
+```
+
+**Important**: `any` and `not any` work with `Many2one`, `One2many`, and `Many2many` fields to check if ANY/NO related record satisfies the given domain.
+
+### Date Field Granularities (Odoo 18)
+
+```python
+# Date granularities for domain filtering (returns integer)
+domain = [
+    ('birthday:day_of_month', '=', 15),     # Day of month (1-31)
+    ('birthday:month_number', '=', 2),       # Month number (1-12)
+    ('birthday:iso_week_number', '=', 10),    # ISO week number (1-53)
+    ('birthday:day_of_year', '=', 100),       # Day of year (1-366)
+    ('birthday:day_of_week', '=', 1),         # Day of week (0=Monday, 6=Sunday)
+    ('date_order:hour_number', '=', 14),       # Hour (0-23)
+    ('date_order:minute_number', '=', 30),     # Minute (0-59)
+    ('date_order:second_number', '=', 0),      # Second (0-59)
+]
+
+# Time granularity for read_group
+result = self.read_group(
+    [('create_date', '>=', fields.DateTime.now())],
+    ['amount:sum'],
+    ['create_date:day']       # Truncate to day
+    # Other options: hour, week, month, quarter, year
+)
+```
+
+**Supported Date Granularities**:
+
+| Granularity | Type | Use Case |
+|-------------|------|----------|
+| `year_number` | Integer | Year number (2024, 2025, ...) |
+| `quarter_number` | Integer | Quarter number (1-4) |
+| `month_number` | Integer | Month number (1-12) |
+| `iso_week_number` | Integer | ISO week number (1-53) |
+| `day_of_year` | Integer | Day of year (1-366) |
+| `day_of_month` | Integer | Day of month (1-31) |
+| `day_of_week` | Integer | Day of week (0=Mon, 6=Sun) |
+| `hour_number` | Integer | Hour (0-23) |
+| `minute_number` | Integer | Minute (0-59) |
+| `second_number` | Integer | Second (0-59) |
+
+**Note**: For `read_group`, you can use `day`, `week`, `month`, `quarter`, `year`, `hour` which truncate the date to that granularity.
 
 ---
 
@@ -744,3 +830,67 @@ sorted_records = records.sorted()
 # Use database order instead
 records = self.search(domain, order='date DESC')
 ```
+
+---
+
+## Advanced Model Attributes (Odoo 18)
+
+### _check_company_auto - Automatic Company Consistency
+
+```python
+class MyModel(models.Model):
+    _name = 'my.model'
+    _check_company_auto = True
+
+    company_id = fields.Many2one('res.company', required=True)
+    partner_id = fields.Many2one(
+        'res.partner',
+        check_company=True  # Will be validated automatically
+    )
+```
+
+**Behavior**:
+- Automatically calls `_check_company()` on `create()` and `write()`
+- Ensures relational fields with `check_company=True` have consistent companies
+- Prevents records from linking to companies incompatible with their own company
+- Use in multi-company environments to maintain data integrity
+
+### _parent_store - Hierarchical Tree Optimization
+
+```python
+class Category(models.Model):
+    _name = 'my.category'
+    _parent_name = 'parent_id'  # Many2one field to use as parent
+    _parent_store = True  # Enable parent_path computation
+
+    name = fields.Char(required=True)
+    parent_id = fields.Many2one('my.category', string='Parent Category')
+    parent_path = fields.Char(index=True)  # Computed automatically
+```
+
+**Behavior**:
+- Computes and stores `parent_path` field for efficient tree queries
+- Enables fast `child_of` and `parent_of` domain operators
+- Automatically maintained when records are created/updated
+- Use for hierarchical models (categories, forums, org structures)
+- Requires `parent_path` field with `index=True`
+
+**Benefits**:
+- Tree queries are much faster with `parent_path` than recursive queries
+- No need for recursive SQL queries
+- `child_of` and `parent_of` operators become efficient
+
+**Note**: `_parent_store` requires a properly configured `parent_id` field and `parent_path` field.
+
+### Model Attribute Reference
+
+| Attribute | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `_check_company_auto` | bool | `False` | Auto-check company consistency on write/create |
+| `_parent_name` | str | `'parent_id'` | Field to use as parent in hierarchy |
+| `_parent_store` | bool | `False` | Enable parent_path for fast tree queries |
+| `_fold_name` | str | `'fold'` | Field to determine folded groups in kanban |
+| `_order` | str | `'id'` | Default order for search results |
+| `_rec_name` | str | `'name'` | Field to use for display name |
+| `_sequence` | int | auto | Sequence number for model ordering |
+| `_register` | bool | `False` | Registry visibility (set to False for abstract classes) |

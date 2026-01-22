@@ -22,6 +22,7 @@ Complete skill guide for AI agents to write proper Odoo 18 code. This master fil
 | [Performance](#performance-guide) | `odoo-18-performance-guide.md` | Optimizing queries, preventing N+1 |
 | [Transactions](#transaction-guide) | `odoo-18-transaction-guide.md` | Savepoints, UniqueViolation, commit/rollback |
 | [Controllers](#controller-guide) | `odoo-18-controller-guide.md` | HTTP endpoints, routing |
+| [OWL Components](#owl-guide) | `odoo-18-owl-guide.md` | Building OWL UI components |
 | [Development](#development-guide) | `odoo-18-development-guide.md` | Manifest, reports, security, wizards |
 
 ---
@@ -378,6 +379,86 @@ class MyController(http.Controller):
 
 ---
 
+## OWL Guide
+
+**File**: `odoo-18-owl-guide.md`
+
+**When to read**: Building OWL components, hooks, services for frontend UI
+
+### Quick Patterns
+
+```javascript
+/** @odoo-module **/
+import { Component, useState, onWillStart } from "@owl/swidget";
+
+// Basic OWL Component
+class MyComponent extends Component {
+    static template = "my_module.MyComponent";
+
+    setup() {
+        this.state = useState({ count: 0 });
+    }
+
+    increment() {
+        this.state.count++;
+    }
+}
+
+// Using ORM service
+setup() {
+    this.orm = useService("orm");
+}
+
+async loadRecords() {
+    this.records = await this.orm.searchRead(
+        "my.model",
+        [["active", "=", true]],
+        ["name", "date"]
+    );
+}
+
+// Using RPC service
+setup() {
+    this.rpc = useService("rpc");
+}
+
+async callMethod() {
+    await this.rpc("/my/controller", { params: {...} });
+}
+```
+
+### Key Services
+
+| Service | Purpose |
+|---------|---------|
+| `orm` | Database operations (search, read, create, write) |
+| `rpc` | Call Python controllers / HTTP routes |
+| `action` | Execute ir.actions |
+| `dialog` | Show modal dialogs |
+| `notification` | Show toasts |
+| `router` | Navigate in app |
+
+### Component Lifecycle
+
+```javascript
+setup() {
+    onWillStart(() => {
+        // Before render, async OK
+        return this.loadData();
+    });
+
+    onMounted(() => {
+        // After DOM ready
+    });
+
+    onWillUnmount(() => {
+        // Cleanup
+    });
+}
+```
+
+---
+
 ## Common Issues & Solutions
 
 ### Issue: N+1 Queries
@@ -443,8 +524,9 @@ docs/skills/odoo/18.0/
 ├── odoo-18-decorator-guide.md      # @api decorators
 ├── odoo-18-view-guide.md          # XML views, actions, menus, QWeb
 ├── odoo-18-performance-guide.md    # N+1 prevention, optimization
-├── odoo-18-transaction-guide.md    # Savepoints, UniqueViolation, commit/rollback
+├── odoo-18-transaction-guide.md   # Savepoints, UniqueViolation, commit/rollback
 ├── odoo-18-controller-guide.md     # HTTP, routing, controllers
+├── odoo-18-owl-guide.md           # OWL components, hooks, services
 └── odoo-18-development-guide.md    # Manifest, reports, security, wizards
 ```
 

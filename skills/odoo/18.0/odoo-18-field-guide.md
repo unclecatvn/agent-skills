@@ -136,6 +136,54 @@ weight = fields.Float(
 
 **Use for**: Non-monetary decimal values. For currency, use `Monetary` field instead.
 
+### Float Helper Methods (Odoo 18)
+
+```python
+# Float precision helpers
+from odoo import fields
+
+# Round to precision
+rounded = fields.Float.round(
+    value,
+    precision_rounding=self.product_uom_id.rounding
+)
+
+# Check if value is zero at precision
+is_zero = fields.Float.is_zero(
+    value,
+    precision_rounding=self.product_uom_id.rounding
+)
+
+# Compare two values at precision
+result = fields.Float.compare(
+    value1,
+    value2,
+    precision_rounding=self.product_uom_id.rounding
+)
+# Returns: negative (v1 < v2), 0 (equal), positive (v1 > v2)
+```
+
+**Common Use Cases**:
+
+```python
+# Round quantity before display
+display_qty = fields.Float.round(
+    self.quantity,
+    precision_rounding=self.uom_id.rounding
+)
+
+# Check if quantity is effectively zero
+if fields.Float.is_zero(self.quantity, precision_rounding=0.001):
+    raise UserError("Quantity cannot be zero")
+
+# Compare prices at precision
+if fields.Float.compare(self.price, self.list_price, precision_rounding=0.01) >= 0:
+    # Price is greater than or equal to list price
+    pass
+```
+
+**Important**: Always use precision_rounding from the unit of measure (product.uom_id.rounding) or currency (res.currency.rounding) when working with Float fields to avoid floating-point comparison issues.
+
 ---
 
 ### Monetary - Currency Field
@@ -195,6 +243,59 @@ write_date = fields.Datetime(string='Last Updated on', readonly=True)
 
 **Use for**: Dates with time. Stored as UTC, displayed in user timezone.
 
+### Date/Datetime Helper Methods (Odoo 18)
+
+```python
+# Date helper methods
+from odoo import fields
+
+# Get start/end of period
+start_of_month = fields.Date.start_of(fields.Date.today(), 'month')
+end_of_quarter = fields.Date.end_of(fields.Date.today(), 'quarter')
+
+# Add/subtract time periods
+next_month = fields.Date.add(fields.Date.today(), months=1)
+last_week = fields.Date.subtract(fields.Date.today(), weeks=2)
+
+# Supported granularities: 'year', 'quarter', 'month', 'week', 'day', 'hour'
+
+# Convert to/from string
+date_obj = fields.Date.to_date('2024-01-15')  # String to date
+date_str = fields.Date.to_string(fields.Date.today())  # Date to string
+
+# Context-aware today
+today_tz = fields.Date.context_today(record)  # Today in record's timezone
+
+# Datetime helper methods
+now_utc = fields.Datetime.now()  # Current UTC datetime
+today_midnight = fields.Datetime.today()  # Today at midnight (00:00:00)
+
+# Add/subtract datetime
+next_hour = fields.Datetime.add(fields.Datetime.now(), hours=1)
+yesterday = fields.Datetime.subtract(fields.Datetime.now(), days=1)
+
+# Convert to/from string
+datetime_obj = fields.Datetime.to_datetime('2024-01-15 14:30:00')
+datetime_str = fields.Datetime.to_string(fields.Datetime.now())
+
+# Context-aware timestamp
+timestamp_tz = fields.Datetime.context_timestamp(record, datetime_obj)
+```
+
+**Common Use Cases**:
+
+```python
+# Get start of current month for reports
+start_date = fields.Date.start_of(fields.Date.today(), 'month')
+end_date = fields.Date.end_of(fields.Date.today(), 'month')
+
+# Add 30 days to current date
+due_date = fields.Date.add(fields.Date.today(), days=30)
+
+# Get end of current quarter
+quarter_end = fields.Date.end_of(fields.Date.today(), 'quarter')
+```
+
 ---
 
 ### Binary - File/Attachment Field
@@ -212,6 +313,72 @@ image_1920 = fields.Binary(string='Image 1920', max_width=1920, max_height=1920)
 **Use for**: File attachments and images. Use `attachment=True` for chatter integration.
 
 **Note**: With `bin_size` context, returns size in bytes instead of content.
+
+---
+
+### Image - Image Field with Resize (Odoo 18)
+
+```python
+# Image field with automatic resize
+image = fields.Image(
+    string='Image',
+    max_width=1920,      # Resize if wider than 1920px
+    max_height=1080,     # Resize if taller than 1080px
+    verify_resolution=True,  # Check max resolution (50MP default)
+)
+
+# Product image
+image_1920 = fields.Image(
+    string='Product Image',
+    max_width=1920,
+    max_height=1920,
+)
+
+# Without size limit
+image_large = fields.Image(
+    string='Large Image',
+    max_width=0,  # No limit
+    max_height=0,  # No limit
+    verify_resolution=False,
+)
+```
+
+**Important**:
+- `Image` extends `Binary` field
+- Automatically resizes images if they exceed `max_width`/`max_height` while maintaining aspect ratio
+- `verify_resolution=True` checks against maximum image resolution (~50MP default)
+- If `max_width` or `max_height` is 0 and `verify_resolution` is False, no verification is performed
+
+---
+
+### Many2oneReference - Dynamic Typed Reference (Odoo 18)
+
+```python
+# Many2oneReference - model stored in separate field
+ref_id = fields.Many2oneReference(
+    string='Reference',
+    model_field='model_name',  # Char field containing model name
+)
+
+# Example usage
+class MyModel(models.Model):
+    _name = 'my.model'
+
+    model_name = fields.Char(string='Model Name')  # Stores model name
+    ref_id = fields.Many2oneReference(
+        string='Reference',
+        model_field='model_name'
+    )
+
+# Usage: ref_id can point to any model, model_name stores which model
+# Stored as integer ID in database (more efficient than Reference string)
+```
+
+**Important**:
+- `Many2oneReference` stores value as integer ID (unlike `Reference` which stores "model,id" string)
+- Requires a separate Char field to store the model name
+- More efficient than `Reference` for database queries and joins
+- Use when you need dynamic references to multiple possible models
 
 ---
 
