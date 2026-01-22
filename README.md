@@ -1,59 +1,55 @@
 # Agent Skills Documentation
 
-> Comprehensive documentation and skill packs for AI-powered development assistants
+> **Skill packs, agents, and commands** for AI-powered development assistants
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Odoo Version](https://img.shields.io/badge/Odoo-18.0-blue)](https://www.odoo.com/)
+[![NPM Version](https://img.shields.io/npm/v/@unclecat/agent-skills-cli.svg)](https://www.npmjs.com/package/@unclecat/agent-skills-cli)
+[![Odoo](https://img.shields.io/badge/Odoo-18.0-blue)](https://www.odoo.com/)
 [![Type](https://img.shields.io/badge/Type-Skills%20Pack-green)]()
 
 ---
 
 ## Overview
 
-This repository contains **versioned documentation and skill packs** designed to enhance AI coding assistants (Cursor, Claude Code, Windsurf, Continue, etc.) with domain-specific knowledge for professional development workflows.
+This repository contains a comprehensive suite of **versioned documentation, skill packs, specialized agents, and command templates** designed to enhance AI coding assistants (Cursor, Claude Code, Windsurf, Continue, etc.) with domain-specific knowledge.
 
-### What are Skill Packs?
+### What's Inside?
 
-Skill packs are structured markdown files with YAML frontmatter that AI agents use to understand:
-- **Framework patterns** and best practices
-- **API conventions** and idiomatic code
-- **Anti-patterns** to avoid
-- **Project-specific conventions**
-
-When an AI agent has access to these skill packs, it generates code that follows your project's standards, uses correct patterns, and avoids common mistakes.
+| Component | Description | Location |
+|-----------|-------------|----------|
+| **Skill Packs** | Versioned framework documentation (Odoo 18.0) | `skills/` |
+| **Agents** | Specialized AI agents (Odoo code reviewer) | `agents/` |
+| **Commands** | Reusable prompt templates | `commands/` |
+| **CLI Tool** | Install & manage skills via CLI | `bin/` |
 
 ---
 
-## Features
+## Table of Contents
 
-| Feature | Description |
-|---------|-------------|
-| **Versioned Documentation** | Separate skill packs for each major version (e.g., Odoo 17.0, 18.0) |
-| **AI-IDE Compatible** | Works with Cursor, Claude Code, Windsurf, Continue, and more |
-| **Remote Rules Support** | Configure once, apply to all projects (Cursor) |
-| **Modular Architecture** | Each topic has its own guide file |
-| **Breaking Changes Tracking** | Clear documentation of version differences |
-| **NPM Package** | Install via CLI for easy setup |
+- [Quick Start](#quick-start)
+- [Skill Packs](#skill-packs)
+- [Agents](#agents)
+- [Commands](#commands)
+- [Installation](#installation)
+- [Supported AI IDEs](#supported-ai-ides)
+- [Repository Structure](#repository-structure)
+- [Contributing](#contributing)
 
 ---
 
 ## Quick Start
 
-### Option 1: Remote Configuration (Cursor - Recommended)
-
-Configure once in Cursor IDE:
+### Remote Configuration (Cursor - Recommended)
 
 1. Open **Settings** → **Rules** → **Add Remote Rule**
 2. Source: `Git Repository`
 3. URL: `git@github.com:unclecatvn/agent-skills.git`
 4. Branch: `odoo/18.0`
 
-Done! Rules automatically apply to all your projects.
-
-### Option 2: NPM CLI
+### NPM CLI Installation
 
 ```bash
-# Install the CLI globally
+# Install CLI globally
 npm install -g @unclecat/agent-skills-cli
 
 # Initialize skills for your project
@@ -63,18 +59,158 @@ agent-skills init --ai cursor odoo --version 18.0
 agent-skills versions odoo
 ```
 
-### Option 3: Manual Setup
+### Manual Setup
 
 ```bash
-# Clone the repository
+# Clone repository
 git clone git@github.com:unclecatvn/agent-skills.git
 
 # Copy to your project
 cp -r agent-skills/skills/odoo/18.0 /your-project/docs/skills/odoo/
 
-# For Claude Code, create symlink
+# For Claude Code
 ln -s docs/skills/odoo/18.0/CLAUDE.md ./CLAUDE.md
 ```
+
+---
+
+## Skill Packs
+
+### Odoo 18.0 Skill Pack
+
+Comprehensive Odoo 18 framework documentation with **7,761 lines** across 9 specialized guides.
+
+| Guide | Lines | Topics |
+|-------|-------|--------|
+| [Model Guide](skills/odoo/18.0/odoo-18-model-guide.md) | 896 | ORM, CRUD, search, domain syntax |
+| [Field Guide](skills/odoo/18.0/odoo-18-field-guide.md) | 844 | Field types, Float/Date helpers, Image, Many2oneReference |
+| [Decorator Guide](skills/odoo/18.0/odoo-18-decorator-guide.md) | 599 | @api decorators, compute, constraints, onchange |
+| [View Guide](skills/odoo/18.0/odoo-18-view-guide.md) | 868 | XML views, actions, menus, QWeb templates |
+| [Performance Guide](skills/odoo/18.0/odoo-18-performance-guide.md) | 611 | N+1 prevention, batch operations |
+| [Transaction Guide](skills/odoo/18.0/odoo-18-transaction-guide.md) | 640 | Savepoints, UniqueViolation, commit/rollback |
+| [Controller Guide](skills/odoo/18.0/odoo-18-controller-guide.md) | 527 | HTTP routing, authentication, JSON endpoints |
+| [OWL Guide](skills/odoo/18.0/odoo-18-owl-guide.md) | 1483 | OWL components, hooks, services, templates |
+| [Development Guide](skills/odoo/18.0/odoo-18-development-guide.md) | 1196 | Module structure, manifest, security, wizards |
+
+**Supporting Files:**
+- `SKILL.md` - Master reference (623 lines)
+- `CLAUDE.md` - Claude Code specific (146 lines)
+- `AGENTS.md` - AI IDE setup guide (428 lines)
+
+#### Key Odoo 18 Changes
+
+| Change | Odoo 17 | Odoo 18 |
+|--------|---------|---------|
+| List view tag | `<tree>` | `<list>` |
+| Delete validation | Override `unlink()` | `@api.ondelete(at_uninstall=False)` |
+| Field aggregation | `group_operator=` | `aggregator=` |
+| SQL queries | `cr.execute()` | `SQL.execute_query_dict()` |
+| Batch create | Single dict | List of dicts |
+
+### Brainstorming Skill Pack
+
+Facilitates structured brainstorming sessions for feature planning and problem-solving.
+
+---
+
+## Agents
+
+### Odoo Code Review Agent
+
+**Location:** `agents/odoo-code-review/SKILL.md` (228 lines)
+
+Expert-level Odoo 18 code review with weighted scoring across multiple criteria:
+
+**Review Criteria:**
+- ORM Best Practices (N+1 prevention, prefetching)
+- @api Decorator Usage (@api.depends, @api.ondelete, @api.constrains)
+- Field Type Selection (Monetary vs Float, proper indexes)
+- Odoo 18 Compatibility (`<list>` vs `<tree>`, aggregator, precompute)
+- Performance Patterns (batch operations, mapped(), filtered())
+- Transaction Safety (savepoints, UniqueViolation handling)
+- Security & Access Control (record rules, ir.rule)
+- View & XML Standards (proper inheritance, QWeb templates)
+- Naming Conventions (Python, XML IDs, modules)
+
+**Usage:**
+```bash
+# Via command
+/odoo-code-review path/to/code.py
+
+# Via AI IDE reference
+"Review this using the odoo-code-review agent"
+```
+
+---
+
+## Commands
+
+Reusable prompt templates for common development workflows.
+
+| Command | Description | Location |
+|---------|-------------|----------|
+| `brainstorm` | Structured brainstorming session | `commands/brainstorm.md` |
+| `code-reviewer` | Trigger Odoo code review | `commands/code-reviewer.md` |
+| `write-plan` | Create implementation plan | `commands/write-plan.md` |
+| `execute-plan` | Execute from plan | `commands/execute-plan.md` |
+
+### Using Commands
+
+**In Cursor IDE:**
+- Commands appear as slash commands (`/brainstorm`, `/code-reviewer`)
+- Type `/` to see available commands
+
+**In Claude Code:**
+- Reference command files in prompts
+- Use built-in slash command support
+
+---
+
+## Installation
+
+### Option 1: Remote Rules (Cursor)
+
+Configure once, apply to all projects:
+
+1. **Settings** → **Rules** → **Add Remote Rule**
+2. Source: `Git Repository`
+3. URL: `git@github.com:unclecatvn/agent-skills.git`
+4. Branch: `odoo/18.0` or `main`
+
+### Option 2: NPM CLI
+
+```bash
+npm install -g @unclecat/agent-skills-cli
+agent-skills init --ai <ide> <framework> --version <version>
+```
+
+### Option 3: Manual Copy
+
+```bash
+# Skills
+cp -r skills/odoo/18.0 /your-project/docs/skills/odoo/
+
+# Agents
+cp -r agents/odoo-code-review /your-project/.claude/agents/
+
+# Commands
+cp -r commands/* /your-project/.claude/commands/
+```
+
+---
+
+## Supported AI IDEs
+
+| IDE | Skills | Agents | Commands | Setup |
+|-----|--------|--------|----------|-------|
+| **Cursor** | ✅ Remote Rules | ✅ | ✅ | Settings → Rules |
+| **Claude Code** | ✅ CLAUDE.md | ✅ | ✅ | Project root |
+| **Windsurf** | ✅ .mdc files | ✅ | ✅ | Project root |
+| **Continue** | ✅ Markdown | ✅ | ⚠️ | Config file |
+| **OpenCode** | ✅ Auto-discover | ⚠️ | ⚠️ | None |
+| **Aider** | ✅ Markdown | ✅ | ⚠️ | Prompt ref |
+
+For detailed setup, see [AGENTS.md](skills/odoo/18.0/AGENTS.md).
 
 ---
 
@@ -83,150 +219,171 @@ ln -s docs/skills/odoo/18.0/CLAUDE.md ./CLAUDE.md
 ```
 docs/
 ├── README.md                                # This file
-├── skills/
-│   └── odoo/
-│       └── 18.0/                            # Odoo 18.0 skill pack
-│           ├── SKILL.md                     # Master reference
-│           ├── CLAUDE.md                    # Claude Code specific
-│           ├── AGENTS.md                    # Setup guide for AI IDEs
-│           ├── odoo-18-model-guide.md       # ORM, CRUD, search, domain
-│           ├── odoo-18-field-guide.md       # Field types, parameters
-│           ├── odoo-18-decorator-guide.md    # @api decorators
-│           ├── odoo-18-view-guide.md         # XML views, actions, menus
-│           ├── odoo-18-performance-guide.md  # N+1 prevention, optimization
-│           ├── odoo-18-transaction-guide.md # Savepoints, error handling
-│           ├── odoo-18-controller-guide.md  # HTTP, routing, controllers
-│           ├── odoo-18-owl-guide.md         # OWL components, hooks
-│           └── odoo-18-development-guide.md  # Manifest, reports, security
-├── commands/                                # Helper prompts and templates
-└── bin/                                     # CLI entry point
+├── LICENSE                                  # MIT License
+├── package.json                             # NPM package config
+├── .npmignore                               # NPM publish ignore rules
+│
+├── skills/                                  # Framework skill packs
+│   ├── odoo/
+│   │   ├── 18.0/                            # Odoo 18.0 (7,761 lines)
+│   │   │   ├── SKILL.md                     # Master reference
+│   │   │   ├── CLAUDE.md                    # Claude Code specific
+│   │   │   ├── AGENTS.md                    # Setup guide
+│   │   │   ├── odoo-18-model-guide.md
+│   │   │   ├── odoo-18-field-guide.md
+│   │   │   ├── odoo-18-decorator-guide.md
+│   │   │   ├── odoo-18-view-guide.md
+│   │   │   ├── odoo-18-performance-guide.md
+│   │   │   ├── odoo-18-transaction-guide.md
+│   │   │   ├── odoo-18-controller-guide.md
+│   │   │   ├── odoo-18-owl-guide.md
+│   │   │   └── odoo-18-development-guide.md
+│   │   ├── README.md                        # Odoo skills overview
+│   │   └── README_EN.md                     # English overview
+│   └── brainstorming/
+│       └── SKILL.md                         # Brainstorming facilitator
+│
+├── agents/                                  # Specialized AI agents
+│   └── odoo-code-review/
+│       └── SKILL.md                         # Odoo code reviewer (228 lines)
+│
+├── commands/                                # Prompt templates
+│   ├── brainstorm.md                        # Brainstorming session
+│   ├── code-reviewer.md                     # Trigger code review
+│   ├── write-plan.md                        # Create plans
+│   └── execute-plan.md                      # Execute plans
+│
+└── bin/                                     # CLI tool entry point
 ```
 
 ---
 
-## Odoo 18.0 Skill Pack
+## Documentation Statistics
 
-### Available Guides
-
-| Guide | Lines | Topics Covered |
-|-------|-------|----------------|
-| Model Guide | 896 | ORM methods, CRUD operations, domain syntax, search methods |
-| Field Guide | 844 | Field types, parameters, Float/Date helpers, Image/Many2oneReference |
-| Decorator Guide | 599 | @api decorators, compute fields, constraints, onchange |
-| View Guide | 868 | XML views, actions, menus, QWeb templates, list views (Odoo 18) |
-| Performance Guide | 611 | N+1 prevention, optimization, batch operations |
-| Transaction Guide | 640 | Savepoints, UniqueViolation, commit/rollback strategies |
-| Controller Guide | 527 | HTTP routing, authentication, JSON endpoints |
-| OWL Guide | 1483 | OWL components, hooks, services, templates |
-| Development Guide | 1196 | Module structure, manifest, security, wizards, reports |
-
-**Total: 8,773 lines of comprehensive Odoo 18 documentation**
-
-### Key Odoo 18 Changes
-
-| Change | Odoo 17 | Odoo 18 |
-|--------|---------|---------|
-| List view tag | `<tree>` | `<list>` |
-| Delete validation | Override `unlink()` | `@api.ondelete(at_uninstall=False)` |
-| Field aggregation | `group_operator=` | `aggregator=` |
-| SQL queries | `cr.execute()` | `SQL` class with `execute_query_dict()` |
-| Batch create | Single dict | List of dicts: `create([{...}, {...}])` |
-
----
-
-## Supported AI IDEs
-
-| IDE | Status | Setup Method |
-|-----|--------|--------------|
-| **Cursor** | ✅ Full Support | Remote Rules (recommended) or local `.mdc` files |
-| **Claude Code** | ✅ Full Support | `CLAUDE.md` in project root |
-| **Windsurf** | ✅ Full Support | `.mdc` files with frontmatter |
-| **Continue** | ✅ Full Support | `CLAUDE.md` or `SKILL.md` |
-| **OpenCode** | ✅ Full Support | Auto-discovers markdown with frontmatter |
-| **GitHub Copilot** | ⚠️ Limited | Reference in code comments |
-| **Aider** | ✅ Full Support | Markdown files in project |
-| **Tabnine** | ⚠️ Limited | Code comments only |
-
-For detailed setup instructions, see [AGENTS.md](./skills/odoo/18.0/AGENTS.md).
+| Category | Files | Total Lines |
+|----------|-------|-------------|
+| **Odoo 18 Skills** | 12 files | 7,761 lines |
+| **Odoo Code Review Agent** | 1 file | 228 lines |
+| **Brainstorming Skill** | 1 file | 53 lines |
+| **Commands** | 4 files | 21 lines |
+| **Total** | **18 files** | **8,063 lines** |
 
 ---
 
 ## Usage Examples
 
-### For Model Development
+### Odoo Model Development
 
-When working with Odoo models, AI agents will:
+With Odoo 18.0 skills loaded, AI agents will:
 
-- ✅ Use `@api.depends('partner_id.email')` with dotted paths
-- ✅ Apply `@api.ondelete(at_uninstall=False)` for delete validation
-- ✅ Use `aggregator='sum'` instead of deprecated `group_operator`
-- ✅ Write `<list>` instead of `<tree>` for list views
-- ✅ Batch operations: `create([{...}, {...}])`
-- ❌ Avoid N+1 queries in loops
-- ❌ Avoid overriding `unlink()` for validation
+```python
+# ✅ Correct patterns automatically applied
+@api.depends('partner_id.email')  # Dotted paths (Odoo 18)
+def _compute_email(self):
+    for rec in self:
+        rec.email = rec.partner_id.email
 
-### For Frontend Development
+@api.ondelete(at_uninstall=False)  # Odoo 18 delete validation
+def _unlink_if_not_draft(self):
+    if any(rec.state != 'draft' for rec in self):
+        raise UserError("Cannot delete non-draft records")
 
-When building OWL components, AI agents will:
+amount = fields.Float(aggregator='sum')  # Not group_operator (deprecated)
+```
 
-- ✅ Use proper services: `orm`, `rpc`, `dialog`, `notification`
-- ✅ Follow lifecycle hooks: `onWillStart`, `onMounted`, `onWillUnmount`
-- ✅ Use `useState` for reactive state management
-- ✅ Properly import with `/** @odoo-module **/`
+### Code Review
+
+```
+You: /code-reviewer
+
+AI: [Invokes odoo-code-review agent]
+     Reviewing code.py...
+
+     ✓ ORM Best Practices: 9/10
+     ✓ @api Decorators: 10/10
+     ⚠ Performance: 7/10 - Consider using search_fetch()
+
+     [Detailed findings and recommendations...]
+```
+
+### Planning & Brainstorming
+
+```
+You: /write-plan
+
+AI: I'll create an implementation plan for this feature.
+     [Structured plan with tasks, dependencies, and estimates...]
+
+You: /brainstorm
+
+AI: Let's brainstorm approaches for this problem...
+     [Facilitates structured brainstorming session...]
+```
 
 ---
 
 ## Version Compatibility
 
-| Odoo Version | Branch | Status | Breaking Changes |
-|--------------|--------|--------|------------------|
-| 18.0 | `odoo/18.0` | ✅ Current | N/A |
-| 17.0 | `odoo/17.0` | ⚠️ Legacy | Incompatible with 18.0 skill pack |
-| 16.0 | `odoo/16.0` | ⚠️ Legacy | Incompatible with 18.0 skill pack |
+| Framework | Version | Status | Branch |
+|-----------|---------|--------|--------|
+| Odoo | 18.0 | ✅ Current | `odoo/18.0` |
+| Odoo | 17.0 | ⚠️ Legacy | `odoo/17.0` |
+| Odoo | 16.0 | ⚠️ Legacy | `odoo/16.0` |
+
+---
+
+## Roadmap
+
+- [ ] **Odoo 19.0** skill pack (Q3 2026)
+- [ ] **Laravel** skill pack
+- [ ] **Django** skill pack
+- [ ] **Testing Agents** (pytest, unittest specialists)
+- [ ] **Migration Agents** (Odoo version upgrade assistant)
+- [ ] **Web Commands** (React, Vue, Angular templates)
 
 ---
 
 ## Contributing
 
-We welcome contributions! To improve the skill packs:
+We welcome contributions! Areas of interest:
 
-1. **Identify the gap**: Missing pattern, incorrect example, or unclear documentation
-2. **Edit the guide**: Modify the relevant `.md` file in `skills/odoo/18.0/`
-3. **Update frontmatter**: Add new topics if introducing new sections
-4. **Test locally**: Verify with your AI agent before submitting
-5. **Submit PR**: Include description of what was improved
+1. **New Skill Packs** - Additional frameworks (Laravel, Django, Express)
+2. **New Agents** - Specialized reviewers (security, performance, testing)
+3. **New Commands** - Workflow templates
+4. **Enhanced Guides** - More examples, patterns, edge cases
+5. **Translations** - Multi-language support
 
-### Contribution Areas
+### Contribution Workflow
 
-- **New Guides**: WebSocket integration, testing patterns, migration guides
-- **Expanded Topics**: More QWeb examples, advanced ORM patterns
-- **Code Examples**: Real-world use cases from production code
-- **Translations**: Multi-language support
+1. Fork the repository
+2. Create a feature branch
+3. Add/edit files in `skills/`, `agents/`, or `commands/`
+4. Test with your AI agent
+5. Submit PR with description
 
 ---
 
 ## License
 
-This project is licensed under the MIT License - see individual files for details.
+MIT License - see [LICENSE](LICENSE) for details.
 
 ---
 
 ## Links
 
-- **Repository**: [git@github.com:unclecatvn/agent-skills.git](https://github.com/unclecatvn/agent-skills)
-- **NPM Package**: [@unclecat/agent-skills-cli](https://www.npmjs.com/package/@unclecat/agent-skills-cli)
-- **Issue Tracker**: [GitHub Issues](https://github.com/unclecatvn/agent-skills/issues)
+| Resource | URL |
+|----------|-----|
+| **Repository** | [github.com/unclecatvn/agent-skills](https://github.com/unclecatvn/agent-skills) |
+| **NPM Package** | [@unclecat/agent-skills-cli](https://www.npmjs.com/package/@unclecat/agent-skills-cli) |
+| **Issues** | [GitHub Issues](https://github.com/unclecatvn/agent-skills/issues) |
+| **Discussions** | [GitHub Discussions](https://github.com/unclecatvn/agent-skills/discussions) |
 
 ---
 
 ## Acknowledgments
 
-Built with references to official Odoo 18 source code:
-- `odoo/models.py` - ORM implementation
-- `odoo/fields.py` - Field types
-- `odoo/api.py` - Decorators
-- `odoo/http.py` - HTTP layer
-- `odoo/exceptions.py` - Exception types
+Built with references to official source code:
+- **Odoo 18**: `odoo/models.py`, `odoo/fields.py`, `odoo/api.py`, `odoo/http.py`
 
 ---
 
