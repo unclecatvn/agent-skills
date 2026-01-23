@@ -28,6 +28,7 @@ When reviewing or writing Odoo 18 code, note these breaking changes from earlier
 | Change | Old (Odoo 17-) | New (Odoo 18) |
 |--------|----------------|---------------|
 | List view tag | `<tree>` | `<list>` |
+| Dynamic attributes | `attrs="{'invisible': [...]}"` | `invisible="..."` (direct) |
 | Delete validation | Override `unlink()` | `@api.ondelete(at_uninstall=False)` |
 | Field aggregation | `group_operator=` | `aggregator=` |
 | SQL queries | `cr.execute()` | `SQL` class with `execute_query_dict()` |
@@ -50,6 +51,7 @@ When reviewing or writing Odoo 18 code, note these breaking changes from earlier
 
 | Anti-Pattern | Why Bad | Correct Approach |
 |--------------|---------|------------------|
+| `attrs="{'invisible': [...]}"` | Deprecated in Odoo 18 | Use `invisible="..."` direct attribute |
 | `@api.depends('partner_id')` then accessing `partner_id.email` | N queries per record | Add `@api.depends('partner_id.email')` |
 | `search()` inside loop | N+1 queries | Use `search()` with `IN` domain or `read_group()` |
 | `create()` in loop | N INSERT statements | Batch: `create([{...}, {...}])` |

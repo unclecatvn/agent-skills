@@ -280,9 +280,48 @@ Complete reference for Odoo 18 XML views, actions, menus, and QWeb templates.
 <field name="name" required="1"/>
 <field name="code" readonly="1"/>
 
-<!-- Invisible -->
-<field name="field_a" invisible="not is_company"/>
+### Dynamic Attributes (Odoo 18 - Direct Attributes)
 
+**IMPORTANT**: In Odoo 18, the `attrs` attribute is **DEPRECATED**. Use direct attributes instead.
+
+#### ❌ BAD: Using `attrs` (Old Odoo 13-17 syntax)
+
+```xml
+<!-- Old syntax - DEPRECATED in Odoo 18 -->
+<field name="is_company" attrs="{'invisible': [('type', '=', 'contact')]"/>
+<field name="email" attrs="{'required': [('is_company', '=', True)]}"/>
+<field name="code" attrs="{'readonly': [('state', '!=', 'draft')]}"/>
+<button name="action" attrs="{'invisible': [('state', '=', 'done')]}"/>
+```
+
+#### ✅ GOOD: Using Direct Attributes (Odoo 18 syntax)
+
+```xml
+<!-- New syntax - Odoo 18+ -->
+<field name="is_company" invisible="type == 'contact'"/>
+<field name="email" required="is_company"/>
+<field name="code" readonly="state != 'draft'"/>
+<button name="action" invisible="state == 'done'"/>
+
+<!-- Complex domain expressions -->
+<field name="company_name" invisible="not company_name or company_name == '' or is_company"/>
+<div invisible="not parent_id" groups="base.group_no_one">
+    <field name="type" class="oe_inline"/>
+</div>
+```
+
+#### Available Dynamic Attributes
+
+| Attribute | Use For | Example |
+|-----------|---------|---------|
+| `invisible` | Hide field/element conditionally | `invisible="state == 'done'"` |
+| `readonly` | Make field read-only conditionally | `readonly="state != 'draft'"` |
+| `required` | Make field required conditionally | `required="is_company"` |
+| `column_invisible` | Hide list column | `column_invisible="True"` |
+
+### Context / Domain
+
+```xml
 <!-- Context / Domain -->
 <field name="product_id" context="{'default_type': 'service'}"/>
 <field name="partner_id" domain="[('supplier_rank', '>', 0)]"/>
@@ -824,6 +863,28 @@ Complete reference for Odoo 18 XML views, actions, menus, and QWeb templates.
 ---
 
 ## Common Anti-Patterns
+
+### ❌ BAD: Using deprecated `attrs` attribute (Odoo 17-)
+
+```xml
+<!-- Odoo 17 and earlier -->
+<field name="is_company" attrs="{'invisible': [('type', '=', 'contact')]}"/>
+<field name="email" attrs="{'required': [('is_company', '=', True)]}"/>
+<field name="code" attrs="{'readonly': [('state', '!=', 'draft')]}"/>
+<button name="action" attrs="{'invisible': [('state', '=', 'done')]}"/>
+```
+
+### ✅ GOOD: Use direct attributes (Odoo 18+)
+
+```xml
+<!-- Odoo 18+ - attrs is REMOVED -->
+<field name="is_company" invisible="type == 'contact'"/>
+<field name="email" required="is_company"/>
+<field name="code" readonly="state != 'draft'"/>
+<button name="action" invisible="state == 'done'"/>
+```
+
+**Migration Note**: Replace all `attrs="{'invisible': [...]}"` with `invisible="..."`, `attrs="{'readonly': [...]}"` with `readonly="..."`, and `attrs="{'required': [...]}"` with `required="..."`. The domain syntax inside these attributes is now a Python expression, not a domain tuple list.
 
 ### ❌ BAD: Using old `<tree>` tag
 
