@@ -1,3 +1,21 @@
+---
+name: odoo-18-testing
+description: Comprehensive guide for testing Odoo 18 modules, including
+  TransactionCase, HttpCase, browser testing, and best practices.
+globs: "**/tests/**/*.py"
+topics:
+  - Test case types (TransactionCase, SavepointCase, HttpCase)
+  - Test decorators (tagged, users, warmup)
+  - Form testing and fixtures
+  - Browser testing (browser_js)
+  - Mocking and patching
+when_to_use:
+  - Writing module tests
+  - Adding regression coverage
+  - Testing UI flows or JS
+  - Mocking external services
+---
+
 # Odoo 18 Testing Guide
 
 Comprehensive guide for testing Odoo 18 modules, covering test classes, decorators, mocking, form testing, browser testing, and best practices.

@@ -1,3 +1,21 @@
+---
+name: odoo-18-migration
+description: Comprehensive guide for upgrading modules and data to Odoo 18,
+  including migration scripts, upgrade hooks, deprecations, and best practices.
+globs: "**/migrations/**/*.py"
+topics:
+  - Migration script structure (pre/post/end)
+  - Module upgrade hooks (pre_init, post_init, uninstall)
+  - Deprecations and replacements
+  - Data migration with SQL and ORM
+  - Version checks and upgrade tooling
+when_to_use:
+  - Creating or reviewing migration scripts
+  - Upgrading modules across major versions
+  - Handling data migration and cleanup
+  - Dealing with deprecations
+---
+
 # Odoo 18 Migration Guide
 
 Comprehensive guide for migrating modules and data to Odoo 18, covering migration scripts, upgrade hooks, deprecations, and best practices.
