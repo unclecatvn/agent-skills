@@ -46,6 +46,14 @@ This repository contains a comprehensive suite of **versioned documentation, ski
 3. URL: `git@github.com:unclecatvn/agent-skills.git`
 4. Branch: `odoo/18.0`
 
+### Local Skills (Cursor + Claude)
+
+This repo already includes wrapper skills:
+- `docs/.cursor/skills/odoo-18/SKILL.md`
+- `docs/.claude/skills/odoo-18/SKILL.md`
+
+They point to the shared docs using relative paths (no duplication).
+
 ### NPM CLI Installation
 
 ```bash
@@ -65,10 +73,12 @@ agent-skills versions odoo
 # Clone repository
 git clone git@github.com:unclecatvn/agent-skills.git
 
-# Copy to your project
-cp -r agent-skills/skills/odoo/18.0 /your-project/docs/skills/odoo/
+# Copy docs to your project
+cp -r agent-skills/docs /your-project/docs
 
-# For Claude Code
+# Claude Code wrapper is already in docs/.claude/skills/odoo-18
+# Cursor wrapper is already in docs/.cursor/skills/odoo-18
+# Optional: symlink CLAUDE.md to project root
 ln -s docs/skills/odoo/18.0/CLAUDE.md ./CLAUDE.md
 ```
 
@@ -187,13 +197,11 @@ agent-skills init --ai <ide> <framework> --version <version>
 ### Option 3: Manual Copy
 
 ```bash
-# Skills
-cp -r skills/odoo/18.0 /your-project/docs/skills/odoo/
+# Copy docs bundle
+cp -r docs /your-project/docs
 
-# Agents
+# Optional: copy agents/commands if you use Claude Code
 cp -r agents/odoo-code-review /your-project/.claude/agents/
-
-# Commands
 cp -r commands/* /your-project/.claude/commands/
 ```
 
@@ -203,8 +211,8 @@ cp -r commands/* /your-project/.claude/commands/
 
 | IDE | Skills | Agents | Commands | Setup |
 |-----|--------|--------|----------|-------|
-| **Cursor** | ✅ Remote Rules | ✅ | ✅ | Settings → Rules |
-| **Claude Code** | ✅ CLAUDE.md | ✅ | ✅ | Project root |
+| **Cursor** | ✅ `.cursor/skills` | ✅ | ✅ | Settings → Rules |
+| **Claude Code** | ✅ `.claude/skills` | ✅ | ✅ | Project root |
 | **Windsurf** | ✅ .mdc files | ✅ | ✅ | Project root |
 | **Continue** | ✅ Markdown | ✅ | ⚠️ | Config file |
 | **OpenCode** | ✅ Auto-discover | ⚠️ | ⚠️ | None |
@@ -222,6 +230,15 @@ docs/
 ├── LICENSE                                  # MIT License
 ├── package.json                             # NPM package config
 ├── .npmignore                               # NPM publish ignore rules
+├── .claude/
+│   ├── settings.json                        # Claude Code configuration
+│   └── skills/
+│       └── odoo-18/
+│           └── SKILL.md                     # Wrapper (relative path)
+├── .cursor/
+│   └── skills/
+│       └── odoo-18/
+│           └── SKILL.md                     # Wrapper (relative path)
 │
 ├── skills/                                  # Framework skill packs
 │   ├── odoo/
