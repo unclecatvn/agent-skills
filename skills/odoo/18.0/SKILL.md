@@ -23,6 +23,8 @@ Complete skill guide for AI agents to write proper Odoo 18 code. This master fil
 | [Transactions](#transaction-guide) | `odoo-18-transaction-guide.md` | Savepoints, UniqueViolation, commit/rollback |
 | [Controllers](#controller-guide) | `odoo-18-controller-guide.md` | HTTP endpoints, routing |
 | [OWL Components](#owl-guide) | `odoo-18-owl-guide.md` | Building OWL UI components |
+| [Migration](#migration-guide) | `odoo-18-migration-guide.md` | Upgrading modules, data migration |
+| [Testing](#testing-guide) | `odoo-18-testing-guide.md` | Writing tests, mocking, assertions |
 | [Development](#development-guide) | `odoo-18-development-guide.md` | Manifest, reports, security, wizards |
 
 ---
@@ -459,6 +461,155 @@ setup() {
 
 ---
 
+## Migration Guide
+
+**File**: `odoo-18-migration-guide.md`
+
+**When to read**: Upgrading modules, data migration, handling version changes
+
+### Quick Patterns
+
+```python
+# Migration script (migrations/18.0.1.0/pre-migrate.py)
+def migrate(cr, version):
+    """Migration script for Odoo 18.0"""
+    if version is None:
+        return  # New installation
+
+    # Your migration code here
+    cr.execute("""
+        UPDATE your_model
+        SET field_name = 'new_value'
+        WHERE condition = true
+    """)
+
+# With ORM
+from odoo import api
+env = api.Environment(cr, 1, {})
+records = env['my.model'].search([])
+for record in records:
+    record.write({'field': 'new_value'})
+```
+
+### Migration Stages
+
+| Stage | When Runs | Use For |
+|-------|-----------|---------|
+| `pre-*.py` | Before module initialization | Schema changes, raw SQL |
+| `post-*.py` | After module initialization | Data migration with ORM |
+| `end-*.py` | After all modules updated | Cross-module consistency |
+
+### Module Hooks
+
+```python
+# __manifest__.py
+{
+    'pre_init_hook': 'pre_init_function',   # Before installation
+    'post_init_hook': 'post_init_function',  # After installation
+    'uninstall_hook': 'uninstall_function',  # Before uninstallation
+}
+```
+
+### Version Check
+
+```python
+def migrate(cr, version):
+    if version is None:
+        return  # New installation
+
+    # Version-specific migration
+    if parse_version(version) < parse_version('17.0'):
+        cr.execute("UPDATE model SET field = 'v16_value'")
+```
+
+---
+
+## Testing Guide
+
+**File**: `odoo-18-testing-guide.md`
+
+**When to read**: Writing tests, mocking, assertions, browser testing
+
+### Test Classes
+
+```python
+from odoo.tests import TransactionCase, HttpCase, tagged
+
+# TransactionCase - each test in savepoint
+class TestMyModel(TransactionCase):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.record = cls.env['my.model'].create({'name': 'Test'})
+
+    def test_basic(self):
+        self.assertEqual(self.record.name, 'Test')
+
+# HttpCase - for browser testing
+@tagged('-at_install', 'post_install')
+class TestMyUI(HttpCase):
+    def test_browser_js(self):
+        self.browser_js(
+            url_path='/web',
+            code="console.log('test successful')",
+            ready="odoo.isReady",
+            login='admin'
+        )
+```
+
+### Test Decorators
+
+```python
+from odoo.tests import tagged, users, warmup
+
+# Tag tests for selective execution
+@tagged('-at_install', 'post_install', 'slow')
+class TestExternalAPI(TransactionCase):
+    pass
+
+# Run test with multiple users
+@users('admin', 'portal')
+def test_access_rights(self):
+    # Runs twice, once for each user
+    pass
+
+# Stabilize query count assertions
+@warmup
+def test_query_count(self):
+    with self.assertQueryCount(5):
+        pass
+```
+
+### Form Testing
+
+```python
+from odoo.tests import Form
+
+def test_create_with_form(self):
+    with Form(self.env['sale.order']) as f:
+        f.partner_id = self.customer
+        with f.order_line.new() as line:
+            line.product_id = self.product
+            line.product_uom_qty = 5
+
+    order = f.save()
+    self.assertTrue(order.order_line)
+```
+
+### Mocking
+
+```python
+from unittest.mock import patch
+
+def test_external_api(self):
+    with patch('requests.post') as mock_post:
+        mock_post.return_value.status_code = 200
+        result = self.env['my.model'].call_external_api()
+        mock_post.assert_called_once()
+```
+
+---
+
 ## Common Issues & Solutions
 
 ### Issue: N+1 Queries
@@ -527,6 +678,8 @@ docs/skills/odoo/18.0/
 ├── odoo-18-transaction-guide.md   # Savepoints, UniqueViolation, commit/rollback
 ├── odoo-18-controller-guide.md     # HTTP, routing, controllers
 ├── odoo-18-owl-guide.md           # OWL components, hooks, services
+├── odoo-18-migration-guide.md     # Migration scripts, upgrade hooks
+├── odoo-18-testing-guide.md       # Test classes, decorators, mocking
 └── odoo-18-development-guide.md    # Manifest, reports, security, wizards
 ```
 

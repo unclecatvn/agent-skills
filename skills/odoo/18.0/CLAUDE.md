@@ -16,8 +16,11 @@ docs/skills/odoo/18.0/
 ├── odoo-18-decorator-guide.md      # @api decorators
 ├── odoo-18-view-guide.md          # XML views, actions, menus
 ├── odoo-18-performance-guide.md    # N+1 prevention, optimization
+├── odoo-18-transaction-guide.md   # Savepoints, UniqueViolation, commit/rollback
 ├── odoo-18-controller-guide.md     # HTTP controllers, routing
 ├── odoo-18-owl-guide.md           # OWL components, hooks, services
+├── odoo-18-migration-guide.md     # Migration scripts, upgrade hooks
+├── odoo-18-testing-guide.md       # Test classes, decorators, mocking
 └── odoo-18-development-guide.md    # Manifest, reports, security, wizards
 ```
 
@@ -44,8 +47,11 @@ When reviewing or writing Odoo 18 code, note these breaking changes from earlier
 | Using @api decorators | `odoo-18-decorator-guide.md` |
 | Writing XML views | `odoo-18-view-guide.md` |
 | Fixing slow code/N+1 queries | `odoo-18-performance-guide.md` |
+| Handling database errors | `odoo-18-transaction-guide.md` |
 | Creating HTTP endpoints | `odoo-18-controller-guide.md` |
 | Building OWL components | `odoo-18-owl-guide.md` |
+| Upgrading modules/migrating data | `odoo-18-migration-guide.md` |
+| Writing tests | `odoo-18-testing-guide.md` |
 
 ## Critical Anti-Patterns
 
@@ -122,6 +128,12 @@ my_module/
 │   └── my_module_security.xml
 ├── data/
 │   └── my_module_data.xml
+├── migrations/
+│   └── 18.0.1.0/
+│       └── post-migrate_data.py
+├── tests/
+│   ├── __init__.py
+│   └── test_my_model.py
 ├── wizard/
 │   ├── __init__.py
 │   └── my_wizard.py

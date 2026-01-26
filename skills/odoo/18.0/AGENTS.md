@@ -47,6 +47,8 @@ docs/skills/odoo/18.0/
 ├── odoo-18-transaction-guide.md   # Savepoints, UniqueViolation, commit/rollback
 ├── odoo-18-controller-guide.md     # HTTP, routing, controllers
 ├── odoo-18-owl-guide.md           # OWL components, hooks, services
+├── odoo-18-migration-guide.md     # Migration scripts, upgrade hooks
+├── odoo-18-testing-guide.md       # Test classes, decorators, mocking
 └── odoo-18-development-guide.md    # Manifest, reports, security
 ```
 
@@ -63,6 +65,8 @@ docs/skills/odoo/18.0/
 | `odoo-18-transaction-guide.md` | Database transactions, error handling | Savepoints, UniqueViolation |
 | `odoo-18-controller-guide.md` | HTTP controllers, routing | Writing endpoints |
 | `odoo-18-owl-guide.md` | OWL components, hooks, services | Building OWL UI components |
+| `odoo-18-migration-guide.md` | Migration scripts, upgrade hooks | Upgrading modules, data migration |
+| `odoo-18-testing-guide.md` | Test classes, decorators, mocking | Writing tests |
 | `odoo-18-development-guide.md` | Module structure, security | Creating new modules |
 
 ---
@@ -136,6 +140,8 @@ alwaysApply: true
 | `odoo-18-performance-guide.md` | `**/*.{py,xml}` | All Odoo files |
 | `odoo-18-transaction-guide.md` | `**/models/**/*.py` | Model files only |
 | `odoo-18-owl-guide.md` | `static/src/**/*.{js,xml}` | OWL/JS files only |
+| `odoo-18-migration-guide.md` | `**/migrations/**/*.py` | Migration scripts |
+| `odoo-18-testing-guide.md` | `**/tests/**/*.py` | Test files only |
 | `odoo-18-development-guide.md` | `**/*.{py,xml,csv}` | All Odoo files |
 
 ### Frontmatter Fields Used by Cursor
