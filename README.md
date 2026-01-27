@@ -49,8 +49,8 @@ This repository contains a comprehensive suite of **versioned documentation, ski
 ### Local Skills (Cursor + Claude)
 
 This repo already includes wrapper skills:
-- `docs/.cursor/skills/odoo-18/SKILL.md`
-- `docs/.claude/skills/odoo-18/SKILL.md`
+- `agent-skills/.cursor/skills/odoo-18/SKILL.md`
+- `agent-skills/.claude/skills/odoo-18/SKILL.md`
 
 They point to the shared docs using relative paths (no duplication).
 
@@ -76,10 +76,10 @@ git clone git@github.com:unclecatvn/agent-skills.git
 # Copy docs to your project
 cp -r agent-skills/docs /your-project/docs
 
-# Claude Code wrapper is already in docs/.claude/skills/odoo-18
-# Cursor wrapper is already in docs/.cursor/skills/odoo-18
+# Claude Code wrapper is already in agent-skills/.claude/skills/odoo-18
+# Cursor wrapper is already in agent-skills/.cursor/skills/odoo-18
 # Optional: symlink CLAUDE.md to project root
-ln -s docs/skills/odoo/18.0/CLAUDE.md ./CLAUDE.md
+ln -s agent-skills/skills/odoo/18.0/CLAUDE.md ./CLAUDE.md
 ```
 
 ---
@@ -225,7 +225,7 @@ For detailed setup, see [AGENTS.md](skills/odoo/18.0/AGENTS.md).
 ## Repository Structure
 
 ```
-docs/
+agent-skills/
 ├── README.md                                # This file
 ├── LICENSE                                  # MIT License
 ├── package.json                             # NPM package config

@@ -1,8 +1,8 @@
 {
   "documentation": [
-    "docs/.claude/skills/odoo-18/SKILL.md"
+    "agent-skills/.claude/skills/odoo-18/SKILL.md"
   ],
   "contextRules": [
-    "docs/skills/odoo/18.0/AGENTS.md"
+    "agent-skills/skills/odoo/18.0/AGENTS.md"
   ]
 }
