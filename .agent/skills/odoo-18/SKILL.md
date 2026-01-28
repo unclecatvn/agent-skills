@@ -8,4 +8,3 @@ description: Master Odoo 18 skill index. Wrapper pointing to the shared Odoo doc
 Source of truth:
 
 - `../../../skills/odoo/18.0/SKILL.md`
-

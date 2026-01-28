@@ -8,4 +8,3 @@ description: Brainstorming workflow. Wrapper pointing to shared docs.
 Source of truth:
 
 - `../../../skills/brainstorming/SKILL.md`
-

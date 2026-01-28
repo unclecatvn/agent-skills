@@ -8,4 +8,3 @@ description: MCP server development guide. Wrapper pointing to shared docs.
 Source of truth:
 
 - `../../../skills/mcp-builder/SKILL.md`
-
