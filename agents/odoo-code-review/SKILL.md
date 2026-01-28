@@ -11,8 +11,22 @@ Review Odoo code changes against clear criteria, identify risks, and score using
 
 ## Pre-review Requirements
 
-- Read `skills/odoo/18.0/SKILL.md` and related guides if there are changes
-  regarding models, fields, views, controllers, security, performance.
+- Read `skills/odoo/18.0/SKILL.md` as the master index for all Odoo 18 guides.
+- Read relevant guides from `skills/odoo/18.0/dev/` based on change scope:
+  - **Models/ORM**: `odoo-18-model-guide.md`
+  - **Fields**: `odoo-18-field-guide.md`
+  - **Decorators**: `odoo-18-decorator-guide.md`
+  - **Performance**: `odoo-18-performance-guide.md`
+  - **Views/XML**: `odoo-18-view-guide.md`
+  - **Security**: `odoo-18-security-guide.md`
+  - **Controllers**: `odoo-18-controller-guide.md`
+  - **Transactions**: `odoo-18-transaction-guide.md`
+  - **Mixins**: `odoo-18-mixins-guide.md` (mail.thread, activities)
+  - **Testing**: `odoo-18-testing-guide.md`
+  - **Migration**: `odoo-18-migration-guide.md`
+  - **Actions**: `odoo-18-actions-guide.md`
+  - **Data Files**: `odoo-18-data-guide.md`
+  - **Manifest**: `odoo-18-manifest-guide.md`
 - Identify scope: module, file, and change context.
 - Master Odoo 18 API changes: `<list>` instead of `<tree>`, `@api.ondelete`, etc.
 
@@ -27,6 +41,12 @@ Review Odoo code changes against clear criteria, identify risks, and score using
 7. **Views & XML**: Odoo 18 tags (`<list>`), inheritance, structure
 8. **Security**: ACL, record rules, exceptions, sudo usage
 9. **Controllers**: Auth types, CSRF protection, routing
+10. **Mixins**: mail.thread, mail.activity.mixin, mail.alias.mixin usage
+11. **Testing**: Test coverage, proper test cases, @tagged decorators
+12. **Migration**: Migration scripts, data migration patterns
+13. **Actions**: Window actions, server actions, cron jobs
+14. **Data Files**: XML/CSV data structure, noupdate, shortcuts
+15. **Manifest**: Dependencies, external deps, hooks, assets
 
 ## Odoo 18 Complete Checklist
 
@@ -95,6 +115,27 @@ Review Odoo code changes against clear criteria, identify risks, and score using
 - ✅ CSRF enabled for POST (default)
 - ✅ `csrf=False` only for external webhooks
 
+### Mixins (Additional Check)
+- ✅ `mail.thread` properly configured with `tracking=True` on tracked fields
+- ✅ `mail.activity.mixin` used for activity-enabled models
+- ✅ `mail.alias.mixin` properly configured with alias fields
+- ✅ `utm.mixin` for campaign tracking when applicable
+- ✅ Proper message_post usage, not direct chatter manipulation
+
+### Testing (Additional Check)
+- ✅ Tests cover new functionality
+- ✅ Proper use of `@tagged` decorators (standard, post_install, etc.)
+- ✅ TransactionCase for model tests, HttpCase for web tests
+- ✅ Test data properly isolated
+- ✅ Query count assertions for performance-critical code
+
+### Migration (Additional Check)
+- ✅ Migration scripts in `migrations/{version}/` directory
+- ✅ Pre-migration scripts for data cleanup
+- ✅ Post-migration scripts for data migration
+- ✅ Uses hooks (pre_init, post_init, uninstall) appropriately
+- ✅ Idempotent migration scripts
+
 ## Anti-Patterns to Detect
 
 | Anti-Pattern | Consequence | Fix |
@@ -111,24 +152,30 @@ Review Odoo code changes against clear criteria, identify risks, and score using
 | Missing `ondelete` on Many2one | Orphan records | Add `ondelete='cascade/restrict'` |
 | Generic `Exception` | Poor UX | Use `UserError`, `ValidationError` |
 | Continue after UniqueViolation without savepoint | Transaction aborted | Use `with self.env.cr.savepoint():` |
+| Direct chatter manipulation instead of message_post | Breaks mail.thread features | Use `message_post()` with proper subtype |
+| Missing `tracking=True` on tracked fields | No field tracking in chatter | Add `tracking=True` to field definition |
+| Tests without `@tagged` decorators | Wrong test environment | Add `@tagged('standard')`, `@tagged('post_install')` |
+| Non-idempotent migration script | Fails on re-run | Use `if not field_exists:` checks |
+| Missing `noupdate="1"` on reference data | Data overwritten on update | Add `noupdate="1"` to reference records |
+| Cron without `interval_number` and `interval_type` | Never runs | Add proper interval configuration |
 
 ## Scoring Scale (Weighted)
 
 **Criteria** (score 1-10):
 
-- **ORM & Model Methods** (30%)
-- **Field Definitions** (15%)
-- **API Decorators** (15%)
-- **Performance** (20%)
+- **ORM & Model Methods** (28%)
+- **Field Definitions** (14%)
+- **API Decorators** (14%)
+- **Performance** (18%)
 - **Transaction Management** (10%)
-- **Views & XML** (5%)
-- **Security** (5%)
-- **Controllers** (5%)
+- **Views & XML** (4%)
+- **Security** (6%)
+- **Controllers** (6%)
 
 **Total calculation**:
 
 ```
-total = 0.3*orm + 0.15*fields + 0.15*decorators + 0.2*performance + 0.1*transaction + 0.05*views + 0.05*security + 0.05*controllers
+total = 0.28*orm + 0.14*fields + 0.14*decorators + 0.18*performance + 0.10*transaction + 0.04*views + 0.06*security + 0.06*controllers
 ```
 
 **Score anchors**:
@@ -147,7 +194,7 @@ total = 0.3*orm + 0.15*fields + 0.15*decorators + 0.2*performance + 0.1*transact
 
 ## Overall Score
 - Total: X.X/10
-- Formula: 0.3*ORM + 0.15*Fields + 0.15*Decorators + 0.2*Perf + 0.1*Trans + 0.05*Views + 0.05*Sec + 0.05*Controllers
+- Formula: 0.28*ORM + 0.14*Fields + 0.14*Decorators + 0.18*Perf + 0.10*Trans + 0.04*Views + 0.06*Sec + 0.06*Controllers
 
 ## Score by Criteria
 - ORM & Model Methods: X/10 — [brief reason, any anti-patterns?]
@@ -200,29 +247,72 @@ When reviewing, thoroughly check:
 1. **Does @api.depends have complete dependencies?**
    - Check dotted paths: `partner_id.email` instead of just `partner_id`
    - Missing dependencies cause N queries
+   - Reference: `dev/odoo-18-decorator-guide.md`
 
 2. **Are there N+1 queries?**
    - Loop with `search()`, `browse()`, `read()` inside
    - Solution: `search_read()` with `IN` domain or `read_group()`
+   - Reference: `dev/odoo-18-performance-guide.md`
 
 3. **Are there batch operations?**
    - `create()`, `write()`, `unlink()` in loop
    - Solution: Batch operations on recordset
+   - Reference: `dev/odoo-18-performance-guide.md`
 
 4. **Is transaction safe?**
    - UniqueViolation handling without savepoint
    - Concurrent updates without advisory lock
+   - Reference: `dev/odoo-18-transaction-guide.md`
 
 5. **Are Odoo 18 patterns correct?**
    - Use `<list>` instead of `<tree>`
    - Use `@api.ondelete()` instead of overriding `unlink()`
    - Use `@api.model_create_multi` for batch create
+   - Reference: `dev/odoo-18-view-guide.md`
 
 6. **Are field definitions correct?**
    - `Monetary` with `currency_field`
    - `Many2one` with `ondelete`
    - Computed field with `store=True` if needed
+   - Reference: `dev/odoo-18-field-guide.md`
 
 7. **Is exception handling correct?**
    - `UserError`, `ValidationError`, `AccessError`
    - No generic `Exception`
+   - Reference: `dev/odoo-18-security-guide.md`
+
+8. **Are mixins properly configured?**
+   - `mail.thread` with proper tracking fields
+   - `mail.activity.mixin` for activities
+   - `mail.alias.mixin` with alias fields
+   - Reference: `dev/odoo-18-mixins-guide.md`
+
+9. **Is testing adequate?**
+   - Tests for new functionality
+   - Proper use of `@tagged` decorators
+   - Query count assertions for performance
+   - Reference: `dev/odoo-18-testing-guide.md`
+
+10. **Are migrations handled correctly?**
+    - Proper migration script location
+    - Pre/post migration scripts
+    - Idempotent operations
+    - Reference: `dev/odoo-18-migration-guide.md`
+
+11. **Are actions properly defined?**
+    - Window actions with correct context
+    - Server actions for automation
+    - Cron jobs with proper intervals
+    - Reference: `dev/odoo-18-actions-guide.md`
+
+12. **Are data files correct?**
+    - Proper XML record structure
+    - `noupdate="1"` for reference data
+    - CSV data properly formatted
+    - Reference: `dev/odoo-18-data-guide.md`
+
+13. **Is manifest correct?**
+    - All dependencies declared
+    - External dependencies listed
+    - Hooks properly configured
+    - Reference: `dev/odoo-18-manifest-guide.md`
