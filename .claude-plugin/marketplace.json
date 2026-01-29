@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json.schemastore.org/claude-marketplace.json",
+  "marketplaces": {
+    "agent-skills": {
+      "displayName": "Agent Skills - Odoo & Development",
+      "description": "Domain-specific skills and specialized agents for Odoo development, code review, and professional workflows",
+      "version": "0.1.0",
+      "author": "UncleCat",
+      "license": "MIT",
+      "homepage": "https://github.com/unclecatvn/agent-skills",
+      "source": {
+        "source": "github",
+        "repo": "unclecatvn/agent-skills"
+      },
+      "capabilities": {
+        "memoryPersistence": true,
+        "sessionLifecycle": true,
+        "crossPlatform": true
+      },
+      "categories": [
+        "frameworks",
+        "code-review",
+        "documentation"
+      ],
+      "tags": [
+        "odoo",
+        "python",
+        "code-review",
+        "development",
+        "enterprise"
+      ]
+    }
+  }
+}

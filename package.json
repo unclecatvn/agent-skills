@@ -5,6 +5,9 @@
   "bin": {
     "agent-skills": "bin/agent-skills.js"
   },
+  "scripts": {
+    "test": "node tests/test-skills.js"
+  },
   "files": [
     "bin",
     "skills",

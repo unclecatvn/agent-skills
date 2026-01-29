@@ -1,6 +1,12 @@
 {
   "documentation": [
-    "agent-skills/.claude/skills/odoo-18/SKILL.md"
+    "agent-skills/.claude/skills/odoo-18/SKILL.md",
+    "agent-skills/skills/odoo/18.0/dev/odoo-18-decorator-guide.md",
+    "agent-skills/skills/odoo/18.0/dev/odoo-18-model-guide.md",
+    "agent-skills/skills/odoo/18.0/dev/odoo-18-field-guide.md",
+    "agent-skills/skills/odoo/18.0/dev/odoo-18-performance-guide.md",
+    "agent-skills/skills/odoo/18.0/dev/odoo-18-development-guide.md",
+    "agent-skills/skills/odoo/18.0/dev/odoo-18-security-guide.md"
   ],
   "contextRules": [
     "agent-skills/skills/odoo/18.0/AGENTS.md"

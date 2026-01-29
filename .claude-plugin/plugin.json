@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json.schemastore.org/claude-plugin.json",
+  "name": "agent-skills",
+  "version": "0.1.0",
+  "description": "Domain-specific skills and agents for Odoo development, code review, and more",
+  "author": "UncleCat",
+  "license": "MIT",
+  "homepage": "https://github.com/unclecatvn/agent-skills",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/unclecatvn/agent-skills.git"
+  },
+  "components": {
+    "agents": [
+      "agents/odoo-code-review/SKILL.md",
+      "agents/odoo-code-tracer/SKILL.md"
+    ],
+    "skills": [
+      "skills/odoo/18.0/SKILL.md",
+      "skills/brainstorming/SKILL.md",
+      "skills/mcp-builder/SKILL.md",
+      "skills/writing-skills/SKILL.md"
+    ],
+    "commands": [
+      "commands/brainstorm.md",
+      "commands/code-reviewer.md",
+      "commands/execute-plan.md",
+      "commands/write-plan.md"
+    ],
+    "rules": [
+      "rules/coding-style.md",
+      "rules/security.md"
+    ]
+  },
+  "capabilities": {
+    "memoryPersistence": true,
+    "sessionLifecycle": true,
+    "crossPlatform": true
+  }
+}
