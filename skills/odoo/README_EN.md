@@ -1,78 +1,42 @@
-# Odoo 18 Development Guides
+# Odoo Development Guides
 
 ![npm](https://img.shields.io/badge/npm-%40unclecat--agent--skills--cli-blue?style=flat-square&logo=npm&label=CLI)
 ![Node](https://img.shields.io/badge/node-%3E%3D18.0.0-green?style=flat-square&logo=node.js)
 ![License](https://img.shields.io/badge/license-MIT-green?style=flat-square)
 
-Complete reference documentation for Odoo 18 development, covering models, fields, decorators, views, performance, controllers, and best practices.
+Comprehensive Odoo development documentation for multiple versions, optimized for AI Assistants (Cursor, Claude Code, Antigravity, etc.).
+
+## 📚 Supported Versions
+
+We currently provide detailed documentation for the following versions:
+
+- **[Odoo 19.0 (Latest)](./19.0/)**: Includes 21+ guides (OWL, ORM, Mixins, Testing, etc.)
+- **[Odoo 18.0](./18.0/)**: Includes 18+ guides focused on ORM and the new Web Client.
 
 ## Introduction
 
-This is a comprehensive reference guide for Odoo 18 development, organized as modular guides that can be used independently or together. Based on analysis of Odoo 18 base source code.
+This is a complete reference documentation ecosystem for Odoo development, organized as modular guides that AI can easily consume for precise context. Based on analysis of Odoo base source code.
 
-## CLI (odoo-cli)
+---
 
-Install the CLI to set up docs by Odoo version and AI assistant:
+## Version Guides
 
-```bash
-npm install -g @unclecat/agent-skills-cli
-```
+Each Odoo version has a similar documentation structure but content is tailored to the specific version's features:
 
-### Example for Odoo 18.0
+- **[Odoo 19.0 Documentation](./19.0/SKILL.md)**: Most complete, including OWL Framework, Testing, Migration.
+- **[Odoo 18.0 Documentation](./18.0/SKILL.md)**: Focused on ORM, Views, and Performance.
 
-```bash
-# Cursor (creates .cursor/commands/odoo.md + .shared/odoo/18.0)
-agent-skills init --ai cursor odoo --version 18.0
-
-# Claude Code (.claude/skills/odoo/18.0)
-agent-skills init --ai claude odoo --version 18.0
-
-# Antigravity (.agent/workflows/odoo.md + .shared/odoo/18.0)
-agent-skills init --ai antigravity odoo --version 18.0
-
-# Kiro (.kiro/steering/odoo.md + .shared/odoo/18.0)
-agent-skills init --ai kiro odoo --version 18.0
-
-# Full docs to docs/skills/odoo/18.0
-agent-skills init --ai docs odoo --version 18.0
-
-# Install all
-agent-skills init --ai all odoo --version 18.0
-```
-
-### List supported versions
-
-```bash
-agent-skills versions odoo
-```
-
-### Update CLI
-
-```bash
-# Check for new version
-agent-skills update
-
-# Update to latest version
-npm update -g @unclecat/agent-skills-cli
-
-# Or reinstall latest
-npm install -g @unclecat/agent-skills-cli@latest
-```
-
-> The CLI will automatically notify you when a new version is available.
-
-## Documentation Structure
+#### Typical Structure (Odoo 19):
 
 ```
-skills/odoo/18.0/
-├── SKILL.md                       # Master reference - overview
-├── odoo-18-development-guide.md    # Module structure, manifest, security, reports, wizards
-├── odoo-18-model-guide.md          # ORM, CRUD, domain, recordset
-├── odoo-18-field-guide.md          # Field types (Char, Monetary, Many2one, etc.)
-├── odoo-18-decorator-guide.md       # @api decorators (depends, constrains, onchange, ondelete)
-├── odoo-18-view-guide.md           # XML views (list, form, search, kanban), actions, menus
-├── odoo-18-performance-guide.md    # N+1 query prevention, performance optimization
-└── odoo-18-controller-guide.md     # HTTP controllers, routing, authentication
+skills/odoo/19.0/
+├── SKILL.md                       # Master index
+├── dev/
+│   ├── odoo-19-owl-guide.md       # OWL Framework (New)
+│   ├── odoo-19-model-guide.md     # ORM/CRUD
+│   ├── odoo-19-view-guide.md      # XML Views (list, form)
+│   ├── odoo-19-testing-guide.md   # Testing (New)
+│   └── ... (21+ files)
 ```
 
 ## The Guides
@@ -80,6 +44,7 @@ skills/odoo/18.0/
 ### 1. Development Guide (`odoo-18-development-guide.md`)
 
 Complete guide to creating Odoo 18 modules:
+
 - Module directory structure
 - `__manifest__.py` and all fields
 - Security: Access Rights, Record Rules, Groups
@@ -91,6 +56,7 @@ Complete guide to creating Odoo 18 modules:
 ### 2. Model Guide (`odoo-18-model-guide.md`)
 
 ORM reference and data operations:
+
 - Recordset basics: `browse()`, `exists()`
 - Search methods: `search()`, `search_read()`, `read_group()`
 - CRUD operations: `create()`, `read()`, `write()`, `unlink()`
@@ -100,6 +66,7 @@ ORM reference and data operations:
 ### 3. Field Guide (`odoo-18-field-guide.md`)
 
 All field types in Odoo 18:
+
 - Simple fields: `Char`, `Text`, `Html`, `Boolean`, `Integer`, `Float`, `Monetary`, `Date`, `Datetime`, `Binary`, `Selection`
 - Relational fields: `Many2one`, `One2many`, `Many2many`
 - Computed fields with `compute`, `store`, `search`, `inverse`
@@ -109,6 +76,7 @@ All field types in Odoo 18:
 ### 4. Decorator Guide (`odoo-18-decorator-guide.md`)
 
 Odoo API Decorators:
+
 - `@api.model` - Model-level methods
 - `@api.depends` - Computed fields (supports dotted paths)
 - `@api.depends_context` - Context-dependent computed fields
@@ -120,6 +88,7 @@ Odoo API Decorators:
 ### 5. View Guide (`odoo-18-view-guide.md`)
 
 XML Views and QWeb templates:
+
 - View types: `list` (changed from `tree`), `form`, `search`, `kanban`, `graph`, `pivot`, `calendar`
 - List view features: `editable`, `decoration`, `optional`, widgets
 - Form view structure: sheet, button box, notebook, chatter
@@ -131,6 +100,7 @@ XML Views and QWeb templates:
 ### 6. Performance Guide (`odoo-18-performance-guide.md`)
 
 Odoo performance optimization:
+
 - Prefetch mechanism (PREFETCH_MAX = 1000)
 - N+1 query prevention
 - Batch operations (create, write, unlink)
@@ -141,6 +111,7 @@ Odoo performance optimization:
 ### 7. Controller Guide (`odoo-18-controller-guide.md`)
 
 HTTP controllers and routing:
+
 - Controller class structure
 - `@route` decorator with URL parameters
 - Authentication types: `auth='user'`, `auth='public'`, `auth='none'`
@@ -150,18 +121,19 @@ HTTP controllers and routing:
 
 ## Key Odoo 18 Changes
 
-| Change | Odoo 17 | Odoo 18 |
-|--------|---------|---------|
-| List view tag | `<tree>` | `<list>` |
+| Change            | Odoo 17             | Odoo 18                             |
+| ----------------- | ------------------- | ----------------------------------- |
+| List view tag     | `<tree>`            | `<list>`                            |
 | Delete validation | Override `unlink()` | `@api.ondelete(at_uninstall=False)` |
-| Batch create | `create({...})` | `create([{...}, {...}])` |
-| SQL queries | `cr.execute()` | `env.execute_query_dict(SQL(...))` |
+| Batch create      | `create({...})`     | `create([{...}, {...}])`            |
+| SQL queries       | `cr.execute()`      | `env.execute_query_dict(SQL(...))`  |
 
 ## Quick Start
 
 ### Creating a New Module
 
 1. Create directory structure:
+
 ```
 my_module/
 ├── __init__.py
@@ -206,21 +178,15 @@ Need to define method behavior?
 └── Normal record method → no decorator needed
 ```
 
-## AI IDE Setup
+See the `AGENTS.md` file in each version directory for detailed IDE-specific instructions.
 
-> **See [skills/odoo/18.0/AGENTS.md](skills/odoo/18.0/AGENTS.md)** for instructions on using this documentation with Cursor, Claude Code, OpenCode, GitHub Copilot, etc.
-
-### Quick Setup (Cursor - Remote Rules)
-
-1. `Settings` → `Rules` → `Add Remote Rule`
-2. URL: `git@github.com:unclecatvn/agent-skills.git`
-3. Branch: `odoo/18.0`
-
-Done! Rules auto-apply to ALL your projects.
+- **[Setup for Odoo 19.0](./19.0/AGENTS.md)**
+- **[Setup for Odoo 18.0](./18.0/AGENTS.md)**
 
 ## Source Reference
 
 All guides are based on analysis of Odoo 18 base source code:
+
 - `odoo/models.py` - ORM implementation
 - `odoo/fields.py` - Field types
 - `odoo/api.py` - Decorators

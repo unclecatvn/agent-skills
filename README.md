@@ -1,7 +1,5 @@
 # 🚀 Agent Skills
 
-> **Turbocharge your AI Development Assistants with Domain-Specific Intelligence.**
-
 ![Agent Skills Hero](lib/image/header.png)
 
 ---
