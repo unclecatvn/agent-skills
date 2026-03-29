@@ -50,6 +50,14 @@ Master index for all Odoo 18 development guides. Read the appropriate guide from
 | Translation | `references/odoo-18-translation-guide.md` | Adding translations, localization, i18n |
 | Views & XML | `references/odoo-18-view-guide.md` | Writing XML views, actions, menus, QWeb templates |
 
+## Related Frontend Skills
+
+Use the master Odoo 18 skill as the router, then hand frontend-heavy work to the dedicated standalone skills:
+
+- `skills/odoo-owl/` for component structure, templates, assets, and runtime decisions
+- `skills/odoo-webclient-extension/` for registries, client actions, services, hooks, and patching
+- `skills/odoo-owl-testing/` for HOOT, mock environments, and frontend tests
+
 ## File Structure
 
 ```

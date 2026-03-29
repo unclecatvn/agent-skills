@@ -1,42 +1,36 @@
-# Agent Skills
+# Odoo Agents
 
 ![Agent Skills Hero](lib/image/header.png)
 
 ---
 
-## What is Agent Skills?
+## What is Odoo Agents?
 
-**Agent Skills** is a collection of documentation and specialized agents that supercharge AI coding assistants like Cursor, Claude Code, Windsurf, and Aider.
+**Odoo Agents** is a collection of documentation and specialized agents that help AI coding assistants work more effectively on Odoo and related engineering tasks.
 
-Think of it as a "knowledge pack" - when you add Agent Skills to your project, your AI assistant gains access to thousands of lines of curated technical expertise about specific frameworks and technologies. This means better code suggestions, fewer mistakes, and more helpful responses.
+Think of it as a knowledge pack: when you add this repository to your project, your AI assistant gains access to curated implementation guidance, review rules, and task-specific frontend workflows that are tailored to real Odoo development.
 
 ### Why use it?
 
-- **Generic AI assistants** give you general programming advice
-- **AI assistants with Agent Skills** give you framework-specific, best-practice guidance
+- Generic AI assistants give broad programming advice
+- AI assistants with Odoo Agents give Odoo-specific guidance, patterns, and guardrails
 
-For example, instead of just getting "how to write a Python function," you get "how to write an Odoo model following Odoo 18.0 conventions with proper ORM usage."
+For example, instead of a generic answer about frontend components, you can route the assistant into dedicated skills for Owl component authoring, webclient extension points, or HOOT-based frontend tests.
 
 ---
 
 ## Quick Start
 
-Get started in 30 seconds with NPX (recommended):
+Get started with skills.sh:
 
 ```bash
-# Add Agent Skills to your current project
-npx skills add unclecatvn/agent-skills
+npx skills add milzamsz/odoo-agents
 ```
-
-That's it! Your AI assistant will now have access to all the skills in this repository.
 
 ### Alternative: Manual Installation
 
 ```bash
-# Install the CLI globally
 npm install -g @unclecat/agent-skills-cli
-
-# Initialize a specific skill (e.g., Odoo 19 for Cursor)
 agent-skills init --ai cursor odoo --version 19.0
 ```
 
@@ -50,8 +44,11 @@ In-depth guides written specifically for AI consumption:
 
 | Skill | Description |
 |-------|-------------|
-| **[Odoo 18.0](skills/odoo-18.0/)** | Complete Odoo 18 development guide (ORM, OWL, Web Client, Performance) |
-| **[Odoo 19.0](skills/odoo-19.0/)** | Complete Odoo 19 development guide with latest features |
+| **[Odoo 18.0](skills/odoo-18.0/)** | Master Odoo 18 guide covering ORM, XML, reports, testing, and bridge docs for frontend work |
+| **[Odoo 19.0](skills/odoo-19.0/)** | Master Odoo 19 guide covering current Odoo APIs and bridge docs for frontend work |
+| **[Odoo OWL](skills/odoo-owl/)** | Dedicated Odoo 18/19 Owl component skill for JS/XML/SCSS triplets, assets, templates, and runtime decisions |
+| **[Odoo Webclient Extension](skills/odoo-webclient-extension/)** | Registries, client actions, services, hooks, and safe patching patterns for Odoo 18/19 |
+| **[Odoo Owl Testing](skills/odoo-owl-testing/)** | HOOT, `web_test_helpers`, `mock_server`, and `web.assets_unit_tests` guidance for Odoo 18/19 |
 | **[DTG Base](skills/dtg-base/)** | DTGBase utilities (date/period, timezone, batch, barcode, Vietnamese text) |
 | **[Payment Integration](skills/payment-integration/)** | Integration guides for SePay, Polar, Stripe, Paddle, Creem.io |
 | **[Code Review](skills/code-review/)** | Standards and protocols for automated code review |
@@ -69,7 +66,7 @@ Specialized agents that act as senior technical leads:
 | **[Odoo Code Tracer](agents/odoo-code-tracer/SKILL.md)** | Traces execution flow from entry point to end, identifying all function calls |
 | **[Odoo Module Generator](agents/odoo-module-generator/SKILL.md)** | Scaffolds complete Odoo 18 modules with proper structure |
 | **[Odoo Query Optimizer](agents/odoo-query-optimizer/SKILL.md)** | Diagnoses N+1 queries and provides optimization suggestions |
-| **[Odoo Migration Helper](agents/odoo-migration-helper/SKILL.md)** | Converts Odoo 16/17 code to Odoo 18 (tree→list, unlink→ondelete, etc.) |
+| **[Odoo Migration Helper](agents/odoo-migration-helper/SKILL.md)** | Converts Odoo 16/17 code to Odoo 18 patterns |
 | **[Planner](agents/planner.md)** | Breaks down complex features into actionable implementation steps |
 
 ### Rules - Coding Standards
@@ -85,29 +82,45 @@ Enforced patterns for consistent, secure code:
 
 ## Project Structure
 
+```text
+odoo-agents/
+|-- skills/
+|   |-- odoo-18.0/                 # Odoo 18 master guide
+|   |-- odoo-19.0/                 # Odoo 19 master guide
+|   |-- odoo-owl/                  # Dedicated Owl component skill
+|   |-- odoo-webclient-extension/  # Dedicated webclient extension skill
+|   |-- odoo-owl-testing/          # Dedicated Owl testing skill
+|   |-- dtg-base/
+|   |-- payment-integration/
+|   |-- code-review/
+|   |-- brainstorming/
+|   |-- writing-skills/
+|   `-- mcp-builder/
+|-- agents/
+|-- rules/
+|-- tests/
+`-- lib/
 ```
-agent-skills/
-├── skills/
-│   ├── odoo-18.0/        # Odoo 18 development guide
-│   ├── odoo-19.0/        # Odoo 19 development guide
-│   ├── dtg-base/         # DTGBase utilities (date/period, timezone, batch)
-│   ├── payment-integration/  # Payment provider integrations
-│   ├── code-review/      # Code review standards
-│   ├── brainstorming/    # Feature ideation framework
-│   ├── writing-skills/   # Guide for creating skills
-│   └── mcp-builder/      # MCP server development guide
-├── agents/           # Autonomous code reviewers and planners
-├── rules/            # Coding standards and security patterns
-└── lib/              # Shared resources and images
+
+---
+
+## Validation
+
+Run the repository smoke test:
+
+```bash
+npm test
 ```
+
+This validates the merged Owl skill layout and confirms the Odoo 18/19 bridge docs link to the dedicated frontend skills.
 
 ---
 
 ## Supported IDEs
 
-Agent Skills works with popular AI-powered IDEs:
+Odoo Agents works with popular AI-powered IDEs:
 
-- **Cursor** - Full integration via CLI
+- **Cursor** - Remote rule or local skill installs
 - **Claude Code** - Native skill support
 - **Windsurf** - Compatible
 - **Aider** - Compatible
@@ -118,19 +131,19 @@ Agent Skills works with popular AI-powered IDEs:
 
 ```mermaid
 graph LR
-    A[Your AI Assistant] --> B[Reads Agent Skills]
-    B --> C[Framework Knowledge]
-    B --> D[Best Practices]
-    B --> E[Code Patterns]
-    C --> F[Better Code Suggestions]
+    A["Your AI Assistant"] --> B["Reads Odoo Agents"]
+    B --> C["Odoo Framework Knowledge"]
+    B --> D["Frontend Workflow Guides"]
+    B --> E["Code Review and Rules"]
+    C --> F["Better Odoo Suggestions"]
     D --> F
     E --> F
 ```
 
-1. You add Agent Skills to your project
-2. Your AI assistant reads the relevant skill files
-3. The AI uses this context to provide framework-specific guidance
-4. You get better, more accurate code assistance
+1. You add Odoo Agents to your project.
+2. Your AI assistant reads the relevant skill files.
+3. The assistant routes frontend-heavy Odoo requests into the dedicated Owl skills when needed.
+4. You get more accurate, version-aware implementation guidance.
 
 ---
 
@@ -138,34 +151,27 @@ graph LR
 
 | Metric | Value |
 |--------|-------|
-| Documentation | 10,000+ lines |
-| Skill Packs | 8 (Odoo 18.0, 19.0, DTG Base, Payment, Code Review, Brainstorming, Writing, MCP) |
-| Agents | 6 (Code Review, Tracer, Module Generator, Query Optimizer, Migration Helper, Planner) |
+| Skill Packs | 11 |
+| Dedicated Odoo Frontend Skills | 3 |
+| Agents | 6 |
 | License | MIT |
 
 ---
 
 ## Contributing
 
-We welcome contributions! Here's how you can help:
+We welcome contributions:
 
-- **Add new skills** - Create documentation for other frameworks
-- **Improve existing docs** - Fix errors, add examples
-- **Create agents** - Build specialized reviewers or planners
-- **Report issues** - Let us know what's missing or broken
-
-See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+- Add new skills
+- Improve existing docs
+- Create agents
+- Report issues
 
 ---
 
 ## Links
 
-- [Issues](https://github.com/unclecatvn/agent-skills/issues)
-- [Discussions](https://github.com/unclecatvn/agent-skills/discussions)
-- [Releases](https://github.com/unclecatvn/agent-skills/releases)
-
----
-
-_If you find this project helpful, please consider giving it a star!_
-
-[![Star History Chart](https://api.star-history.com/svg?repos=unclecatvn/agent-skills&type=Date)](https://star-history.com/#unclecatvn/agent-skills&Date)
+- [Repository](https://github.com/milzamsz/odoo-agents)
+- [Issues](https://github.com/milzamsz/odoo-agents/issues)
+- [Discussions](https://github.com/milzamsz/odoo-agents/discussions)
+- [Releases](https://github.com/milzamsz/odoo-agents/releases)
