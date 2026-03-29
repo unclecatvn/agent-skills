@@ -1,14 +1,14 @@
 {
   "$schema": "https://json.schemastore.org/claude-plugin.json",
-  "name": "agent-skills",
+  "name": "odoo-agents",
   "version": "0.1.0",
-  "description": "Domain-specific skills and agents for Odoo development, code review, and more",
-  "author": "UncleCat",
+  "description": "Odoo-focused skills, OWL frontend guides, and helper agents for AI coding assistants",
+  "author": "milzamsz",
   "license": "MIT",
-  "homepage": "https://github.com/unclecatvn/agent-skills",
+  "homepage": "https://github.com/milzamsz/odoo-agents",
   "repository": {
     "type": "git",
-    "url": "https://github.com/unclecatvn/agent-skills.git"
+    "url": "https://github.com/milzamsz/odoo-agents.git"
   },
   "components": {
     "agents": [
@@ -16,16 +16,17 @@
       "agents/odoo-code-tracer/SKILL.md"
     ],
     "skills": [
-      "skills/odoo/18.0/SKILL.md",
       "skills/brainstorming/SKILL.md",
+      "skills/code-review/SKILL.md",
+      "skills/dtg-base/SKILL.md",
       "skills/mcp-builder/SKILL.md",
+      "skills/odoo-18.0/SKILL.md",
+      "skills/odoo-19.0/SKILL.md",
+      "skills/odoo-owl/SKILL.md",
+      "skills/odoo-owl-testing/SKILL.md",
+      "skills/odoo-webclient-extension/SKILL.md",
+      "skills/payment-integration/SKILL.md",
       "skills/writing-skills/SKILL.md"
-    ],
-    "commands": [
-      "commands/brainstorm.md",
-      "commands/code-reviewer.md",
-      "commands/execute-plan.md",
-      "commands/write-plan.md"
     ],
     "rules": [
       "rules/coding-style.md",

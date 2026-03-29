@@ -6,7 +6,7 @@
     "agent-skills": "bin/agent-skills.js"
   },
   "scripts": {
-    "test": "node tests/test-skills.js"
+    "test": "node scripts/sync-codex-skills.js --check && node tests/test-skills.js"
   },
   "files": [
     "bin",

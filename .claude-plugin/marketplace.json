@@ -1,16 +1,16 @@
 {
   "$schema": "https://json.schemastore.org/claude-marketplace.json",
   "marketplaces": {
-    "agent-skills": {
-      "displayName": "Agent Skills - Odoo & Development",
-      "description": "Domain-specific skills and specialized agents for Odoo development, code review, and professional workflows",
+    "odoo-agents": {
+      "displayName": "Odoo Agents",
+      "description": "Odoo-focused skills, OWL frontend guides, and helper agents for AI coding assistants",
       "version": "0.1.0",
-      "author": "UncleCat",
+      "author": "milzamsz",
       "license": "MIT",
-      "homepage": "https://github.com/unclecatvn/agent-skills",
+      "homepage": "https://github.com/milzamsz/odoo-agents",
       "source": {
         "source": "github",
-        "repo": "unclecatvn/agent-skills"
+        "repo": "milzamsz/odoo-agents"
       },
       "capabilities": {
         "memoryPersistence": true,
@@ -24,7 +24,9 @@
       ],
       "tags": [
         "odoo",
+        "owl",
         "python",
+        "codex",
         "code-review",
         "development",
         "enterprise"

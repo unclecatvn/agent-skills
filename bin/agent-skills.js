@@ -10,7 +10,7 @@ const DEFAULT_AI = "cursor";
 const DEFAULT_SKILL = "odoo";
 const DEFAULT_VERSION = "18.0";
 const EXCLUDED_DIRS = new Set(["bin", "node_modules"]);
-const GITHUB_REPO = "unclecatvn/agent-skills";
+const GITHUB_REPO = "milzamsz/odoo-agents";
 const NPM_PACKAGE = "@unclecat/agent-skills-cli";
 
 // Config file path for storing last update check
