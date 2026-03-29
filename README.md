@@ -8,47 +8,39 @@
 
 **Odoo Agents** is a collection of documentation and specialized agents that help AI coding assistants work more effectively on Odoo and related engineering tasks.
 
-Think of it as a knowledge pack: when you add this repository to your workflow, your AI assistant gains access to curated implementation guidance, review rules, and task-specific frontend workflows that are tailored to real Odoo development.
+Think of it as a knowledge pack - when you add Odoo Agents to your project, your AI assistant gains access to curated technical expertise about Odoo, frontend workflows, and code quality patterns. This means better suggestions, fewer mistakes, and more helpful responses.
 
 ### Why use it?
 
-- Generic AI assistants give broad programming advice.
-- AI assistants with Odoo Agents give Odoo-specific guidance, patterns, and guardrails.
+- **Generic AI assistants** give you broad programming advice
+- **AI assistants with Odoo Agents** give you Odoo-specific guidance, patterns, and guardrails
 
 For example, instead of a generic answer about frontend components, you can route the assistant into dedicated skills for Owl component authoring, webclient extension points, or HOOT-based frontend tests.
 
 ---
 
-## Use with Codex
+## Quick Start
 
-Codex is a first-class target for this repository.
-
-### Codex App, CLI, and IDE Extension
-
-1. Clone or open this repository in Codex.
-2. Start Codex from the repo root.
-3. Codex will read the root `AGENTS.md` for repo guidance and discover repo-scoped skills from `.agents/skills/`.
-
-Useful official docs:
-
-- [Codex docs](https://developers.openai.com/codex)
-- [Custom instructions with AGENTS.md](https://developers.openai.com/codex/guides/agents-md)
-
-### Repo Rules for Codex
-
-- Canonical authored skills live in `skills/`.
-- `.agents/skills/` is a generated mirror for Codex discovery.
-- Edit `skills/` only, then resync the Codex mirror.
-
----
-
-## Use with Other Skill Consumers
-
-### skills.sh
+Get started with skills.sh:
 
 ```bash
 npx skills add milzamsz/odoo-agents
 ```
+
+That's it. Your AI assistant can now use the skills in this repository.
+
+### Use with Codex
+
+Codex is supported too:
+
+1. Clone or open this repository in Codex.
+2. Start Codex from the repo root.
+3. Codex reads the root `AGENTS.md` and discovers repo-scoped skills from `.agents/skills/`.
+
+Helpful docs:
+
+- [Codex docs](https://developers.openai.com/codex)
+- [AGENTS.md guide](https://developers.openai.com/codex/guides/agents-md)
 
 ### Cursor Remote Rule
 
@@ -57,10 +49,6 @@ Use the relevant skill subfolder as the remote rule target, for example:
 - repo: `git@github.com:milzamsz/odoo-agents.git`
 - branch: `18.0`
 - subfolder: `skills/odoo-19.0/` or `skills/odoo-owl/`
-
-### Claude Code and Similar Tools
-
-Use the `skills/` folders directly, or install from the repo through your preferred skill workflow.
 
 ---
 
@@ -92,8 +80,6 @@ Specialized agents that act as senior technical leads:
 |-------|--------------|
 | **[Odoo Code Review](agents/odoo-code-review/SKILL.md)** | Automatically reviews Odoo code with scoring (1-10) and detailed feedback |
 | **[Odoo Code Tracer](agents/odoo-code-tracer/SKILL.md)** | Traces execution flow from entry point to end, identifying all function calls |
-| **[Odoo Module Generator](agents/odoo-module-generator/SKILL.md)** | Scaffolds complete Odoo 18 modules with proper structure |
-| **[Odoo Query Optimizer](agents/odoo-query-optimizer/SKILL.md)** | Diagnoses N+1 queries and provides optimization suggestions |
 | **[Planner](agents/planner.md)** | Breaks down complex features into actionable implementation steps |
 
 ### Rules - Coding Standards
@@ -131,28 +117,6 @@ odoo-agents/
 
 ---
 
-## Validation
-
-Regenerate the Codex mirror after changing any top-level skill:
-
-```bash
-node scripts/sync-codex-skills.js --write
-```
-
-Verify the mirror is current:
-
-```bash
-node scripts/sync-codex-skills.js --check
-```
-
-Run the repository smoke test:
-
-```bash
-npm test
-```
-
----
-
 ## Supported Tools
 
 Odoo Agents works with popular AI-powered tools:
@@ -180,10 +144,22 @@ graph LR
     E --> F
 ```
 
-1. You add Odoo Agents to your workflow.
-2. Your AI assistant reads the relevant guidance and skill files.
-3. Codex can discover repo-scoped skills from `.agents/skills/`, while other tools can use the canonical `skills/` tree.
-4. You get more accurate, version-aware implementation guidance.
+1. You add Odoo Agents to your project
+2. Your AI assistant reads the relevant skill files
+3. Codex can discover repo-scoped skills from `.agents/skills/`, while other tools can use the canonical `skills/` tree
+4. You get better, more accurate code assistance
+
+---
+
+## Validation
+
+When you change a skill:
+
+```bash
+node scripts/sync-codex-skills.js --write
+node scripts/sync-codex-skills.js --check
+npm test
+```
 
 ---
 
@@ -206,12 +182,6 @@ We welcome contributions:
 - Improve existing docs
 - Create agents
 - Report issues
-
-When you change a skill:
-
-1. Edit the canonical folder in `skills/`.
-2. Run `node scripts/sync-codex-skills.js --write`.
-3. Run `npm test`.
 
 ---
 
