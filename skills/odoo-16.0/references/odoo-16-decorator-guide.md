@@ -569,6 +569,16 @@ Defining / overriding a METHOD
 
 ---
 
+## Coding Conventions
+
+- Name selection providers `_selection_<field>`, onchange handlers
+  `_onchange_<field>`, and constraints `_check_<concern>`.
+- Keep compute, inverse, and search methods adjacent to their fields; keep
+  constraints and onchanges after field-related methods and before CRUD
+  overrides.
+- Use public `action_` methods for UI actions and `ensure_one()` when their
+  contract is one record. Keep implementation helpers underscore-prefixed.
+
 ## Base Code Reference
 
 Verify decorator semantics in:

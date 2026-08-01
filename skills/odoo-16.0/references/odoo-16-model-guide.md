@@ -803,6 +803,27 @@ class SaleOrder(models.Model):
 
 ---
 
+## Python and Odoo Conventions
+
+- Order imports into standard/external libraries, `odoo` imports, then imports
+  from Odoo addons; alphabetize within each group.
+- Prefer readable built-ins, comprehensions, and recordset helpers such as
+  `filtered`, `mapped`, and `sorted` over clever abstractions. Avoid custom
+  generators and decorators in addon business code.
+- Use singular dotted model names. Use CamelCase classes, `snake_case` normal
+  variables, and `_id`/`_ids` only for integer IDs rather than recordsets.
+- Keep model declarations ordered: private attributes, `default_get` and
+  `_default_*` helpers, fields, compute/inverse/search methods, selection
+  methods, constraints/onchanges, CRUD overrides, actions, then business
+  methods.
+- Design overrides to be extendable: call `super()`, avoid assumptions about
+  a singleton unless the method explicitly calls `ensure_one()`, and avoid
+  mutating context directly. Use `with_context()` for a derived environment.
+- Context is immutable and automatically propagated. Avoid generic
+  `default_<field>` keys: they can become defaults for nested creates on any
+  model with the same field name. Prefix custom behavior keys with the module
+  name and keep their scope narrow.
+
 ## Base Code Reference
 
 The examples in this guide track Odoo 16's source. Verify behaviour in:

@@ -883,6 +883,15 @@ my_module/
 
 ---
 
+## Coding Conventions
+
+- Keep printable report actions and paper formats in `<model>_reports.xml` and
+  QWeb report templates in `<model>_templates.xml`.
+- Keep SQL-view report Python and backend views together as
+  `<model>_report.py` and `<model>_report_views.xml`.
+- Use stable, descriptive XML IDs and record names; avoid generic report IDs
+  that become unclear when several reports share a module.
+
 ## Base Code Reference
 
 The APIs and templates documented here live in the Odoo 16 source:

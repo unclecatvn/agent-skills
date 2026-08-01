@@ -22,6 +22,7 @@ skills/odoo-16.0/
 
 ## Which Guides Matter Most
 
+- `references/odoo-16-development-guide.md` for module naming and file layout.
 - `references/odoo-16-view-guide.md` for XML views, inherited views, chatter, kanban.
 - `references/odoo-16-model-guide.md` for ORM, CRUD, domains, recordsets.
 - `references/odoo-16-field-guide.md` for field definitions and `group_operator=`.
@@ -43,3 +44,4 @@ skills/odoo-16.0/
 - Prefer the `attrs` / `states` patterns documented in the 16 view guide for client-side dynamic modifiers; direct `invisible="..."` is valid only for static/context-time visibility.
 - Match the existing addon style when editing 16 code, but check `api-highlights.md` before mass-rewriting XML.
 - Treat `skills/odoo-16.0/references/api-highlights.md` as the authority when 16 and 17 guidance diverge.
+- Apply the Coding Conventions section in the guide you open; Odoo 16 runtime behavior and the local stable-file style take precedence when they conflict.
