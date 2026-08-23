@@ -1,7 +1,7 @@
 ---
 name: odoo-17-development
-description: Overview guide for authoring Odoo 17 modules — directory structure, __init__.py patterns, wizards (TransientModel), report declarations, security files, asset bundles, i18n/.pot, and static assets.
-globs: "**/*.{py,xml,csv}"
+description: Overview guide for authoring Odoo 17 modules — directory structure, __init__.py patterns, wizards (TransientModel), report declarations, security files, asset bundles, i18n/.pot, static assets, and JavaScript/CSS/SCSS conventions.
+globs: "**/*.{py,xml,csv,js,css,scss}"
 topics:
   - Standard Odoo 17 module directory structure
   - __init__.py patterns (root, models/, wizard/, controllers/)
@@ -11,17 +11,20 @@ topics:
   - Asset bundles available in Odoo 17
   - i18n folder with .pot template + locale .po files
   - Static assets layout (description/icon.png, src/, lib/)
+  - JavaScript and CSS/SCSS conventions
 when_to_use:
   - Scaffolding a new Odoo 17 module
   - Adding a wizard, report, or controllers subpackage
   - Setting up translations for a module
   - Deciding where an asset/file belongs
+  - Authoring or reviewing JavaScript, CSS, or SCSS assets
 ---
 
 # Odoo 17 Development Guide
 
 Module creation overview for Odoo 17: directory structure, `__init__.py`
-patterns, wizards, reports, security, asset bundles, i18n, and static assets.
+patterns, wizards, reports, security, asset bundles, i18n, static assets, and
+JavaScript/CSS/SCSS conventions.
 For the full `__manifest__.py` reference see
 [`odoo-17-manifest-guide.md`](./odoo-17-manifest-guide.md). For migration
 scripts see [`odoo-17-migration-guide.md`](./odoo-17-migration-guide.md).
@@ -59,12 +62,13 @@ my_module/
 │
 ├── wizard/
 │   ├── __init__.py
-│   ├── my_wizard.py                 # models.TransientModel subclasses
-│   └── my_wizard_views.xml
+│   ├── make_my_model.py             # models.TransientModel subclasses
+│   └── make_my_model_views.xml
 │
 ├── controllers/
 │   ├── __init__.py
-│   └── main.py                      # http.Controller subclasses
+│   ├── my_module.py                 # http.Controller subclasses
+│   └── portal.py                     # inherited portal controller, if needed
 │
 ├── views/
 │   ├── my_model_views.xml
@@ -73,20 +77,21 @@ my_module/
 │
 ├── security/
 │   ├── my_module_groups.xml         # res.groups, categories
-│   ├── ir_rule.xml                  # ir.rule record rules
+│   ├── my_model_security.xml        # ir.rule record rules
 │   └── ir.model.access.csv          # Model-level ACL
 │
 ├── data/
 │   ├── ir_sequence_data.xml
 │   ├── ir_cron_data.xml
-│   └── mail_template_data.xml
+│   ├── mail_template_data.xml
+│   └── my_model_data.xml             # reference data for the main model
 │
 ├── demo/
 │   └── my_module_demo.xml
 │
 ├── report/
-│   ├── my_report_actions.xml        # ir.actions.report
-│   └── my_report_templates.xml      # QWeb templates
+│   ├── my_model_reports.xml         # ir.actions.report and paper formats
+│   └── my_model_templates.xml       # QWeb templates
 │
 ├── migrations/
 │   └── 17.0.1.0.0/
@@ -103,6 +108,8 @@ my_module/
 │   ├── description/
 │   │   ├── icon.png                 # Shown in Apps list
 │   │   └── index.html               # Optional marketing page
+│   ├── lib/
+│   │   └── vendor_library/           # Bundled third-party browser library
 │   └── src/
 │       ├── js/
 │       │   └── my_component.js
@@ -124,6 +131,20 @@ Optional subfolders:
   `external_dependencies`).
 - `populate/` — `populate` CLI data generators.
 - `report/` / `reports/` — both names work; pick one and be consistent.
+
+### Coding Conventions
+
+- Prefer a community module prefix such as `company_feature` to avoid naming
+  collisions. Use lowercase filenames containing only `[a-z0-9_]`.
+- Split model logic by main model and keep inherited-model extensions in
+  separate files. Name controller files after their module or inherited module;
+  `main.py` is legacy for new code.
+- Name transient files `<action>.py` and `<action>_views.xml`; use
+  `<model>_views.xml`, `<module>_menus.xml`, `<model>_data.xml`, and
+  `<model>_demo.xml` for focused XML files.
+- Keep third-party browser libraries under `static/lib/<library>/`; bundle
+  assets instead of linking remote images or libraries. Use directories `755`
+  and files `644` for deployment.
 
 ---
 
@@ -177,14 +198,15 @@ Each file inside `models/` defines one or more classes inheriting from
 
 ```python
 # my_module/wizard/__init__.py
-from . import my_wizard
+from . import make_my_model
 ```
 
 ### `controllers/__init__.py`
 
 ```python
 # my_module/controllers/__init__.py
-from . import main
+from . import my_module
+from . import portal
 ```
 
 ### `tests/__init__.py`
@@ -244,7 +266,7 @@ references a group or a model needs those records to already exist.
 ```
 security/
 ├── my_module_groups.xml       # res.groups records
-├── ir_rule.xml                # Record rules
+├── my_model_security.xml       # Record rules
 └── ir.model.access.csv        # Model-level access control
 ```
 
@@ -253,7 +275,7 @@ security/
 ```python
 'data': [
     'security/my_module_groups.xml',     # groups first (rules reference them)
-    'security/ir_rule.xml',              # then rules
+    'security/my_model_security.xml',    # then rules
     'security/ir.model.access.csv',      # then ACL
     # ...views, reports, menus...
 ],
@@ -297,7 +319,7 @@ access_my_model_manager,my.model manager,model_my_model,my_module.group_my_modul
 ### Record rules
 
 ```xml
-<!-- security/ir_rule.xml -->
+<!-- security/my_model_security.xml -->
 <?xml version="1.0" encoding="utf-8"?>
 <odoo noupdate="1">
     <record id="my_model_personal_rule" model="ir.rule">
@@ -326,8 +348,8 @@ For the full security reference see `odoo-17-security-guide.md`.
 
 ```
 report/
-├── my_report_actions.xml            # ir.actions.report
-└── my_report_templates.xml          # QWeb templates
+├── my_model_reports.xml              # ir.actions.report and paper formats
+└── my_model_templates.xml            # QWeb templates
 ```
 
 Declared in `data` **before** menus but **after** views (reports may be
@@ -336,8 +358,8 @@ referenced from view buttons):
 ```python
 'data': [
     # ...security, data, views...
-    'report/my_report_templates.xml',
-    'report/my_report_actions.xml',
+    'report/my_model_templates.xml',
+    'report/my_model_reports.xml',
     'views/my_module_menus.xml',
 ],
 ```
@@ -345,7 +367,7 @@ referenced from view buttons):
 ### Action
 
 ```xml
-<!-- report/my_report_actions.xml -->
+<!-- report/my_model_reports.xml -->
 <odoo>
     <record id="action_report_my_model" model="ir.actions.report">
         <field name="name">My Model Report</field>
@@ -369,7 +391,7 @@ referenced from view buttons):
 ### Template
 
 ```xml
-<!-- report/my_report_templates.xml -->
+<!-- report/my_model_templates.xml -->
 <odoo>
     <template id="report_my_model_document">
         <t t-call="web.external_layout">
@@ -408,14 +430,14 @@ triggered from a model's form view.
 ```
 wizard/
 ├── __init__.py
-├── my_wizard.py
-└── my_wizard_views.xml
+├── make_my_model.py
+└── make_my_model_views.xml
 ```
 
 ### Python
 
 ```python
-# wizard/my_wizard.py
+# wizard/make_my_model.py
 from odoo import api, fields, models
 from odoo.exceptions import UserError
 
@@ -460,7 +482,7 @@ class MyWizard(models.TransientModel):
 ### View
 
 ```xml
-<!-- wizard/my_wizard_views.xml -->
+<!-- wizard/make_my_model_views.xml -->
 <odoo>
     <record id="view_my_wizard_form" model="ir.ui.view">
         <field name="name">my.wizard.form</field>
@@ -497,7 +519,7 @@ Declared in `data`:
 ```python
 'data': [
     # ...security...
-    'wizard/my_wizard_views.xml',
+    'wizard/make_my_model_views.xml',
     # ...views, menus...
 ],
 ```
@@ -646,6 +668,19 @@ Conventions:
   you do not declare it in the manifest.
 - Third-party libraries go in `static/lib/` (each library in its own
   subfolder).
+- Keep one meaningful component per JavaScript, XML template, and stylesheet
+  file; use subdirectories to group a component package.
+
+### JavaScript and CSS/SCSS Conventions
+
+- Colocate JS, XML templates, and SCSS when they change together. Use
+  meaningful component files, strict mode where the asset format permits it,
+  and no minified third-party source.
+- Indent CSS/SCSS with four spaces, one declaration per line, and avoid ID
+  selectors. Prefix module classes with `o_<module_name>`.
+- Order styles from variables through positioning, layout, box model,
+  backgrounds, typography, then decorative effects. Use SCSS for global
+  design-system values and CSS variables for contextual DOM adaptations.
 
 ---
 
@@ -762,21 +797,21 @@ business_trip/
 │   └── business_trip_cancel_views.xml
 ├── controllers/
 │   ├── __init__.py
-│   └── main.py
+│   └── business_trip.py
 ├── views/
 │   ├── business_trip_views.xml
 │   └── business_trip_menus.xml
 ├── security/
 │   ├── business_trip_groups.xml
-│   ├── ir_rule.xml
+│   ├── business_trip_security.xml
 │   └── ir.model.access.csv
 ├── data/
 │   └── ir_sequence_data.xml
 ├── demo/
 │   └── business_trip_demo.xml
 ├── report/
-│   ├── business_trip_report_actions.xml
-│   └── business_trip_report_templates.xml
+│   ├── business_trip_reports.xml
+│   └── business_trip_templates.xml
 ├── migrations/
 │   └── 17.0.1.0.0/
 │       └── post-migrate.py
@@ -812,13 +847,13 @@ business_trip/
     'depends': ['base', 'mail', 'hr'],
     'data': [
         'security/business_trip_groups.xml',
-        'security/ir_rule.xml',
+        'security/business_trip_security.xml',
         'security/ir.model.access.csv',
         'data/ir_sequence_data.xml',
         'wizard/business_trip_cancel_views.xml',
         'views/business_trip_views.xml',
-        'report/business_trip_report_templates.xml',
-        'report/business_trip_report_actions.xml',
+        'report/business_trip_templates.xml',
+        'report/business_trip_reports.xml',
         'views/business_trip_menus.xml',
     ],
     'demo': [

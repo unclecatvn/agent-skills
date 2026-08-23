@@ -756,7 +756,8 @@ all_records = self.search(domain)
 for i in range(0, len(all_records), BATCH):
     batch = all_records[i:i + BATCH]
     batch.action_process()
-    self.env.cr.commit()     # persist progress; only in cron/migration scripts
+    # Keep the ambient transaction under Odoo's control. Use a separately
+    # owned cursor only for an independently recoverable batch boundary.
 ```
 
 ---
@@ -847,6 +848,20 @@ class SaleOrder(models.Model):
 | `_log_access` | bool | `True` | Whether `create_date`, `write_date`, etc. are maintained |
 
 ---
+
+## Python and Odoo Conventions
+
+- Order imports into standard/external libraries, `odoo`, and Odoo-addon
+  imports; alphabetize within each group.
+- Prefer readable built-ins, comprehensions, and `filtered`, `mapped`, and
+  `sorted`; avoid custom generators and decorators in addon business code.
+- Use singular dotted model names, CamelCase classes, and `snake_case`
+  variables. Order models: private attributes, defaults, fields, field
+  helpers, constraints/onchanges, CRUD, actions, then business methods.
+- Make overrides extendable: call `super()`, avoid singleton assumptions
+  without `ensure_one()`, and derive environments with `with_context()`.
+- Keep context keys narrow and module-prefixed; generic `default_<field>`
+  keys can leak into nested creates.
 
 ## Base Code Reference
 

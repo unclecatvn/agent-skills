@@ -778,6 +778,15 @@ return {
 
 ---
 
+## Coding Conventions
+
+- Name a model's main action `<model>_action`; suffix additional actions with
+  a short lowercase purpose, and action-view records `<model>_action_view_<type>`.
+- Name menus `<model>_menu` or `<model>_menu_<purpose>` and define actions
+  before menus that reference them.
+- Prefix object action methods with `action_`; call `self.ensure_one()` when
+  the action contract is exactly one record.
+
 ## Base Code Reference
 
 - `odoo/addons/base/models/ir_actions.py` — `IrActions`, `act_window`, `act_url`, `server`, `client`, `act_window_view`, `VIEW_TYPES`, default `view_mode='tree,form'` (v17).

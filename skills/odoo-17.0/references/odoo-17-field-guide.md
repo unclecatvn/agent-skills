@@ -713,6 +713,15 @@ Defaults defined in XML context (e.g. `default_partner_id` in an action's contex
 
 ---
 
+## Coding Conventions
+
+- Name `Many2one` fields with `_id` and `One2many`/`Many2many` fields with
+  `_ids`; do not use those suffixes for recordsets.
+- Keep fields together near the model top and keep their compute, inverse,
+  and search methods in the same order.
+- Use `_default_<field>`, `_compute_<field>`, and `_search_<field>` for their
+  corresponding helpers.
+
 ## Base Code Reference
 
 Verify every parameter/type described here against:

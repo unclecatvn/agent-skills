@@ -722,6 +722,15 @@ You can freely mix updatable and non-updatable blocks in one file:
 
 ---
 
+## Coding Conventions
+
+- Prefer `<record>` for full declarations and shortcut tags such as
+  `<menuitem>` and `<template>` when they fully express the record.
+- Put `id` before `model`; in fields, put `name` first, then the value, then
+  presentation attributes. Group records by model where dependencies allow.
+- Use `<data>` only to set `noupdate="1"`; set it on `<odoo>` when the entire
+  file is immutable. Keep IDs lowercase and descriptive.
+
 ## Base Code Reference
 
 - `odoo/tools/convert.py` — XML data loader, all tag handlers (`_tag_record`, `_tag_delete`, `_tag_function`, `_tag_menuitem`, `_tag_template`, `_tag_asset`), `eval` context (`_get_idref`).
