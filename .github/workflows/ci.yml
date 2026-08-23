@@ -74,10 +74,12 @@ jobs:
 
       - name: Scan skills with skillspector
         run: |
-          uv tool install git+https://github.com/NVIDIA/skillspector.git
+          # Pinned: unpinned HEAD moved to 2.9.6 and broke the baseline schema (v1 -> v2).
+          uv tool install git+https://github.com/NVIDIA/skillspector.git@v2.9.6
           # ponytail: --no-llm = static only, no API key. Add an LLM key + drop the flag for deeper analysis.
           # --baseline suppresses today's accepted findings, so the gate only fails on NEW ones (risk > 50).
-          # Regenerate after intentional changes: skillspector baseline ./skills/ --no-llm
+          # Regenerate after intentional changes (and after bumping the pin above):
+          #   skillspector baseline ./skills/ --no-llm --output .skillspector-baseline.yaml
           skillspector scan ./skills/ --no-llm \
             --baseline .skillspector-baseline.yaml \
             --format sarif --output skillspector.sarif

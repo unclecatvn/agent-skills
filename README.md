@@ -295,7 +295,7 @@ flowchart LR
 | Other skill packs | 5 (DTG Base, Code Review, Odoo Commit, Flow Diagram, Slide) |
 | Agents | 3 (Odoo Code Review, Odoo Code Tracer, Planner) |
 | Rules | 2 (Coding Style, Security) |
-| Current release | [1.0.13](CHANGELOG.md) |
+| Current release | [1.0.14](CHANGELOG.md) |
 | License | MIT |
 
 ---
