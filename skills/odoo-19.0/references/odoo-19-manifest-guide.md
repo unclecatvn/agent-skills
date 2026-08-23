@@ -1,5 +1,9 @@
 # Odoo 19 Manifest Guide
 
+## Coding Conventions
+
+Load security before views and actions before menus; use focused model-based filenames.
+
 Guide for configuring `__manifest__.py` in Odoo 19 modules.
 
 ## Table of Contents
@@ -32,7 +36,7 @@ File: `__manifest__.py`
     Description text
     """,
     'data': [
-        'views/mymodule_view.xml',
+        'views/my_model_views.xml',
     ],
     'demo': [
         'demo/demo_data.xml',
@@ -170,9 +174,14 @@ Data files always loaded at installation and update.
 
 ```python
 'data': [
-    'security/my_module_security.xml',
+    'security/my_module_groups.xml',
+    'security/my_model_security.xml',
+    'security/ir.model.access.csv',
+    'data/my_model_data.xml',
     'views/my_model_views.xml',
-    'data/my_module_data.xml',
+    'report/my_model_templates.xml',
+    'report/my_model_reports.xml',
+    'views/my_module_menus.xml',
 ],
 ```
 
@@ -302,9 +311,14 @@ This module adds awesome functionality to Odoo.
     'license': 'LGPL-3',
     'depends': ['base', 'web'],
     'data': [
-        'security/my_module_security.xml',
+        'security/my_module_groups.xml',
+        'security/my_model_security.xml',
+        'security/ir.model.access.csv',
+        'data/my_model_data.xml',
         'views/my_model_views.xml',
-        'data/ir_cron_data.xml',
+        'report/my_model_templates.xml',
+        'report/my_model_reports.xml',
+        'views/my_module_menus.xml',
     ],
     'demo': [
         'demo/demo_data.xml',

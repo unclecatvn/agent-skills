@@ -1,5 +1,11 @@
 # Odoo 19 Development Guide
 
+## Coding Conventions
+
+Use singular, descriptive module names and model-oriented filenames. Keep
+Python, XML, JS, CSS, and SCSS concise and purpose-specific; Odoo 19 runtime
+behavior and established addon style take precedence over a style-only rewrite.
+
 Guide for developing Odoo 19 modules: creating modules, manifest, structure, and common patterns.
 
 ## Table of Contents
@@ -30,9 +36,10 @@ my_module/
 │   └── my_model_views.xml
 ├── security/
 │   ├── ir.model.access.csv
-│   └── my_module_security.xml
+│   ├── my_module_groups.xml
+│   └── my_model_security.xml
 ├── data/
-│   └── my_module_data.xml
+│   └── my_model_data.xml
 ├── demo/
 │   └── demo_data.xml
 ├── migrations/
@@ -43,10 +50,10 @@ my_module/
 │   └── test_my_model.py
 ├── wizard/
 │   ├── __init__.py
-│   └── my_wizard.py
+│   └── make_my_model.py
 ├── controllers/
 │   ├── __init__.py
-│   └── my_controller.py
+│   └── my_model.py
 ├── static/
 │   ├── src/
 │   │   ├── js/
@@ -55,7 +62,8 @@ my_module/
 │   └── description/
 │       └── icon.png
 └── report/
-    └── my_report.xml
+    ├── my_model_templates.xml
+    └── my_model_reports.xml
 ```
 
 ---
@@ -122,8 +130,14 @@ class MyModel(models.Model):
     'license': 'LGPL-3',
     'depends': ['base'],
     'data': [
-        'security/my_module_security.xml',
+        'security/my_module_groups.xml',
+        'security/my_model_security.xml',
+        'security/ir.model.access.csv',
+        'data/my_model_data.xml',
         'views/my_model_views.xml',
+        'report/my_model_templates.xml',
+        'report/my_model_reports.xml',
+        'views/my_module_menus.xml',
     ],
     'demo': [
         'demo/demo_data.xml',
@@ -235,8 +249,8 @@ class NewModel(models.Model):
 <?xml version="1.0" encoding="UTF-8"?>
 <odoo>
     <!-- List View -->
-    <record id="view_my_model_tree" model="ir.ui.view">
-        <field name="name">my.model.tree</field>
+    <record id="my_model_view_list" model="ir.ui.view">
+        <field name="name">my.model.list</field>
         <field name="model">my.model</field>
         <field name="arch" type="xml">
             <list string="My Models">
@@ -388,6 +402,17 @@ access_my_model_manager,my.model.manager,model_my_model,group_my_module_manager,
 
 ## Assets
 
+### JavaScript, CSS, and SCSS Conventions
+
+- Put addon source in `static/src/js`, `static/src/scss`, and `static/src/css`;
+  reserve `static/lib` for bundled third-party code.
+- Use one component or concern per file, explicit imports/exports, and Odoo's
+  module conventions. Do not load remote third-party assets from a manifest.
+- Prefer SCSS for themed styles. Scope selectors beneath a module/component
+  class, use variables and nesting sparingly, and avoid `!important`.
+- Keep CSS/SCSS presentation-only and put behavior in JS; list assets in the
+  appropriate bundle in dependency order.
+
 ### JavaScript
 
 ```python
@@ -424,9 +449,9 @@ access_my_model_manager,my.model.manager,model_my_model,group_my_module_manager,
 ```python
 from odoo import models, fields
 
-class MyWizard(models.TransientModel):
-    _name = 'my.wizard'
-    _description = 'My Wizard'
+class MyModelMake(models.TransientModel):
+    _name = 'my.model.make'
+    _description = 'Make My Model'
 
     date = fields.Date(string="Date", required=True, default=fields.Date.context_today)
     note = fields.Text(string="Note")
@@ -439,11 +464,11 @@ class MyWizard(models.TransientModel):
 ### Wizard View
 
 ```xml
-<record id="view_my_wizard_form" model="ir.ui.view">
-    <field name="name">my.wizard.form</field>
-    <field name="model">my.wizard</field>
+<record id="view_my_model_make_form" model="ir.ui.view">
+    <field name="name">my.model.make.form</field>
+    <field name="model">my.model.make</field>
     <field name="arch" type="xml">
-        <form string="My Wizard">
+        <form string="Make My Model">
             <group>
                 <field name="date"/>
                 <field name="note"/>
@@ -463,8 +488,8 @@ class MyWizard(models.TransientModel):
 def action_open_wizard(self):
     return {
         'type': 'ir.actions.act_window',
-        'name': 'My Wizard',
-        'res_model': 'my.wizard',
+        'name': 'Make My Model',
+        'res_model': 'my.model.make',
         'view_mode': 'form',
         'target': 'new',
         'context': {

@@ -1,5 +1,24 @@
 # Odoo 19 Model Guide
 
+## Python and Odoo Conventions
+
+- Order imports into standard/external libraries, `odoo` imports, then imports
+  from Odoo addons; alphabetize within each group.
+- Prefer readable built-ins, comprehensions, and recordset helpers such as
+  `filtered`, `mapped`, and `sorted` over clever abstractions. Avoid custom
+  generators and decorators in addon business code.
+- Use singular dotted model names, CamelCase classes, and `snake_case`
+  variables. Reserve `_id`/`_ids` for integer IDs rather than recordsets.
+- Order declarations as private attributes, defaults, fields, compute/inverse/
+  search methods, selection methods, constraints/onchanges, CRUD overrides,
+  actions, then business methods.
+- Make overrides extendable: call `super()`, do not assume a singleton without
+  `ensure_one()`, and never mutate context directly; use `with_context()` for a
+  derived environment.
+- Context is immutable and propagated automatically. Prefix custom behavior
+  keys with the module name; avoid generic `default_<field>` keys because they
+  can leak into nested creates on unrelated models.
+
 Guide for working with Odoo 19 ORM, recordsets, CRUD operations, and domain filters.
 
 ## Table of Contents

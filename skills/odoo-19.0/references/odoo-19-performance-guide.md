@@ -1,5 +1,9 @@
 # Odoo 19 Performance Guide
 
+## Coding Conventions
+
+Prefer batch-aware ORM operations; do not commit Odoo's ambient transaction.
+
 Guide for optimizing Odoo 19 code: preventing N+1 queries, reducing database queries, and using profiler.
 
 ## Table of Contents

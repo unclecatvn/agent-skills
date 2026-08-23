@@ -1,5 +1,13 @@
 # Odoo 19 Data Files Guide
 
+## Coding Conventions
+
+- Use stable, descriptive XML IDs, prefixed by the target model or feature;
+  never use numeric or presentation-only IDs.
+- Format XML with one attribute per line when it improves readability, keep
+  records in dependency order, and use `noupdate="1"` only for data that must
+  not be overwritten on upgrade.
+
 Guide for working with Odoo 19 data files (XML and CSV), records, and shortcuts.
 
 ## Table of Contents

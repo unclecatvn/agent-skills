@@ -22,7 +22,8 @@ description: >-
   templates, xpath inheritance, QWeb templates). Use when writing, reviewing,
   or debugging any Odoo 19 Python or XML code, creating or modifying modules,
   fixing performance issues, or looking up Odoo 19 API patterns and best
-  practices.
+  practices. Includes CSS/SCSS asset authoring and review for Odoo addons.
+globs: "**/*.{py,xml,csv,js,ts,css,scss}"
 ---
 
 # Odoo 19 Skill - Master Index
@@ -51,6 +52,16 @@ Master index for all Odoo 19 development guides. Read the appropriate guide from
 | Transactions   | `references/odoo-19-transaction-guide.md` | Handling database errors, savepoints, UniqueViolation   |
 | Translation    | `references/odoo-19-translation-guide.md` | Adding translations, localization, i18n                 |
 | Views & XML    | `references/odoo-19-view-guide.md`        | Writing XML views, actions, menus, QWeb templates       |
+
+## Coding Conventions
+
+Apply the convention section in the guide you open. Odoo 19 runtime behavior,
+then existing stable-addon style, takes precedence; keep diffs focused.
+
+- Module naming, assets, JavaScript, CSS, and SCSS: development guide.
+- XML formatting and IDs: data, actions, reports, security, and views guides.
+- Python, recordsets, transactions, and translations: model, field, decorator,
+  performance, transaction, and translation guides.
 
 ## File Structure
 
@@ -95,3 +106,4 @@ All guides are based on analysis of Odoo 19 source code:
 
 - [Odoo 19 Official Documentation](https://github.com/odoo/documentation/tree/19.0)
 - [Odoo 19 Developer Reference](https://github.com/odoo/documentation/blob/19.0/developer/reference/orm.rst)
+- [Odoo Coding Guidelines](https://raw.githubusercontent.com/odoo/documentation/17.0/content/contributing/development/coding_guidelines.rst)
