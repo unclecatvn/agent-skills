@@ -285,26 +285,15 @@ def test_install_module(self):
 Freeze time for testing date/time-dependent code.
 
 ```python
+from datetime import datetime
+from odoo.tests import TransactionCase
 from odoo.tests.common import freeze_time
 
-# As class decorator
-@freeze_time('2024-01-01 12:00:00')
-class TestDates(TransactionCase):
-    def test_new_year(self):
-        from datetime import datetime
-        self.assertEqual(fields.Date.today(), '2024-01-01')
-
-# As method decorator
-@freeze_time('2024-01-01')
-def test_something(self):
-    # Time is frozen
-    pass
-
-# As context manager
-def test_something(self):
-    with freeze_time('2024-01-01'):
-        # Time is frozen here
-        pass
+class TestSomething(TransactionCase):
+    @freeze_time("2024-01-01 10:10:10")
+    def test_creation_time(self):
+        partner = self.env["res.partner"].create({"name": "Foo"})
+        self.assertEqual(partner.create_date, datetime(2024, 1, 1, 10, 10, 10))
 ```
 
 ---
@@ -733,8 +722,8 @@ def test_with_user(self):
         name='Test User'
     )
 
-    # Test with user
-    records = self.env['my.model'].sudo(user).search([])
+    # Test with the user's normal permissions
+    records = self.env['my.model'].with_user(user).search([])
 ```
 
 ### RecordCapturer
@@ -868,16 +857,9 @@ class TestExternalAPI(TransactionCase):
     pass
 ```
 
-### 3. Use Context Managers for Cleanup
+### 3. Use patch helpers with automatic cleanup
 
-```python
-def test_something(self):
-    """Automatic cleanup with context manager."""
-    with self.patch(Model, 'method', replacement):
-        # Test code
-        pass
-    # Automatically cleaned up
-```
+Use `self.patch()`, `self.classPatch()`, or `self.startPatcher()`; see [Mocking and Patching](#mocking-and-patching) for the canonical API examples and cleanup behavior.
 
 ### 4. Use Form for UI-like Testing
 
@@ -904,7 +886,7 @@ def test_access_rights(self):
     # Test with different access rights
 ```
 
-### 6. Use subTest for Multiple Cases
+### 6. Use subTest without sharing mutable state
 
 ```python
 def test_multiple_cases(self):
@@ -914,16 +896,19 @@ def test_multiple_cases(self):
             self.assertEqual(value * 2, expected)
 ```
 
+Database changes are not rolled back between subtests. Use unique fixtures or explicitly reset the state for each case, and do not carry records or cached values from one case into another.
+
 ### 7. Use addCleanup for Resources
 
 ```python
 def test_with_resource(self):
     """Automatic cleanup with addCleanup."""
-    import tempfile
     import os
+    from tempfile import TemporaryDirectory
 
-    temp_file = tempfile.mktemp()
-    self.addCleanup(os.remove, temp_file)
+    temp_dir = TemporaryDirectory()
+    self.addCleanup(temp_dir.cleanup)
+    temp_file = os.path.join(temp_dir.name, 'test.txt')
 
     # Use temp_file
     with open(temp_file, 'w') as f:
@@ -932,19 +917,7 @@ def test_with_resource(self):
 
 ### 8. Mock External Dependencies
 
-```python
-def test_external_api(self):
-    """Mock external API calls."""
-    with patch('requests.post') as mock_post:
-        mock_post.return_value.status_code = 200
-        mock_post.return_value.json.return_value = {'success': True}
-
-        # Test code that calls external API
-        result = self.env['my.model'].call_external_api()
-
-        mock_post.assert_called_once()
-        self.assertTrue(result)
-```
+Mock external services by default; see [Mocking and Patching](#mocking-and-patching) for the canonical example. If a live integration test is necessary, keep it out of the standard test selection with an explicit test tag such as `external`.
 
 ### 9. setUpClass for Expensive Setup
 
@@ -965,13 +938,7 @@ def setUpClass(cls):
 
 ### 10. Use freeze_time for Date-Dependent Tests
 
-```python
-@freeze_time('2024-01-01')
-def test_year_end(self):
-    """Test with frozen time."""
-    from datetime import date
-    self.assertEqual(fields.Date.today(), date(2024, 1, 1))
-```
+Use the canonical creation-time example shown in the `@freeze_time` section above.
 
 ### 11. Test Error Cases
 
@@ -983,9 +950,11 @@ def test_validation_error(self):
 
 def test_access_error(self):
     """Test that access errors are raised."""
-    user = new_test_user(self.env, login='test')
+    # Configure my.restricted.model ACLs to deny portal users.
+    user = new_test_user(self.env, login='test', groups='base.group_portal')
+    record = self.env['my.restricted.model'].create({})
     with self.assertRaises(AccessError):
-        self.env['mail.channel'].sudo(user).search([])
+        record.with_user(user).read()
 ```
 
 ### 12. Test Onchange Behavior
@@ -1000,6 +969,26 @@ def test_onchange(self):
         # Onchange automatically triggered
         self.assertEqual(f.payment_term_id, partner.property_payment_term_id)
 ```
+
+### 13. Add regression tests for fixes
+
+Every reproducible bug fix should include a test that fails before the fix and passes afterward. New behavior should cover its success path and important error paths.
+
+### 14. Test with the lowest practical permissions
+
+Use `new_test_user()` and `@users` to exercise access-sensitive flows as the least privileged user that should be allowed to perform them. This avoids false positives from tests that run as an administrator.
+
+### 15. Keep records aligned with the active environment
+
+Records stored on a class or test instance retain their original `.env` (including user, context, cursor, and sudo state). After changing the test environment, use `record.with_env(self.env)` before asserting access behavior.
+
+### 16. Create deterministic fixtures
+
+Create the data needed by the test instead of relying on demo records. Use fixed dates for time-dependent assertions and avoid `datetime.now()` or `datetime.today()`.
+
+### 17. Treat coverage drops as a test signal
+
+When coverage decreases after a change, inspect the uncovered paths and add tests where the behavior is meaningful rather than lowering the expectation.
 
 ---
 

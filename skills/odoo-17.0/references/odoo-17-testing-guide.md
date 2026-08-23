@@ -278,14 +278,15 @@ def test_install(env):
 Odoo 17 does **not** ship its own `freeze_time` in `odoo.tests.common`. Use the external `freezegun` package directly:
 
 ```python
+from datetime import datetime
 from freezegun import freeze_time
+from odoo.tests import TransactionCase
 
-
-@freeze_time('2024-01-01 12:00:00')
-class TestDates(TransactionCase):
-    def test_today(self):
-        from odoo import fields
-        self.assertEqual(fields.Date.today(), fields.Date.from_string('2024-01-01'))
+class TestSomething(TransactionCase):
+    @freeze_time("2024-01-01 10:10:10")
+    def test_creation_time(self):
+        partner = self.env["res.partner"].create({"name": "Foo"})
+        self.assertEqual(partner.create_date, datetime(2024, 1, 1, 10, 10, 10))
 ```
 
 ---
@@ -702,7 +703,7 @@ The selector supports `+include / -exclude` tokens separated by commas. Empty in
 
 ### Tips
 
-- HttpCase tests need the HTTP layer and demo data; tag them `post_install` so they run after module installation.
+- HttpCase tests need the HTTP layer and module setup; tag them `post_install` so they run after module installation. Create any required test data explicitly.
 - `--log-level=test` shows each test class and method as it runs.
 - Set `--log-handler=odoo.tests.common:DEBUG` to see query counts and browser events.
 - A test that modifies the registry must restore it (`self.registry.reset_changes()` / `addCleanup`).
@@ -725,7 +726,7 @@ class TestUI(HttpCase):
 
 ### 3. Keep `setUpClass` fast and deterministic
 
-Create the minimum fixtures there; tests should not rely on demo data unless they check for it.
+Create the minimum fixtures there; tests should create the data they need instead of relying on demo data.
 
 ### 4. Use `Form` to exercise real UI flow
 
@@ -765,7 +766,7 @@ def test_validation(self):
         self.env['business.trip'].create({'name': False})
 ```
 
-### 9. Subtests for data-driven checks
+### 9. Use subtests without sharing mutable state
 
 ```python
 def test_cases(self):
@@ -774,7 +775,33 @@ def test_cases(self):
             self.assertEqual(self.env['my.model']._parse_int(raw), expected)
 ```
 
-### 10. Minimal Template
+Database changes are not rolled back between subtests. Use unique fixtures or explicitly reset the state for each case, and do not carry records or cached values from one case into another.
+
+### 10. Add regression tests for fixes
+
+Every reproducible bug fix should include a test that fails before the fix and passes afterward. New behavior should cover its success path and important error paths.
+
+### 11. Test with the lowest practical permissions
+
+Use `new_test_user()` and `@users` to exercise access-sensitive flows as the least privileged user that should be allowed to perform them. This avoids false positives from tests that run as an administrator.
+
+### 12. Keep records aligned with the active environment
+
+Records stored on a class or test instance retain their original `.env` (including user, context, cursor, and sudo state). After changing the test environment, use `record.with_env(self.env)` before asserting access behavior.
+
+### 13. Freeze time-dependent behavior
+
+Use fixed dates instead of `datetime.now()` or `datetime.today()` in assertions. See the canonical `freeze_time` example above.
+
+### 14. Mock external services by default
+
+Use `self.patch()`, `self.classPatch()`, or `self.startPatcher()` to isolate network and other external services. If a live integration test is necessary, keep it out of the standard test selection with an explicit test tag such as `external`.
+
+### 15. Treat coverage drops as a test signal
+
+When coverage decreases after a change, inspect the uncovered paths and add tests where the behavior is meaningful rather than lowering the expectation.
+
+### 16. Minimal Template
 
 ```python
 from odoo.tests.common import TransactionCase, tagged
