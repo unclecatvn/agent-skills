@@ -21,6 +21,11 @@ when_to_use:
 
 # Odoo 18 Actions Guide
 
+## Coding Conventions
+
+Use descriptive model-based XML IDs, define actions before menus, and name
+singleton UI methods `action_*`.
+
 Complete reference for Odoo 18 actions: window, URL, server, report, client, and scheduled actions with bindings.
 
 ## Table of Contents

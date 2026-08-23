@@ -22,6 +22,10 @@ when_to_use:
 
 # Odoo 18 Reports Guide
 
+## Coding Conventions
+
+Use focused report/template filenames and stable descriptive XML IDs.
+
 Complete reference for Odoo 18 QWeb reports: PDF/HTML reports, templates, paper formats, and custom reports.
 
 ## Table of Contents

@@ -758,7 +758,7 @@ await this.action.doAction({
     name: "Partners",
     type: "ir.actions.act_window",
     res_model: "res.partner",
-    view_mode: "tree,form",
+    view_mode: "list,form",
     views: [[false, "list"], [false, "form"]],
     domain: [["customer_rank", ">", 0]],
 });

@@ -18,6 +18,10 @@ when_to_use:
 
 # Odoo 18 Field Guide
 
+## Coding Conventions
+
+Keep fields and their default, compute, inverse, and search helpers together.
+
 Complete reference for Odoo 18 field types, parameters, and when to use each.
 
 ## Table of Contents

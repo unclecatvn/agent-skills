@@ -19,6 +19,10 @@ when_to_use:
 
 # Odoo 18 Translation & Localization Guide
 
+## Coding Conventions
+
+Translate literal source strings with parameters, never dynamically built strings.
+
 Complete guide for translating and localizing Odoo 18 modules.
 
 ## Quick Reference

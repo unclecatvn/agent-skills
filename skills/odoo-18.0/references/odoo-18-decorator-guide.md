@@ -21,6 +21,10 @@ when_to_use:
 
 # Odoo 18 Decorator Guide
 
+## Coding Conventions
+
+Use `_selection_<field>`, `_onchange_<field>`, and `_check_<concern>` helper names.
+
 Complete reference for Odoo 18 API decorators and their proper usage.
 
 ## Table of Contents

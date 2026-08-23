@@ -21,6 +21,10 @@ when_to_use:
 
 # Odoo 18 Module Manifest Guide
 
+## Coding Conventions
+
+Load security before views and actions before menus; use focused model-based filenames.
+
 Complete reference for Odoo 18 `__manifest__.py`: all fields, dependencies, assets, hooks, and configuration.
 
 ## Table of Contents
@@ -297,9 +301,14 @@ Common for "link modules":
 
 ```python
 'data': [
-    'views/my_views.xml',
-    'security/my_security.xml',
-    'report/my_reports.xml',
+    'security/my_module_groups.xml',
+    'security/my_model_security.xml',
+    'security/ir.model.access.csv',
+    'data/my_model_data.xml',
+    'views/my_model_views.xml',
+    'report/my_model_templates.xml',
+    'report/my_model_reports.xml',
+    'views/my_module_menus.xml',
 ],
 ```
 
@@ -387,8 +396,8 @@ Paths are relative to module root:
         'my_module/static/src/scss/main.scss',
         'my_module/static/src/css/custom.css',
 
-        # External files (rare)
-        'https://cdn.example.com/library.js',
+        # Bundled third-party library
+        'my_module/static/lib/library/library.js',
     ],
 }
 ```
@@ -399,10 +408,10 @@ Paths are relative to module root:
 'assets': {
     'web.assets_frontend': [
         'my_module/static/src/js/*.js',
-        'my_module.static.src.scss.*',  # Note: different format
+        'my_module/static/src/scss/*.scss',
     ],
     'my_module.assets': [
-        'my_module/static/lib/library.js',
+        'my_module/static/lib/library/library.js',
     ],
 }
 ```
@@ -646,24 +655,25 @@ Features
     # == Data ==
     'data': [
         # Security
+        'security/business_trip_groups.xml',
         'security/business_trip_security.xml',
         'security/ir.model.access.csv',
 
-        # Views
-        'views/business_trip_views.xml',
-        'views/expense_views.xml',
-        'views/business_trip_templates.xml',
-
         # Data
         'data/business_trip_data.xml',
-        'data/ir_cron_data.xml',
+        'data/business_trip_cron.xml',
+
+        # Wizards and views
+        'wizard/make_business_trip_views.xml',
+        'views/business_trip_views.xml',
+        'views/expense_views.xml',
 
         # Reports
-        'report/trip_report_views.xml',
-        'report/trip_report_templates.xml',
+        'report/business_trip_templates.xml',
+        'report/business_trip_reports.xml',
 
-        # Wizards
-        'wizard/trip_wizard_views.xml',
+        # Menus last: they reference actions defined above.
+        'views/business_trip_menus.xml',
 
         # Demo (only in demo mode)
         'demo/business_trip_demo.xml',

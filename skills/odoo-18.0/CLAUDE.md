@@ -68,6 +68,20 @@ skills/odoo-18.0/
 | SQL queries | `cr.execute()` | `SQL` class with `execute_query_dict()` |
 | Batch create | Single dict | List of dicts (`create([{...}, {...}])`) |
 
+## Coding Conventions
+
+Apply the Coding Conventions section in the guide you open. Odoo 18 runtime
+behavior takes precedence, followed by the surrounding stable-addon style;
+keep convention-only changes focused. The common source is the [Odoo Coding
+Guidelines](https://raw.githubusercontent.com/odoo/documentation/17.0/content/contributing/development/coding_guidelines.rst).
+
+- Use the development guide for module layout, assets, JavaScript, CSS, and
+  SCSS conventions.
+- Use data, actions, reports, security, and views guides for XML formatting
+  and external IDs.
+- Use model, field, decorator, performance, transaction, and translation
+  guides for Python, recordsets, context, database work, and i18n.
+
 ## Critical Anti-Patterns
 
 | Anti-Pattern | Why Bad | Correct Approach |
@@ -152,10 +166,10 @@ my_module/
 │   └── test_my_model.py
 ├── wizard/
 │   ├── __init__.py
-│   └── my_wizard.py
+│   └── make_my_model.py
 ├── controllers/
 │   ├── __init__.py
-│   └── my_controller.py
+│   └── my_module.py
 └── static/
     └── src/
         ├── js/

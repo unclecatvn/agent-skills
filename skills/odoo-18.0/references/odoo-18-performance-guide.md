@@ -22,6 +22,10 @@ when_to_use:
 
 # Odoo 18 Performance Guide
 
+## Coding Conventions
+
+Prefer batch-aware ORM operations; do not commit Odoo's ambient transaction.
+
 Complete guide for writing performant Odoo 18 code, focusing on N+1 query prevention and clean patterns.
 
 ## Table of Contents
