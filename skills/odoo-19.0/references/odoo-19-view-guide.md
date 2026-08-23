@@ -1,5 +1,12 @@
 # Odoo 19 View Guide
 
+## Coding Conventions
+
+- Use model-first IDs such as `my_model_view_list` and matching dotted names
+  such as `my.model.list`; name inherited views after the model and feature.
+- Use `<list>` and `list,form` in normal Odoo 19 examples. Keep field order
+  task-oriented and use direct modifier expressions rather than `attrs`.
+
 Guide for creating views in Odoo 19: list, form, search, kanban, calendar, graph, pivot, and QWeb templates.
 
 ## Table of Contents
@@ -38,8 +45,8 @@ Guide for creating views in Odoo 19: list, form, search, kanban, calendar, graph
 ### Basic List View
 
 ```xml
-<record id="view_my_model_tree" model="ir.ui.view">
-    <field name="name">my.model.tree</field>
+<record id="my_model_view_list" model="ir.ui.view">
+    <field name="name">my.model.list</field>
     <field name="model">my.model</field>
     <field name="arch" type="xml">
         <list string="My Models">

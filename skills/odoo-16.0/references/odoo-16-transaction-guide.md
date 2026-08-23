@@ -313,18 +313,30 @@ Note the hooks: `precommit`, `postcommit`, `prerollback`, `postrollback` are cal
 
 **Almost never** in request-handling code. Odoo commits for you at the end of an HTTP request or cron job.
 
-Manual `commit()` is appropriate only in:
+Never call `commit()` or `rollback()` on Odoo's ambient cursor
+(`self.env.cr`). Odoo owns that transaction. Manual control is an
+**exceptional last resort** and requires a cursor that this code created
+explicitly for one complete, recoverable unit of work. Document why the
+boundary is safe. Typical cases include:
 
-1. **Long cron jobs** that must release row locks periodically
-2. **Data imports / migration scripts** that should persist progress
-3. **Init hooks** running outside a normal HTTP/RPC cycle
+1. **Long cron jobs** that must release row locks periodically.
+2. **Data imports or migration scripts** that need to persist progress.
+3. **Init hooks** running outside a normal HTTP/RPC cycle.
+4. **Independent audit or error-path logging** that must survive a caller
+   rollback.
 
 ```python
-# GOOD: cron job committing every chunk
+# LAST RESORT: each chunk gets its own cursor and is safe to restart after a
+# later chunk fails. Never commit the caller's self.env.cr cursor.
+from contextlib import closing
+from odoo import api
+
 def _cron_sync(self):
-    for chunk in self._chunks():
-        self._sync_chunk(chunk)
-        self.env.cr.commit()
+    for chunk_ids in self._chunk_ids():
+        with closing(self.env.registry.cursor()) as cr:
+            env = api.Environment(cr, self.env.uid, self.env.context)
+            env['my.model'].browse(chunk_ids)._sync_chunk()
+            cr.commit()
 ```
 
 ### When NOT to use `commit()`
@@ -340,16 +352,30 @@ def create_order(self, vals):
 
 ### `rollback()` in error handlers
 
+Manual rollback is also limited to a cursor created explicitly by this code.
+For a recoverable sub-operation on the ambient transaction, use a savepoint
+and let Odoo handle the outer transaction.
+
 ```python
+from contextlib import closing
+from odoo import api
+
 def batch_import(self, rows):
-    try:
-        for row in rows:
-            self.create(row)
-        self.env.cr.commit()
-    except Exception:
-        self.env.cr.rollback()
-        _logger.exception("Batch import failed, rolled back")
-        raise
+    # This import deliberately owns an independent cursor and its rollback.
+    with closing(self.env.registry.cursor()) as cr:
+        env = api.Environment(cr, self.env.uid, self.env.context)
+        try:
+            env['my.model'].create(rows)
+            cr.commit()
+        except Exception:
+            cr.rollback()
+            _logger.exception("Batch import failed, rolled back")
+            raise
+
+# For ordinary request/cron work, isolate a recoverable operation instead:
+def _create_one(self, values):
+    with self.env.cr.savepoint():
+        return self.create(values)
 ```
 
 ### Cursor as context manager
@@ -383,10 +409,9 @@ current transaction is aborted, commands ignored until end of transaction block
 
 ### Recovery
 
-Either:
-
-- Rollback the whole transaction: `self.env.cr.rollback()` (loses all uncommitted work)
-- Or isolate the error beforehand with `savepoint()` so only the savepoint is rolled back
+Prefer isolating a recoverable operation with `savepoint()` so only that
+operation is rolled back. If the code owns the entire batch transaction, a
+manual rollback remains available as a last-resort recovery boundary.
 
 ```python
 # GOOD: savepoint keeps outer transaction alive
@@ -579,6 +604,7 @@ def _log_audit(self, message):
     with closing(self.env.registry.cursor()) as cr:
         env = odoo.api.Environment(cr, self.env.uid, self.env.context)
         env['audit.log'].create({'message': message})
+        # Required: the audit record survives a later rollback of the caller.
         cr.commit()
 ```
 
@@ -666,7 +692,7 @@ Need error isolation?
 After catching a database error, ask:
 
 - [ ] Was it caught inside a `with cr.savepoint():`? If yes, transaction is still valid.
-- [ ] If not, do I need to `env.cr.rollback()` the whole transaction?
+- [ ] If not, can I re-raise and let Odoo roll back the ambient transaction?
 - [ ] Do I need to `env.invalidate_all()` to drop stale cache entries?
 - [ ] Will the caller (HTTP/cron) retry, or should I retry here?
 
@@ -678,7 +704,8 @@ After catching a database error, ask:
 4. Use `SELECT ... FOR UPDATE NOWAIT` + `savepoint(flush=False)` for cron contention.
 5. Group identical updates to minimize serialization conflicts.
 6. Flush before raw SQL reads.
-7. Use a new cursor (`registry.cursor()`) only for audit / error-path logging.
+7. Use a new cursor (`registry.cursor()`) only for exceptional independent
+   work such as audit/error-path logging or a restartable batch.
 
 ---
 
@@ -761,6 +788,7 @@ def _audit(self, message):
     with closing(self.env.registry.cursor()) as cr:
         env = odoo.api.Environment(cr, self.env.uid, self.env.context)
         env['audit.log'].create({'message': message})
+        # Required: the audit record survives a later rollback of the caller.
         cr.commit()
 ```
 
@@ -779,6 +807,21 @@ def get_totals(self):
 ```
 
 ---
+
+## Coding Conventions
+
+- Never call `commit()` or `rollback()` on `self.env.cr`. Odoo owns normal
+  request and cron transactions; re-raise failures or use a savepoint.
+- Manual `commit()` and `rollback()` are exceptional and permitted only on a
+  cursor explicitly created by the current code. Before using them, make the
+  unit restartable and document its recovery boundary.
+- A manually committed separate cursor is useful for deliberately isolated
+  work such as an audit log or recoverable batch; keep its boundary explicit
+  and close it reliably.
+- Every non-framework `cr.commit()` needs a nearby comment explaining why it
+  is necessary and why the isolated transaction is safe.
+- Prefer a savepoint for recoverable database errors. Catch only exceptions
+  you can handle and re-raise unexpected failures.
 
 ## Base Code Reference
 

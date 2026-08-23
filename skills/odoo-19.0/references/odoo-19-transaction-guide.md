@@ -1,5 +1,15 @@
 # Odoo 19 Transaction Guide
 
+## Coding Conventions
+
+- Never call `commit()` or `rollback()` on `self.env.cr`: Odoo owns normal
+  request and cron transactions. Re-raise failures or use a savepoint.
+- A manual commit or rollback is exceptional and only permitted on a cursor
+  explicitly created by the current code. Make the unit restartable and
+  document why its independent transaction boundary is safe.
+- Prefer a savepoint for recoverable database errors. Catch only exceptions
+  that can be handled; re-raise unexpected failures.
+
 Guide for handling database transactions in Odoo 19: errors, savepoints, and serialization failures.
 
 ## Table of Contents
@@ -73,25 +83,20 @@ Savepoints isolate errors within a transaction.
 ```python
 def process_records(self):
     for record in self:
-        # Create savepoint before each record
-        self.env.cr.execute("SAVEPOINT my_savepoint")
-
         try:
-            record.process()
-        except Exception as e:
-            # Rollback to savepoint on error
-            self.env.cr.execute("ROLLBACK TO SAVEPOINT my_savepoint")
-            _logger.warning("Failed to process %s: %s", record, e)
+            with self.env.cr.savepoint():
+                record.process()
+        except (ValidationError, UserError) as error:
+            _logger.warning("Failed to process %s: %s", record, error)
 ```
 
-### Release Savepoint
+### Savepoint Lifetime
 
 ```python
-try:
+with self.env.cr.savepoint():
     record.process()
-finally:
-    # Release savepoint
-    self.env.cr.execute("RELEASE SAVEPOINT my_savepoint")
+# The context manager releases the savepoint on success and rolls it back
+# when an exception escapes the block.
 ```
 
 ---
@@ -100,26 +105,8 @@ finally:
 
 ### Retry on Serialization Failure
 
-```python
-from odoo.exceptions import UserError
-from psycopg2 import OperationalError
-
-def retry_on_failure(max_retries=3):
-    def decorator(func):
-        def wrapper(self, *args, **kwargs):
-            for attempt in range(max_retries):
-                try:
-                    return func(self, *args, **kwargs)
-                except OperationalError as e:
-                    if e.pgcode == '40001':  # Serialization failure
-                        if attempt < max_retries - 1:
-                            self.env.cr.rollback()
-                            self.env.cr.execute("SAVEPOINT retry_savepoint")
-                            continue
-                    raise
-        return wrapper
-    return decorator
-```
+Do not retry an ambient transaction inside model code. Let Odoo retry the
+complete request or cron transaction, or re-raise so its scheduler can do so.
 
 ### Handle Validation Errors
 
@@ -174,18 +161,20 @@ Odoo auto-commits after successful operations.
 record.write({'field': 'value'})
 ```
 
-### Manual Rollback
+### Recoverable Work
 
 ```python
 try:
-    # Multiple operations
-    record1.write({'field': 'value'})
-    record2.write({'field': 'value'})
-except Exception as e:
-    # Rollback entire transaction
-    self.env.cr.rollback()
+    with self.env.cr.savepoint():
+        record1.write({'field': 'value'})
+        record2.write({'field': 'value'})
+except ValidationError:
+    # The savepoint rolls back only this recoverable unit.
     raise
 ```
+
+Only an explicitly created cursor may be committed or rolled back. Such code
+must document why the independently restartable transaction boundary is safe.
 
 ---
 
@@ -243,14 +232,11 @@ def safe_update(self, values):
 ```python
 def bulk_process(self, records):
     for record in records:
-        self.env.cr.execute("SAVEPOINT process_savepoint")
         try:
-            record.process()
-        except Exception as e:
-            self.env.cr.execute("ROLLBACK TO SAVEPOINT process_savepoint")
-            _logger.warning("Failed: %s", e)
-        finally:
-            self.env.cr.execute("RELEASE SAVEPOINT process_savepoint")
+            with self.env.cr.savepoint():
+                record.process()
+        except (ValidationError, UserError) as error:
+            _logger.warning("Failed: %s", error)
 ```
 
 ---

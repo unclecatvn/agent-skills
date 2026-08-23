@@ -7,7 +7,7 @@ description: >
   Use this skill whenever work involves Odoo 16 or custom addons—even if the user only pastes a traceback,
   mentions addons/ or __manifest__.py, describes form/tree/kanban/XML errors, HTTP controllers, or
   business rules on models—including building features, fixing bugs, refactoring, or reviewing addon code.
-globs: "**/*.{py,xml,csv,js,ts}"
+  Includes CSS/SCSS asset authoring and review for Odoo addons.
 ---
 
 # Odoo 16 Skill - Master Index
@@ -36,6 +36,19 @@ Master index for all Odoo 16 development guides. Read the appropriate guide from
 | Transactions | `references/odoo-16-transaction-guide.md` | Handling database errors, savepoints, UniqueViolation |
 | Translation | `references/odoo-16-translation-guide.md` | Adding translations, localization, i18n |
 | Views & XML | `references/odoo-16-view-guide.md` | Writing XML views, actions, menus, QWeb templates |
+
+## Coding Conventions
+
+Apply the relevant convention section in the guide you open. The conventions
+are advisory: preserve the style of an existing stable addon and keep diffs
+focused. When guidance conflicts, prefer Odoo 16 runtime/source behavior,
+then the surrounding addon style, then the convention.
+
+- Module layout and asset placement: development and controller guides.
+- XML formatting and external IDs: data, view, action, report, and security guides.
+- Python naming, imports, recordsets, transactions, and translations: model,
+  field, decorator, performance, transaction, and translation guides.
+- JavaScript and CSS/SCSS: development guide.
 
 ## File Structure
 
@@ -79,3 +92,4 @@ All guides are based on analysis of Odoo 16 source code:
 
 - [Odoo 16 Official Documentation](https://github.com/odoo/documentation/tree/16.0)
 - [Odoo 16 Developer Reference](https://github.com/odoo/documentation/blob/16.0/content/developer/reference/backend/orm.rst)
+- [Odoo 16 Coding Guidelines](https://github.com/odoo/documentation/blob/16.0/content/contributing/development/coding_guidelines.rst)

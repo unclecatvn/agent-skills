@@ -91,6 +91,20 @@ skills/odoo-19.0/
 | Using `category_id` in `res.groups`                            | Removed in Odoo 19           | Use `privilege_id` + `res.groups.privilege`        |
 | Using `read_group()`                                           | Deprecated                   | Use `_read_group()` or `formatted_read_group()`    |
 
+## Coding Conventions
+
+Apply the Coding Conventions section in the guide you open. Odoo 19 runtime
+behavior takes precedence, followed by the surrounding stable-addon style;
+keep convention-only changes focused. The common source is the [Odoo Coding
+Guidelines](https://raw.githubusercontent.com/odoo/documentation/17.0/content/contributing/development/coding_guidelines.rst).
+
+- Use the development guide for module layout, assets, JavaScript, CSS, and
+  SCSS conventions.
+- Use data, actions, reports, security, and views guides for XML formatting
+  and external IDs.
+- Use model, field, decorator, performance, transaction, and translation
+  guides for Python, recordsets, context, database work, and i18n.
+
 ## @api Decorator Decision Tree
 
 ```
@@ -153,9 +167,10 @@ my_module/
 │   └── my_model_views.xml
 ├── security/
 │   ├── ir.model.access.csv
-│   └── my_module_security.xml
+│   ├── my_module_groups.xml
+│   └── my_model_security.xml
 ├── data/
-│   └── my_module_data.xml
+│   └── my_model_data.xml
 ├── migrations/
 │   └── 19.0.1.0/
 │       └── post-migration.py
@@ -164,10 +179,10 @@ my_module/
 │   └── test_my_model.py
 ├── wizard/
 │   ├── __init__.py
-│   └── my_wizard.py
+│   └── make_my_model.py
 ├── controllers/
 │   ├── __init__.py
-│   └── my_controller.py
+│   └── my_model.py
 └── static/
     └── src/
         ├── js/

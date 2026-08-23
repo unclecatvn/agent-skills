@@ -126,9 +126,9 @@ Defined in `odoo/addons/base/models/ir_actions.py`:
 ### Open a Single Record in a Dialog
 
 ```xml
-<record id="action_open_wizard" model="ir.actions.act_window">
+<record id="action_open_configure" model="ir.actions.act_window">
     <field name="name">Configure</field>
-    <field name="res_model">my.config.wizard</field>
+    <field name="res_model">my.config.configure</field>
     <field name="view_mode">form</field>
     <field name="target">new</field>
 </record>
@@ -807,6 +807,16 @@ return {
 ```
 
 ---
+
+## Coding Conventions
+
+- Name the main action `<model>_action`; suffix additional actions with a
+  short lowercase purpose. Name explicit action-view records
+  `<model>_action_view_<type>`.
+- Name menus `<model>_menu` or `<model>_menu_<purpose>` and declare actions
+  before menus that reference them.
+- Prefix object action methods with `action_`; call `self.ensure_one()` when
+  the action is defined for exactly one record.
 
 ## Base Code Reference
 

@@ -1,7 +1,7 @@
 ---
 name: odoo-18-development
 description: Complete guide for Odoo 18 module development covering manifest structure, security, reports, wizards, data files, hooks, and exception handling.
-globs: "**/*.{py,xml,csv}"
+globs: "**/*.{py,xml,csv,js,css,scss}"
 topics:
   - Module structure (folders and files)
   - __manifest__.py (all fields, assets, external dependencies)
@@ -23,6 +23,19 @@ when_to_use:
 ---
 
 # Odoo 18 Development Guide
+
+## Coding Conventions
+
+Use lowercase `[a-z0-9_]` filenames; split model logic by main model and put
+inherited-model extensions in their own file. Name controllers after their
+module (or inherited module), not `main.py`. Name transient files `<action>.py`
+and `<action>_views.xml`, where `<action>` describes the base-model operation.
+Use `<model>_views.xml`, `<module>_menus.xml`, `<model>_data.xml`, and
+`<model>_demo.xml`; put groups in `<module>_groups.xml`, rules in
+`<model>_security.xml`, report actions in `<model>_reports.xml`, and QWeb
+templates in `<model>_templates.xml`. Put third-party browser libraries in
+`static/lib/<library>/`; colocate meaningful JS, XML, and SCSS component files,
+use four spaces in CSS/SCSS, and prefix module classes `o_<module_name>`.
 
 Complete guide for Odoo 18 module development: manifest structure, reports, security, wizards, and advanced patterns.
 
@@ -49,26 +62,27 @@ my_module/
 ├── models/
 │   ├── __init__.py
 │   ├── my_model.py             # Model definitions
-│   └── ir_rule.py              # Optional: security rules in Python
+│   └── res_partner.py          # Extension of an inherited model
 ├── views/
 │   ├── my_model_views.xml      # View definitions
 │   ├── my_model_templates.xml  # QWeb templates
-│   └── report_templates.xml    # Report templates
+│   └── my_module_menus.xml     # Menu definitions
 ├── security/
 │   ├── ir.model.access.csv     # Access rights (REQUIRED)
-│   └── my_module_security.xml   # Record rules
+│   ├── my_module_groups.xml    # Group definitions
+│   └── my_model_security.xml   # Record rules
 ├── data/
-│   ├── my_module_data.xml      # Data records
-│   └── ir_cron_data.xml        # Scheduled actions
+│   ├── my_model_data.xml       # Data records
+│   └── my_model_cron.xml       # Scheduled actions
 ├── demo/
 │   └── my_module_demo.xml      # Demo data
 ├── report/
-│   ├── my_report_views.xml     # Report actions
-│   └── my_report_templates.xml # Report QWeb templates
+│   ├── my_model_reports.xml    # Report actions
+│   └── my_model_templates.xml  # Report QWeb templates
 ├── wizard/
 │   ├── __init__.py
-│   ├── my_wizard.py            # TransientModel
-│   └── my_wizard_views.xml     # Wizard views
+│   ├── make_my_model.py        # TransientModel
+│   └── make_my_model_views.xml # Transient views
 ├── static/
 │   ├── src/
 │   │   ├── js/                 # JavaScript files
@@ -78,14 +92,12 @@ my_module/
 │       └── icon.png            # Module icon
 ├── controllers/
 │   ├── __init__.py
-│   └── my_controller.py        # HTTP controllers
+│   └── my_module.py            # HTTP controllers
 ├── tests/
 │   ├── __init__.py
 │   └── test_my_module.py       # Test cases
-└── lib/
-    └── controller/
-        ├── __init__.py
-        └── main.py             # Alternative controller location
+└── static/lib/
+    └── library/                # Bundled third-party browser library
 ```
 
 ---
@@ -120,11 +132,14 @@ Detailed description of what the module does.
 
     # Data files
     'data': [
-        'security/my_module_security.xml',
+        'security/my_module_groups.xml',
+        'security/my_model_security.xml',
         'security/ir.model.access.csv',
-        'views/my_module_views.xml',
-        'data/my_module_data.xml',
-        'report/my_report_views.xml',
+        'data/my_model_data.xml',
+        'views/my_model_views.xml',
+        'report/my_model_templates.xml',
+        'report/my_model_reports.xml',
+        'views/my_module_menus.xml',
     ],
 
     # Demo data
@@ -558,10 +573,10 @@ Odoo provides several built-in layouts:
 from odoo import models, fields, api
 from odoo.exceptions import UserError
 
-class MyWizard(models.TransientModel):
-    """Wizard for processing selected records"""
-    _name = 'my.wizard'
-    _description = 'My Wizard'
+class MyModelMake(models.TransientModel):
+    """Make selected My Model records."""
+    _name = 'my.model.make'
+    _description = 'Make My Model'
 
     # Fields
     date = fields.Date(string='Date', default=fields.Date.context_today, required=True)
@@ -571,8 +586,8 @@ class MyWizard(models.TransientModel):
     # Related records (from context)
     record_ids = fields.Many2many(
         'my.model',
-        'my_wizard_record_rel',
-        'wizard_id',
+        'my_model_make_record_rel',
+        'make_id',
         'record_id',
         string='Records',
     )
@@ -580,7 +595,7 @@ class MyWizard(models.TransientModel):
     @api.model
     def default_get(self, fields):
         """Set defaults from context (active_ids)"""
-        res = super(MyWizard, self).default_get(fields)
+        res = super().default_get(fields)
 
         if 'record_ids' in fields and self.env.context.get('active_model') == 'my.model':
             records = self.env['my.model'].browse(self.env.context.get('active_ids', []))
@@ -626,11 +641,11 @@ class MyWizard(models.TransientModel):
 <odoo>
 
     <!-- Wizard Form View -->
-    <record id="view_my_wizard_form" model="ir.ui.view">
-        <field name="name">my.wizard.form</field>
-        <field name="model">my.wizard</field>
+    <record id="view_my_model_make_form" model="ir.ui.view">
+        <field name="name">my.model.make.form</field>
+        <field name="model">my.model.make</field>
         <field name="arch" type="xml">
-            <form string="My Wizard">
+            <form string="Make My Model">
                 <field name="record_ids" invisible="1"/>
                 <group>
                     <group>
@@ -652,11 +667,11 @@ class MyWizard(models.TransientModel):
     </record>
 
     <!-- Wizard Action -->
-    <record id="action_my_wizard" model="ir.actions.act_window">
-        <field name="name">My Wizard</field>
-        <field name="res_model">my.wizard</field>
+    <record id="action_my_model_make" model="ir.actions.act_window">
+        <field name="name">Make My Model</field>
+        <field name="res_model">my.model.make</field>
         <field name="view_mode">form</field>
-        <field name="view_id" ref="view_my_wizard_form"/>
+        <field name="view_id" ref="view_my_model_make_form"/>
         <field name="target">new</field>
     </record>
 
@@ -673,7 +688,7 @@ class MyWizard(models.TransientModel):
     <field name="inherit_id" ref="my_module.view_my_model_form"/>
     <field name="arch" type="xml">
         <header position="inside">
-            <button string="Open Wizard" name="%(action_my_wizard)d"
+            <button string="Make My Model" name="%(action_my_model_make)d"
                     type="action" class="btn-primary"/>
         </header>
     </field>
@@ -907,12 +922,15 @@ Detailed description.
     'depends': ['base'],
 
     'data': [
-        'security/my_module_security.xml',
+        'security/my_module_groups.xml',
+        'security/my_model_security.xml',
         'security/ir.model.access.csv',
+        'data/my_model_data.xml',
+        'wizard/make_my_model_views.xml',
         'views/my_model_views.xml',
-        'views/wizard_views.xml',
-        'data/my_module_data.xml',
-        'report/my_report_views.xml',
+        'report/my_model_templates.xml',
+        'report/my_model_reports.xml',
+        'views/my_module_menus.xml',
     ],
 
     'demo': [
@@ -960,7 +978,7 @@ access_my_model_user,my.model.user,model_my_model,base.group_user,1,1,1,0
 access_my_model_manager,my.model.manager,model_my_model,group_my_module_manager,1,1,1,1
 ```
 
-### security/my_module_security.xml
+### security/my_module_groups.xml
 
 ```xml
 <?xml version="1.0" encoding="utf-8"?>

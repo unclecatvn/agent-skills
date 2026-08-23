@@ -1,5 +1,12 @@
 # Odoo 19 Actions Guide
 
+## Coding Conventions
+
+- Name window/server/report actions `action_<model>_<purpose>` and menus
+  `menu_<model>_<purpose>`; define actions before menus that reference them.
+- Use explicit `list,form` view modes and stable descriptive XML IDs; keep the
+  action's target model and binding fields together.
+
 Guide for working with Odoo 19 actions (`ir.actions.*`), scheduled jobs (cron), and action bindings.
 
 ## Table of Contents
@@ -293,11 +300,12 @@ def _cron_do_something(self):
             if not record:
                 continue
             try:
-                record.do_something(conn)
+                with self.env.cr.savepoint():
+                    record.do_something(conn)
                 if not self.env['ir.cron']._commit_progress(1):
                     break
-            except Exception:
-                self.env.cr.rollback()
+            except (UserError, ValidationError) as error:
+                _logger.warning("Cron record %s failed: %s", record, error)
 ```
 
 ### Running cron functions

@@ -61,6 +61,10 @@ skills/odoo-17.0/
 
 Odoo 17 is the version *before* the big v18 API modernization. Code must use the v17 patterns:
 
+Apply the Coding Conventions section in the guide you open. Prefer Odoo 17
+runtime behavior, then the surrounding stable-addon style, when they conflict
+with a convention.
+
 | Concern | Odoo 17 convention | Odoo 18+ change (do NOT use in v17) |
 |---------|--------------------|-------------------------------------|
 | List view tag | `<tree>` | `<list>` |

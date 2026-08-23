@@ -890,6 +890,15 @@ When adding translatable content to an Odoo 17 module:
 
 ---
 
+## Coding Conventions
+
+- Call `_()` with a literal source string and pass values as arguments; never
+  translate dynamically built strings or format after translation.
+- Prefer `%s` for one replacement and named `%(name)s` placeholders for
+  several, so translators can safely reorder them.
+- Let translatable fields translate their values; do not wrap a field value
+  or technical XML ID in `_()`.
+
 ## Base Code Reference
 
 - `odoo/tools/translate.py` - `_`, `_lt`, `TranslationImporter`, `TranslationModuleReader`, `code_translations`, `html_translate`, `xml_translate`

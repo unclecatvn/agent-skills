@@ -1,5 +1,13 @@
 # Odoo 19 Translation Guide
 
+## Coding Conventions
+
+- Translate literal source strings with parameters, never dynamically built strings.
+- Use `_()` for immediate Python translations and `_t()` in JavaScript; pass
+  values as interpolation parameters rather than concatenating translated text.
+- Keep technical identifiers and markup outside translatable strings unless
+  they are part of the user-visible message.
+
 Guide for adding translations and localization in Odoo 19: Python, JavaScript, and QWeb templates.
 
 ## Table of Contents

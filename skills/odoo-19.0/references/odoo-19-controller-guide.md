@@ -1,5 +1,12 @@
 # Odoo 19 Controller Guide
 
+## Coding Conventions
+
+Group related routes in one controller and preserve extensibility by redecorating
+overrides and calling `super()` where the parent behavior remains relevant.
+Name controller files after the served model or feature (for example,
+`controllers/my_model.py`), never a catch-all `my_controller.py`.
+
 Guide for creating HTTP controllers and routes in Odoo 19.
 
 ## Table of Contents

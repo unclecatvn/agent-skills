@@ -336,15 +336,15 @@ non-dependencies [...] for module <name>
     'data/mail_template_data.xml',
 
     # 3. Wizards
-    'wizard/my_wizard_views.xml',
+    'wizard/make_my_model_views.xml',
 
     # 4. Views
     'views/my_model_views.xml',
     'views/res_partner_views.xml',
 
     # 5. Reports (templates + actions)
-    'report/my_report_templates.xml',
-    'report/my_report_actions.xml',
+    'report/my_model_templates.xml',
+    'report/my_model_reports.xml',
 
     # 6. Menus LAST — they reference window actions defined above.
     'views/my_menus.xml',
@@ -699,7 +699,7 @@ Features:
     'data': [
         # Security first
         'security/business_trip_groups.xml',
-        'security/ir_rule.xml',
+        'security/business_trip_security.xml',
         'security/ir.model.access.csv',
 
         # Reference data
@@ -716,8 +716,8 @@ Features:
         'views/hr_employee_views.xml',
 
         # Reports
-        'report/business_trip_report_templates.xml',
-        'report/business_trip_report_actions.xml',
+        'report/business_trip_templates.xml',
+        'report/business_trip_reports.xml',
 
         # Menus (last)
         'views/business_trip_menus.xml',
@@ -846,6 +846,13 @@ Features:
 ```
 
 ---
+
+## Coding Conventions
+
+- Load groups before ACLs and rules that reference them, and security before
+  views; load actions/reports before menus that reference them.
+- Use focused filenames: `<module>_groups.xml`, `<model>_security.xml`,
+  `<model>_views.xml`, `<model>_templates.xml`, and `<model>_reports.xml`.
 
 ## Base Code Reference
 

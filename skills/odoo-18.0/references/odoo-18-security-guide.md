@@ -21,6 +21,10 @@ when_to_use:
 
 # Odoo 18 Security Guide
 
+## Coding Conventions
+
+Keep ACLs, groups, and rules in discoverable dedicated files and load dependencies first.
+
 Complete reference for Odoo 18 security: access rights, record rules, field access, and preventing security pitfalls.
 
 ## Table of Contents

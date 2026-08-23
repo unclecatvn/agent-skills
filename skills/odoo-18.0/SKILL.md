@@ -7,7 +7,8 @@ description: >
   Use this skill whenever work involves Odoo 18 or custom addons—even if the user only pastes a traceback,
   mentions addons/ or __manifest__.py, describes form/list/kanban/XML errors, HTTP controllers, or
   business rules on models—including building features, fixing bugs, refactoring, or reviewing addon code.
-globs: "**/*.{py,xml,csv,js,ts}"
+  Includes CSS/SCSS asset authoring and review for Odoo addons.
+globs: "**/*.{py,xml,csv,js,ts,css,scss}"
 ---
 
 # Odoo 18 Skill - Master Index
@@ -36,6 +37,16 @@ Master index for all Odoo 18 development guides. Read the appropriate guide from
 | Transactions | `references/odoo-18-transaction-guide.md` | Handling database errors, savepoints, UniqueViolation |
 | Translation | `references/odoo-18-translation-guide.md` | Adding translations, localization, i18n |
 | Views & XML | `references/odoo-18-view-guide.md` | Writing XML views, actions, menus, QWeb templates |
+
+## Coding Conventions
+
+Apply the convention section in the guide you open. Odoo 18 runtime behavior,
+then existing stable-addon style, takes precedence; keep diffs focused.
+
+- Module naming, assets, JavaScript, CSS, and SCSS: development guide.
+- XML formatting and IDs: data, actions, reports, security, and views guides.
+- Python, recordsets, transactions, and translations: model, field, decorator,
+  performance, transaction, and translation guides.
 
 ## File Structure
 
@@ -79,3 +90,4 @@ All guides are based on analysis of Odoo 18 source code:
 
 - [Odoo 18 Official Documentation](https://github.com/odoo/documentation/tree/18.0)
 - [Odoo 18 Developer Reference](https://github.com/odoo/documentation/blob/18.0/developer/reference/orm.rst)
+- [Odoo Coding Guidelines](https://raw.githubusercontent.com/odoo/documentation/17.0/content/contributing/development/coding_guidelines.rst)

@@ -164,6 +164,20 @@ After installing via `npx skills add unclecatvn/agent-skills`, the skill is plac
 | Field aggregation | `group_operator=` | `aggregator=` |
 | SQL queries | `cr.execute()` | `SQL` class with `execute_query_dict()` |
 
+## Coding Conventions
+
+Apply the Coding Conventions section in the guide you open. Odoo 18 runtime
+behavior takes precedence, followed by the surrounding stable-addon style;
+keep convention-only changes focused. The common source is the [Odoo Coding
+Guidelines](https://raw.githubusercontent.com/odoo/documentation/17.0/content/contributing/development/coding_guidelines.rst).
+
+- Use the development guide for module layout, asset, JavaScript, CSS, and
+  SCSS conventions.
+- Use the data, action, report, security, and view guides for XML formatting
+  and external IDs.
+- Use the model, field, decorator, performance, transaction, and translation
+  guides for Python, recordsets, context, database work, and i18n.
+
 ---
 
 ## Repository

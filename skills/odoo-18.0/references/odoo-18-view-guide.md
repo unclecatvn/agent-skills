@@ -22,6 +22,10 @@ when_to_use:
 
 # Odoo 18 View Guide
 
+## Coding Conventions
+
+Use model-based view IDs, matching dotted names, and meaningful inherit names.
+
 Complete reference for Odoo 18 XML views, actions, menus, and QWeb templates.
 
 ## Table of Contents
@@ -195,10 +199,10 @@ Complete reference for Odoo 18 XML views, actions, menus, and QWeb templates.
             </page>
             <page string="Lines" name="lines">
                 <field name="line_ids" nolabel="1">
-                    <tree editable="bottom">
+                    <list editable="bottom">
                         <field name="product_id"/>
                         <field name="quantity"/>
-                    </tree>
+                    </list>
                 </field>
             </page>
         </notebook>
@@ -516,7 +520,7 @@ Complete reference for Odoo 18 XML views, actions, menus, and QWeb templates.
 <record id="action_my_model" model="ir.actions.act_window">
     <field name="name">My Model</field>
     <field name="res_model">my.model</field>
-    <field name="view_mode">tree,form</field>
+    <field name="view_mode">list,form</field>
     <field name="domain">[]</field>
     <field name="context">{'search_default_active': 1}</field>
     <field name="view_id" ref="view_my_model_tree"/>
@@ -739,11 +743,11 @@ Complete reference for Odoo 18 XML views, actions, menus, and QWeb templates.
                             </page>
                             <page string="Lines">
                                 <field name="line_ids" nolabel="1">
-                                    <tree editable="bottom">
+                                    <list editable="bottom">
                                         <field name="product_id"/>
                                         <field name="quantity"/>
                                         <field name="price"/>
-                                    </tree>
+                                    </list>
                                 </field>
                             </page>
                         </notebook>
@@ -798,7 +802,7 @@ Complete reference for Odoo 18 XML views, actions, menus, and QWeb templates.
         <record id="action_my_module" model="ir.actions.act_window">
             <field name="name">My Module</field>
             <field name="res_model">my.module</field>
-            <field name="view_mode">tree,form,kanban</field>
+            <field name="view_mode">list,form,kanban</field>
             <field name="context">{'search_default_my_items': 1}</field>
             <field name="help" type="html">
                 <p class="o_view_nocontent_smiling_face">

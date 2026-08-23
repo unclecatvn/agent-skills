@@ -231,8 +231,8 @@ def process_all(self):
     for chunk_ids in split_every(500, ids):
         records = self.browse(chunk_ids)
         records._do_process()
-        # Commit between chunks to release locks on long jobs (cron only!)
-        self.env.cr.commit()
+        # Keep the ambient transaction under Odoo's control. Use a separately
+        # owned cursor only for an independently recoverable batch boundary.
 ```
 
 ---
@@ -720,6 +720,14 @@ for row in self.search_read([('state', '=', 'done')], ['name']):
 ```
 
 ---
+
+## Coding Conventions
+
+- Prefer batch-aware ORM operations and `filtered`, `mapped`, and `sorted`
+  when they make intent clearer and avoid per-record queries.
+- Do not add custom generators or decorators solely for iteration.
+- Odoo owns normal request and cron transactions; performance is not a reason
+  to commit the ambient cursor.
 
 ## Base Code Reference
 

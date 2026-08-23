@@ -1184,6 +1184,15 @@ Use a meaningful domain or an XML-id reference in the action context instead.
 
 ---
 
+## Coding Conventions
+
+- Name view IDs `<model>_view_<type>` and use the matching dotted name in
+  `ir.ui.view.name`.
+- For inherited views, reuse the original view-ID portion and add a dotted
+  `.inherit.<purpose>` suffix to the view name; primary views need none.
+- Group records by model where practical, place `id` before `model`, and use
+  meaningful XML IDs rather than generic names.
+
 ## Base Code Reference
 
 All behaviour above is backed by the Odoo 17 source:

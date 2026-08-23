@@ -1,5 +1,9 @@
 # Odoo 19 Reports Guide
 
+## Coding Conventions
+
+Use focused report/template filenames and stable descriptive XML IDs.
+
 Guide for creating QWeb reports in Odoo 19: PDF/HTML reports, templates, and paper formats.
 
 ## Table of Contents

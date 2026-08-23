@@ -7,6 +7,7 @@
  *      valid `name` and `description` in its YAML frontmatter.
  *   2. Every component path listed in .claude-plugin/plugin.json exists.
  *   3. package.json version has a matching section in CHANGELOG.md
+ *   4. Versioned Odoo testing guides contain the generic testing guidance.
  *      (skipped if the version is still 0.x or under [Unreleased]).
  *
  * Exit code 0 on success, 1 on any failure.
@@ -129,6 +130,46 @@ function validateChangelog() {
   }
 }
 
+function validateVersionedTestingGuides() {
+  const expectedFreezeImports = {
+    "16.0": "from freezegun import freeze_time",
+    "17.0": "from freezegun import freeze_time",
+    "18.0": "from odoo.tests.common import freeze_time",
+    "19.0": "from odoo.tests.common import freeze_time",
+  };
+  const requiredPatterns = [
+    /regression tests? for fixes|regression and error-path coverage/i,
+    /lowest practical permissions/i,
+    /subtests? without sharing mutable state|not rolled back between `?subTest/i,
+    /with_env\(self\.env\)/i,
+    /datetime\.now\(\).*datetime\.today\(\)|fixed dates/i,
+    /mock external services by default/i,
+    /demo records/i,
+    /coverage decreases/i,
+  ];
+
+  for (const [version, freezeImport] of Object.entries(expectedFreezeImports)) {
+    const filePath = path.join(
+      ROOT,
+      `skills/odoo-${version}/references/odoo-${version.split(".")[0]}-testing-guide.md`
+    );
+    if (!fs.existsSync(filePath)) {
+      fail(`missing versioned testing guide: ${path.relative(ROOT, filePath)}`);
+      continue;
+    }
+    const content = fs.readFileSync(filePath, "utf8");
+    for (const pattern of requiredPatterns) {
+      if (!pattern.test(content)) {
+        fail(`${path.relative(ROOT, filePath)}: missing generic testing guidance ${pattern}`);
+      }
+    }
+    if (!content.includes(freezeImport)) {
+      fail(`${path.relative(ROOT, filePath)}: missing version-correct freeze_time import`);
+    }
+    ok(`${path.relative(ROOT, filePath)} has generic testing guidance`);
+  }
+}
+
 function main() {
   console.log("Validating skills/");
   validateSkillDir(path.join(ROOT, "skills"), "skills");
@@ -141,6 +182,9 @@ function main() {
 
   console.log("\nValidating CHANGELOG");
   validateChangelog();
+
+  console.log("\nValidating versioned testing guides");
+  validateVersionedTestingGuides();
 
   console.log("");
   if (errors.length > 0) {

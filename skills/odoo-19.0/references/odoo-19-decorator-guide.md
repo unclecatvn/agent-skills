@@ -1,5 +1,14 @@
 # Odoo 19 Decorator Guide
 
+## Coding Conventions
+
+- Keep field declarations and their default, compute, inverse, search, and
+  constraint helpers together; name helpers after the field and operation.
+- Use `@api.model_create_multi` for `create()` overrides, declare complete
+  dotted dependencies for computed fields, and keep constraints batch-safe.
+- Use `@api.ondelete(at_uninstall=False)` for deletion validation; do not use
+  onchange methods to perform persistence or business-side effects.
+
 Guide for using `@api` decorators in Odoo 19: computed fields, validation, onchange, and more.
 
 ## Table of Contents

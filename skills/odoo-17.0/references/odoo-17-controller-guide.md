@@ -782,6 +782,14 @@ request.not_found()                                           # 404
 
 ---
 
+## Coding Conventions
+
+- Name the main controller file after the module and an inherited-controller
+  file after the inherited module. `main.py` is legacy and may remain in an
+  existing addon.
+- Keep routes thin: delegate business behavior to models and use explicit,
+  descriptive route method names.
+
 ## Base Code Reference
 
 The APIs documented here are defined in the Odoo 17 source:

@@ -554,6 +554,15 @@ Defining / overriding a METHOD
 
 ---
 
+## Coding Conventions
+
+- Name selection providers `_selection_<field>`, onchange handlers
+  `_onchange_<field>`, and constraints `_check_<concern>`.
+- Keep compute, inverse, and search methods adjacent to their fields;
+  constraints/onchanges precede CRUD overrides.
+- Keep helpers private; public UI methods use `action_` and call
+  `ensure_one()` when they require a singleton.
+
 ## Base Code Reference
 
 Verify decorator semantics in:

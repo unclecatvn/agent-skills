@@ -325,8 +325,8 @@ non-dependencies [...] for module <name>
 ```python
 'data': [
     # 1. Security FIRST (groups, ACL, record rules) — views reference them.
-    'security/res_groups.xml',
-    'security/ir_rules.xml',
+    'security/my_module_groups.xml',
+    'security/my_model_security.xml',
     'security/ir.model.access.csv',
 
     # 2. Reference data (sequences, parameters, templates)
@@ -334,18 +334,18 @@ non-dependencies [...] for module <name>
     'data/mail_template_data.xml',
 
     # 3. Wizards
-    'wizard/my_wizard_views.xml',
+    'wizard/make_my_model_views.xml',
 
     # 4. Views
     'views/my_model_views.xml',
     'views/res_partner_views.xml',
 
     # 5. Reports (templates + actions)
-    'report/my_report_templates.xml',
-    'report/my_report_actions.xml',
+    'report/my_model_templates.xml',
+    'report/my_model_reports.xml',
 
     # 6. Menus LAST — they reference window actions defined above.
-    'views/my_menus.xml',
+    'views/my_module_menus.xml',
 ],
 ```
 
@@ -704,7 +704,7 @@ Features:
     'data': [
         # Security first
         'security/business_trip_groups.xml',
-        'security/ir_rule.xml',
+        'security/business_trip_security.xml',
         'security/ir.model.access.csv',
 
         # Reference data

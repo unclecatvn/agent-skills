@@ -1,5 +1,13 @@
 # Odoo 19 Field Guide
 
+## Coding Conventions
+
+- Keep fields and their default, compute, inverse, and search helpers together.
+- Declare related fields near their source field and use explicit labels only
+  when the generated label is not suitable; keep help text user-facing.
+- Use `aggregator=` for list/graph aggregation in Odoo 19 and avoid storing a
+  computed field unless it is searched, grouped, or needed for performance.
+
 Guide for defining fields in Odoo 19: field types, parameters, computed fields, and relational fields.
 
 ## Table of Contents

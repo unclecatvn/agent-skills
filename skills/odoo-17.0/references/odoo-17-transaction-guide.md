@@ -319,18 +319,26 @@ Note the hooks: `precommit`, `postcommit`, `prerollback`, `postrollback` are cal
 
 **Almost never** in request-handling code. Odoo commits for you at the end of an HTTP request or cron job.
 
-Manual `commit()` is appropriate only in:
+Never call `commit()` or `rollback()` on Odoo's ambient cursor
+(`self.env.cr`). Odoo owns that transaction. Manual control is an exceptional
+last resort and requires a cursor explicitly created for one complete,
+recoverable unit of work. Typical cases include:
 
 1. **Long cron jobs** that must release row locks periodically
 2. **Data imports / migration scripts** that should persist progress
 3. **Init hooks** running outside a normal HTTP/RPC cycle
 
 ```python
-# GOOD: cron job committing every chunk
+# LAST RESORT: each chunk owns an independent cursor and is safe to restart.
+from contextlib import closing
+from odoo import api
+
 def _cron_sync(self):
-    for chunk in self._chunks():
-        self._sync_chunk(chunk)
-        self.env.cr.commit()
+    for chunk_ids in self._chunk_ids():
+        with closing(self.env.registry.cursor()) as cr:
+            env = api.Environment(cr, self.env.uid, self.env.context)
+            env['my.model'].browse(chunk_ids)._sync_chunk()
+            cr.commit()  # independent, restartable batch boundary
 ```
 
 ### When NOT to use `commit()`
@@ -339,23 +347,15 @@ def _cron_sync(self):
 # BAD: mid-business-logic commit makes errors impossible to roll back
 def create_order(self, vals):
     order = self.create(vals)
-    self.env.cr.commit()           # point of no return
     order.action_confirm()         # if this fails, order is orphaned
-    self.env.cr.commit()
 ```
 
 ### `rollback()` in error handlers
 
 ```python
 def batch_import(self, rows):
-    try:
-        for row in rows:
-            self.create(row)
-        self.env.cr.commit()
-    except Exception:
-        self.env.cr.rollback()
-        _logger.exception("Batch import failed, rolled back")
-        raise
+    with self.env.cr.savepoint():
+        return self.create(rows)
 ```
 
 ### Cursor as context manager
@@ -389,10 +389,9 @@ current transaction is aborted, commands ignored until end of transaction block
 
 ### Recovery
 
-Either:
-
-- Rollback the whole transaction: `self.env.cr.rollback()` (loses all uncommitted work)
-- Or isolate the error beforehand with `savepoint()` so only the savepoint is rolled back
+Prefer isolating a recoverable operation with `savepoint()` so only that
+operation is rolled back. Re-raise other failures and let Odoo roll back the
+ambient transaction.
 
 ```python
 # GOOD: savepoint keeps outer transaction alive
@@ -500,8 +499,7 @@ def _write_with_retry(self, values, retries=3):
         except psycopg2.errors.SerializationFailure:
             if attempt == retries - 1:
                 raise
-            self.env.cr.rollback()
-            time.sleep(0.05 * (2 ** attempt))   # small backoff
+            raise  # Let Odoo's RPC transaction/retry handling own recovery.
 ```
 
 Note: the RPC layer in `odoo/service/model.py` already retries "concurrent update" errors for you at the request level (`MAX_TRIES_ON_CONCURRENCY_FAILURE`), so manual retry loops are only needed inside cron jobs or long-lived sessions.
@@ -746,8 +744,7 @@ def write_with_retry(self, vals, retries=3):
         except psycopg2.errors.SerializationFailure:
             if attempt == retries - 1:
                 raise
-            self.env.cr.rollback()
-            time.sleep(0.05 * (2 ** attempt))
+            raise  # Let Odoo's RPC transaction/retry handling own recovery.
 ```
 
 ### Pattern 5: Audit log across rollback
@@ -778,6 +775,15 @@ def get_totals(self):
 ```
 
 ---
+
+## Coding Conventions
+
+- Never call `commit()` or `rollback()` on `self.env.cr`; Odoo owns normal
+  request and cron transactions. Re-raise failures or use a savepoint.
+- Commit or roll back only a cursor explicitly created by the current code,
+  for an independently recoverable unit, and explain the boundary nearby.
+- Prefer a savepoint for recoverable database errors; catch only exceptions
+  that can be handled and re-raise unexpected failures.
 
 ## Base Code Reference
 

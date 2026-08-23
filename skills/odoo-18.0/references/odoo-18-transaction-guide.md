@@ -18,6 +18,16 @@ when_to_use:
 
 # Odoo 18 Transaction Guide
 
+## Coding Conventions
+
+- Never call `commit()` or `rollback()` on `self.env.cr`: Odoo owns normal
+  request and cron transactions. Re-raise failures or use a savepoint.
+- A manual commit or rollback is exceptional and only permitted on a cursor
+  explicitly created by the current code. Make the unit restartable and
+  document why its independent transaction boundary is safe.
+- Prefer a savepoint for recoverable database errors. Catch only exceptions
+  that can be handled; re-raise unexpected failures.
+
 Complete guide for handling database transactions, UniqueViolation errors, savepoints, and commit operations in Odoo 18.
 
 ## Table of Contents
@@ -286,20 +296,24 @@ def commit(self):
     return result
 ```
 
-Odoo automatically commits at the end of HTTP requests. Only use manual commit for:
-
-1. **Long-running batch jobs** (to release locks periodically)
-2. **Multi-transaction operations** (cron jobs, data imports)
+Odoo automatically commits or rolls back the ambient transaction at the end of
+HTTP requests and cron jobs. Never call `commit()` or `rollback()` on
+`self.env.cr`. Manual transaction control is an exceptional last resort and
+requires a cursor explicitly created by this code for one restartable unit of
+work, with the independent boundary documented.
 
 ```python
-# GOOD: Batch commit for long operations
-def process_large_dataset(self):
-    records = self.search([])
-    batch_size = 100
-    for i in range(0, len(records), batch_size):
-        batch = records[i:i+batch_size]
-        batch.write({'processed': True})
-        self.env.cr.commit()  # Commit progress
+# LAST RESORT: each chunk owns a complete transaction and is restartable.
+from contextlib import closing
+from odoo import api
+
+def _cron_process_large_dataset(self):
+    for chunk_ids in self._chunk_ids():
+        with closing(self.env.registry.cursor()) as cr:
+            env = api.Environment(cr, self.env.uid, self.env.context)
+            env['my.model'].browse(chunk_ids)._process_chunk()
+            # Required: persist this restartable chunk independently.
+            cr.commit()
 ```
 
 ### When NOT to Use commit()
@@ -309,8 +323,8 @@ def process_large_dataset(self):
 @api.model
 def create_order(self, values):
     order = self.create(values)
-    self.env.cr.commit()  # DON'T DO THIS!
-    order.action_confirm()  # If this fails, order is already committed!
+    # Odoo commits or rolls back the ambient transaction.
+    order.action_confirm()  # Odoo rolls back both operations if this fails.
 ```
 
 ### rollback() Usage
@@ -328,21 +342,31 @@ def rollback(self):
     return result
 ```
 
-**When to use rollback**:
-- After catching critical errors in cron jobs
-- In test cleanup
-- In multi-phase operations where you want to undo everything
+Manual rollback is also limited to a cursor created by this code. For
+recoverable work in Odoo's ambient transaction, use a savepoint and let Odoo
+control the outer transaction.
 
 ```python
-# GOOD: Rollback on error in batch operation
+# This import deliberately owns an independent transaction boundary.
+from contextlib import closing
+from odoo import api
+
 def batch_import(self, data_list):
-    try:
-        for data in data_list:
-            self.create(data)
-        self.env.cr.commit()
-    except Exception as e:
-        self.env.cr.rollback()
-        _logger.error("Import failed, rolled back: %s", e)
+    with closing(self.env.registry.cursor()) as cr:
+        env = api.Environment(cr, self.env.uid, self.env.context)
+        try:
+            env['my.model'].create(data_list)
+            # Required: this independently owned import must survive later work.
+            cr.commit()
+        except Exception:
+            cr.rollback()
+            _logger.exception("Batch import failed; independent cursor rolled back")
+            raise
+
+# Ordinary request/cron code isolates recoverable operations instead.
+def _create_one(self, values):
+    with self.env.cr.savepoint():
+        return self.create(values)
 ```
 
 ### Cursor as Context Manager
@@ -693,9 +717,8 @@ def update_with_retry(self, records, values, max_retries=3):
         except psycopg2.errors.SerializationError:
             if attempt == max_retries - 1:
                 raise
-            tools.config['test_enable'] = False  # Avoid test mode issues
-            self.env.cr.rollback()
-            self._cr.execute("SELECT 1")  # Reset transaction state
+            # Re-raise: Odoo must retry the complete ambient transaction.
+            raise
 ```
 
 ### Pattern 5: Flush Before SQL Query

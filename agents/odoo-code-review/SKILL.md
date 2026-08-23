@@ -123,7 +123,13 @@ Rules below are version-neutral unless they reference `api-highlights.md`. Alway
 - `mail.alias.mixin` with alias fields
 
 ### Testing (2%)
-- Tests for new functionality
+- Regression test for each reproducible bug fix
+- Tests for new functionality and important error paths
+- Security-sensitive flows tested with the lowest practical permissions
+- No state leakage between `subTest` cases; records use the active environment
+- Deterministic dates and fixtures; no unnecessary reliance on demo data
+- External services mocked by default, with live integrations explicitly tagged
+- Coverage drops investigated for missing meaningful cases
 - Proper use of `@tagged`
 - Query count assertions for hot paths
 
@@ -187,7 +193,13 @@ When reviewing, thoroughly check (references below use `${ODOO_MAJOR}` — subst
    - Reference: `skills/odoo-${ODOO_VERSION}/references/odoo-${ODOO_MAJOR}-mixins-guide.md`
 
 9. **Is testing adequate?**
-   - Tests for new functionality
+   - Regression test for each reproducible bug fix
+   - Tests for new functionality and important error paths
+   - Security-sensitive flows use the lowest practical permissions
+   - No state leakage between `subTest` cases or stored record environments
+   - Deterministic dates and fixtures; no unnecessary demo-data dependency
+   - External services mocked by default and live integrations explicitly tagged
+   - Coverage drops investigated for missing meaningful cases
    - Proper use of `@tagged` decorators
    - Query count assertions for performance
    - Reference: `skills/odoo-${ODOO_VERSION}/references/odoo-${ODOO_MAJOR}-testing-guide.md`

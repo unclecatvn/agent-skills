@@ -19,6 +19,10 @@ when_to_use:
 
 # Odoo 18 Controller Guide
 
+## Coding Conventions
+
+Name controller files after their module or inherited module; `main.py` is legacy.
+
 Complete reference for Odoo 18 HTTP controllers, routing, and request handling.
 
 ## Table of Contents

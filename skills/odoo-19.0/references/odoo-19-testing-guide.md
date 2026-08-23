@@ -11,6 +11,7 @@ Guide for testing Odoo 19: Python unit tests, JS tests, and tours (integration t
 - [JS Tests](#js-tests)
 - [Integration Tests (Tours)](#integration-tests-tours)
 - [Performance Testing](#performance-testing)
+- [Best Practices](#best-practices)
 
 ---
 
@@ -426,6 +427,46 @@ with self.assertQueryCount(11):
 with self.assertQueryCount(__system__=1211):
     do_something()
 ```
+
+---
+
+## Best Practices
+
+### Regression and error-path coverage
+
+Every reproducible bug fix should include a test that fails before the fix and passes afterward. New behavior should cover its success path and important error paths.
+
+### Lowest practical permissions
+
+Use `new_test_user()` and `@users` to exercise access-sensitive flows as the least privileged user that should be allowed to perform them. This avoids false positives from tests that run as an administrator.
+
+### Deterministic, isolated fixtures
+
+Create the data needed by the test instead of relying on demo records. Database changes are not rolled back between `subTest` cases, so use unique fixtures or explicitly reset state for each case.
+
+Records stored on a class or test instance retain their original `.env` (including user, context, cursor, and sudo state). After changing the test environment, use `record.with_env(self.env)` before asserting access behavior.
+
+Use fixed dates instead of `datetime.now()` or `datetime.today()` in assertions. Odoo 19 provides the helper through `odoo.tests.common`:
+
+```python
+from datetime import datetime
+from odoo.tests import TransactionCase
+from odoo.tests.common import freeze_time
+
+class TestSomething(TransactionCase):
+    @freeze_time("2024-01-01 10:10:10")
+    def test_creation_time(self):
+        partner = self.env["res.partner"].create({"name": "Foo"})
+        self.assertEqual(partner.create_date, datetime(2024, 1, 1, 10, 10, 10))
+```
+
+### Mock external services by default
+
+Use `self.patch()`, `self.classPatch()`, or `self.startPatcher()` to isolate network and other external services. If a live integration test is necessary, keep it out of the standard test selection with an explicit test tag such as `external`.
+
+### Treat coverage drops as a test signal
+
+When coverage decreases after a change, inspect the uncovered paths and add tests where the behavior is meaningful rather than lowering the expectation.
 
 ---
 

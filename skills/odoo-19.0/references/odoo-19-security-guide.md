@@ -1,5 +1,12 @@
 # Odoo 19 Security Guide
 
+## Coding Conventions
+
+- Keep groups in `<module>_groups.xml`, model rules in `<model>_security.xml`,
+  and ACLs in `ir.model.access.csv`; load groups and rules before ACLs.
+- Name ACL IDs `access_<model>_<role>` and rule IDs `<model>_<role>_rule`.
+  Keep record-rule domains narrow and never rely on a UI restriction as access control.
+
 Guide for Odoo 19 security: access rights, record rules, field permissions, and security pitfalls.
 
 ## Table of Contents

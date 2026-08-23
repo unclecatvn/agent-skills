@@ -22,6 +22,10 @@ when_to_use:
 
 # Odoo 18 Data Files Guide
 
+## Coding Conventions
+
+Put `id` before `model`, group records by model, and reserve `<data>` for noupdate data.
+
 Complete reference for Odoo 18 data files: XML structure, records, fields, shortcuts, and CSV files.
 
 ## Table of Contents

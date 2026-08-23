@@ -87,13 +87,16 @@ my_module/
 ├── __init__.py
 ├── __manifest__.py
 ├── controllers/
-│   ├── __init__.py       # from . import main, api
-│   ├── main.py
-│   └── api.py
+│   ├── __init__.py       # from . import my_module, portal
+│   ├── my_module.py
+│   └── portal.py          # extends portal controllers
 └── ...
 ```
 
 Remember to `from . import controllers` in the root `__init__.py`.
+For new code, name the main controller file after the module. Name a file
+that extends another module's controller after that module. `main.py` is a
+legacy Odoo convention and may remain in existing addons.
 
 ---
 

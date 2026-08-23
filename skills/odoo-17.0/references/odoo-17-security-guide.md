@@ -749,6 +749,14 @@ Register both in the manifest (order matters - security XML must be loaded befor
 
 ---
 
+## Coding Conventions
+
+- Keep ACLs in `ir.model.access.csv`, groups in `<module>_groups.xml`, and
+  rules in `<model>_security.xml` where separate files improve discovery.
+- Name groups `<module>_group_<role>` and rules
+  `<model>_rule_<concerned_group>`; use the corresponding dotted name.
+- Load groups before ACLs/rules that reference them and before views.
+
 ## Base Code Reference
 
 The guide is based on the Odoo 17 source tree. Reference files:
