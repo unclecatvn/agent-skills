@@ -2,6 +2,34 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.14]
+
+### Release Description
+Aligned the Odoo 16–19 skill packs with the official Odoo coding guidelines, so the agents now recommend upstream-sanctioned module structure, naming, and formatting instead of ad-hoc conventions — while keeping each version's runtime APIs intact (Odoo 17 stays on `<tree>` / `group_operator` / `_sql_constraints`; Odoo 18/19 use `<list>` / `aggregator`; Odoo 19 keeps `models.Constraint`). Also unblocks CI: the security-scan job now pins SkillSpector instead of tracking upstream `HEAD`, which had silently moved to 2.9.6 and broken the accepted-findings baseline.
+
+### Added
+- Coding-convention routing in `skills/odoo-16.0/`, `skills/odoo-17.0/`, `skills/odoo-18.0/`, `skills/odoo-19.0/` (`SKILL.md`, `AGENTS.md`, `CLAUDE.md`) so the agents load guideline coverage alongside the version pack.
+- Guideline sections across the per-version reference guides: module structure and filenames, XML IDs and formatting, reports, security, static-asset layout, Python/ORM patterns, translations, and transactions.
+- `tests/test-skills.js` — validator coverage for the versioned testing guidance.
+
+### Changed
+- `agents/odoo-code-review/SKILL.md` cites the coding guidelines during review.
+- `skills/odoo-*/references/odoo-*-testing-guide.md` — reworked versioned testing guidance.
+- `.github/workflows/ci.yml` — `skill-security-scan` pins `skillspector@v2.9.6`; regenerating the baseline is documented next to the pin.
+- `.skillspector-baseline.yaml` — regenerated in version-2 format for SkillSpector 2.9.6 (101 accepted findings, all static-analysis false positives in reference documentation).
+
+### Removed
+- `docs/superpowers/plans/2026-06-20-odoo-16-review-fixes.md` — obsolete planning file.
+
+### Fixed
+- CI `skill-security-scan` no longer fails on every run. Installing SkillSpector from an unpinned Git `HEAD` picked up 2.9.6, which rejects version-1 baselines (`unsupported baseline version 1; expected 2`) and re-scored the remaining findings above the gate.
+
+### Notes
+- Ships #24.
+- Thank you to **Piruin Panichphol** ([@piruin](https://github.com/piruin)) for the Odoo 16–19 coding-guidelines work in #24 — a second contribution after the Odoo Commit skill in 1.0.13.
+- Source for the guidelines: [Odoo coding guidelines](https://raw.githubusercontent.com/odoo/documentation/17.0/content/contributing/development/coding_guidelines.rst).
+- Bump the SkillSpector pin deliberately from now on; regenerate the baseline in the same commit.
+
 ## [1.0.13]
 
 ### Release Description
