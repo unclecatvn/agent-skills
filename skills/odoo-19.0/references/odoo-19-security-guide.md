@@ -367,17 +367,25 @@ domain = literal_eval(self.filter_domain)
 
 ### Accessing Object Attributes
 
-Use `__getitem__` instead of `getattr()` for dynamic field access.
+Use `__getitem__` instead of `getattr()` for dynamic field access. `record[state_field]`
+blocks arbitrary method access, but it still returns the value of *any* field on the
+model. If `state_field` comes from an untrusted caller, also validate it against a
+fixed allowlist and avoid `sudo()` unless the caller's access to that specific field
+is already established.
 
 ```python
-# BAD: unsafe, can access any attribute
+# BAD: unsafe, can access any attribute (including methods) and any field
 def _get_state_value(self, res_id, state_field):
     record = self.sudo().browse(res_id)
     return getattr(record, state_field, False)
 
-# GOOD: safer
+# GOOD: blocks method access, restricts fields to an allowlist, no unconditional sudo()
+ALLOWED_STATE_FIELDS = {'state', 'stage_id'}
+
 def _get_state_value(self, res_id, state_field):
-    record = self.sudo().browse(res_id)
+    if state_field not in ALLOWED_STATE_FIELDS:
+        raise ValueError(f"Field {state_field!r} is not allowed")
+    record = self.browse(res_id)
     return record[state_field]
 ```
 
