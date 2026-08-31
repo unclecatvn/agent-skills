@@ -118,7 +118,7 @@ def _set_document(self):
     for record in self:
         if not record.document:
             continue
-        with open(record.document_path) as f:
+        with open(record.document_path, "w", encoding="utf-8") as f:
             f.write(record.document)
 ```
 

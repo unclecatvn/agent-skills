@@ -87,7 +87,7 @@ When defining actions from XML data files:
 | Attribute | Description |
 |-----------|-------------|
 | `view_mode` | Comma-separated list of view types (e.g., `list,form`) |
-| `view_ids` | Many2many to view objects |
+| `view_ids` | One2many to view objects (`ir.actions.act_window.view`, via `act_window_id`) |
 | `view_id` | Specific view to add to views list |
 
 ### Using ir.actions.act_window.view

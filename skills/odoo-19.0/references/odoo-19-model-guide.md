@@ -520,21 +520,25 @@ env.lang        # Current language
 
 ### Altering Environment
 
+Each of these returns a **new** recordset bound to the modified environment; the
+original recordset is unchanged. Always use the return value (assign it or chain
+the next call on it).
+
 ```python
 # Change context
-records.with_context(lang='fr_FR')
+records_fr = records.with_context(lang='fr_FR')
 
 # Change user
-records.with_user(user_id)
+records_as_user = records.with_user(user_id)
 
 # Change company
-records.with_company(company_id)
+records_for_company = records.with_company(company_id)
 
 # Change environment completely
-records.with_env(new_env)
+records_new_env = records.with_env(new_env)
 
 # Sudo (superuser mode)
-records.sudo()
+records_sudo = records.sudo()
 ```
 
 ---

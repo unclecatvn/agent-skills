@@ -158,17 +158,7 @@ Guide for creating views in Odoo 19: list, form, search, kanban, calendar, graph
 
 ### Chatter
 
-```xml
-<form string="My Model">
-    <chatter>
-    <sheet>
-        <!-- Form content -->
-    </sheet>
-    </chatter>
-</form>
-```
-
-Or use shortcut:
+`<chatter/>` must be a direct sibling of `<sheet>`, not a wrapper around it:
 
 ```xml
 <form string="My Model">
@@ -184,8 +174,8 @@ Or use shortcut:
 ```xml
 <form string="My Model">
     <header>
-        <button name="action_confirm" string="Confirm" type="object" states="draft"/>
-        <button name="action_done" string="Done" type="object" states="confirmed"/>
+        <button name="action_confirm" string="Confirm" type="object" invisible="state != 'draft'"/>
+        <button name="action_done" string="Done" type="object" invisible="state != 'confirmed'"/>
         <field name="state" widget="statusbar"/>
     </header>
     <sheet>
