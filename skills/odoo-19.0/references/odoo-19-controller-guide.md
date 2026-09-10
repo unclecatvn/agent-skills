@@ -83,12 +83,12 @@ def hello(self):
 | Parameter | Description                                    |
 | --------- | ---------------------------------------------- |
 | `route`   | Route path(s) (string or list)                 |
-| `auth`    | Authentication type (`public`, `user`, `none`) |
-| `methods` | Allowed HTTP methods (`GET`, `POST`, etc.)     |
-| `type`    | Response type (`http`, `json`)                 |
-| `website` | Boolean: bind to current website               |
-| `csrf`    | Boolean: CSRF protection (default: True)       |
-| `sitemap` | Boolean or sitemap config                      |
+| `auth`    | Authentication type (`public`, `user`, `none`, `bearer`) |
+| `methods` | Allowed HTTP methods (`GET`, `POST`, etc.)               |
+| `type`    | Response type (`http`, `jsonrpc`)                        |
+| `website` | Boolean: bind to current website                         |
+| `csrf`    | Boolean: CSRF protection (default: enabled for `http`, disabled for `jsonrpc`) |
+| `sitemap` | Boolean or sitemap config                                |
 
 ### Multiple Routes
 
@@ -101,11 +101,11 @@ def hello_bonjour(self):
 ### HTTP Methods
 
 ```python
-@http.route('/api/data', methods=['GET'], auth='user', type='json')
+@http.route('/api/data', methods=['GET'], auth='user', type='jsonrpc')
 def get_data(self):
     return {'data': 'value'}
 
-@http.route('/api/data', methods=['POST'], auth='user', type='json')
+@http.route('/api/data', methods=['POST'], auth='user', type='jsonrpc')
 def post_data(self, **kwargs):
     return {'result': 'created'}
 ```
@@ -120,8 +120,10 @@ def post_data(self, **kwargs):
 | --------- | ----------------------------- |
 | `public`  | No authentication required    |
 | `user`    | Requires active user session  |
+| `bearer`  | Authenticated via `Authorization: Bearer` API token header; falls back to `user` session if header is absent |
 | `none`    | No authentication, no session |
-| `website` | Public with website support   |
+
+Website routes are not a distinct `auth` value: use `auth='public'` (or `'user'`) together with `website=True`.
 
 ### Examples
 
@@ -137,7 +139,7 @@ def user_page(self):
     return "Only logged users can see this"
 
 # No authentication
-@http.route('/api/status', auth='none', type='json')
+@http.route('/api/status', auth='none', type='jsonrpc')
 def status(self):
     return {'status': 'ok'}
 ```
@@ -211,7 +213,7 @@ def html_response(self):
     return "<h1>Hello</h1>"
 
 # JSON response
-@http.route('/json', auth='public', type='json')
+@http.route('/json', auth='public', type='jsonrpc')
 def json_response(self):
     return {'key': 'value'}
 ```
@@ -236,7 +238,7 @@ def download_file(self):
         ('Content-Type', 'application/pdf'),
         ('Content-Disposition', 'attachment; filename="file.pdf"'),
     ]
-    return request.make_response(
+    return http.request.make_response(
         file_content,
         headers
     )
@@ -249,7 +251,7 @@ def download_file(self):
 ### JSON Controller
 
 ```python
-@http.route('/api/search', auth='user', type='json', methods=['POST'])
+@http.route('/api/search', auth='user', type='jsonrpc', methods=['POST'])
 def json_search(self, model, domain, fields=None):
     Model = http.request.env[model]
     records = Model.search(domain)
@@ -335,7 +337,7 @@ def sensitive(self):
 
 ### CSRF Protection
 
-CSRF is enabled by default for POST. Disable with caution:
+CSRF is enabled by default for `type='http'` routes and disabled by default for `type='jsonrpc'` routes. Disable with caution:
 
 ```python
 @http.route('/webhook', auth='public', methods=['POST'], csrf=False)

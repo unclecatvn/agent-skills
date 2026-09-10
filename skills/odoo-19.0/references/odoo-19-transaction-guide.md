@@ -154,11 +154,22 @@ self.env.cr.execute("SELECT id FROM my_model WHERE id IN %s FOR UPDATE", (tuple(
 
 ### Auto Commit
 
-Odoo auto-commits after successful operations.
+Odoo commits the transaction once at the end of a successful request or job
+(controller call, RPC call, cron job), not immediately after each ORM call. If
+an exception is raised before that boundary, the whole transaction is rolled
+back, undoing every write made since it started.
 
 ```python
-# Transaction is auto-committed
-record.write({'field': 'value'})
+from odoo import http
+from odoo.http import request
+
+class MyController(http.Controller):
+    @http.route('/process', auth='user', type='jsonrpc')
+    def process(self, record_id):
+        record = request.env['my.model'].browse(record_id)
+        record.write({'field': 'value'})
+        # No manual commit here: Odoo commits automatically when this
+        # request completes successfully.
 ```
 
 ### Recoverable Work

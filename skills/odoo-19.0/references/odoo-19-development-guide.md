@@ -507,7 +507,7 @@ def action_open_wizard(self):
 ```python
 state = fields.Selection([
     ('draft', 'Draft'),
-    'confirmed', 'Confirmed'),
+    ('confirmed', 'Confirmed'),
     ('done', 'Done'),
 ], string='State', default='draft', tracking=True)
 ```

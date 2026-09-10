@@ -247,14 +247,11 @@ class MyModel(models.Model):
         required=True,
     )
 
-    def get_alias_model_name(self, vals):
-        return self._name
-
-    def get_alias_values(self):
-        values = super().get_alias_values()
-        values.update({
-            'alias_defaults': 'name',
-        })
+    def _alias_get_creation_values(self):
+        values = super()._alias_get_creation_values()
+        values['alias_model_id'] = self.env['ir.model']._get_id(self._name)
+        if self.id:
+            values['alias_defaults'] = {'name': self.name}
         return values
 ```
 

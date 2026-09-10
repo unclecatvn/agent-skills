@@ -263,7 +263,7 @@ partner_id = fields.Many2one(
     required=True,
     ondelete='cascade',
     domain=[('customer_rank', '>', 0)],
-    default=lambda self: self.env.partner,
+    default=lambda self: self.env.user.partner_id,
 )
 ```
 

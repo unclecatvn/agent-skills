@@ -100,7 +100,11 @@ def _compute_count(self):
 def _compute_count(self):
     domain = [('related_id', 'in', self.ids)]
     counts_data = other_model._read_group(domain, ['related_id'], ['__count'])
-    mapped_data = {r['related_id'][0]: r['__count'] for r in counts_data}
+    mapped_data = {
+        related.id: count
+        for related, count in counts_data
+        if related
+    }
     for record in self:
         record.count = mapped_data.get(record.id, 0)
 ```
