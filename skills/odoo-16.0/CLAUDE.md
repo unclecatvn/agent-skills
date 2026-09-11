@@ -30,6 +30,8 @@ This file is the short operational guide for agents working on Odoo 16.
 - Prefer `attrs` / `states` for client-side dynamic view modifiers; direct `invisible="..."` is valid only for static/context-time visibility.
 - Check the view guide before rewriting inherited XML broadly.
 - Flag 18/19-only constructs such as `<list>`, `aggregator=`, `models.Constraint(...)`, or `<chatter/>`.
+- Before writing code, run the `odoo-workflow` skill if it is installed (trace the real
+  source, Context Brief with `file:line`, definition of done); install it alongside this pack.
 - Apply the Coding Conventions section in the guide you open. Prefer Odoo 16 runtime behavior, then the surrounding stable-addon style, when they conflict with a convention.
 
 ## Common Safe Defaults

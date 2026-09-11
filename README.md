@@ -85,15 +85,28 @@ npx @unclecat/agent-skills-cli init --ai cursor --skill skills --version odoo-18
 
 # Install for all supported assistants
 npx @unclecat/agent-skills-cli init --ai all --skill skills --version odoo-19.0
+
+# Install the Odoo workflow gate next to a pack (Claude Code)
+npx @unclecat/agent-skills-cli init --ai claude --skill skills --version odoo-workflow
 ```
 
 Supported `--ai` targets: `cursor`, `claude`, `antigravity`, `kiro`, `docs`, `all`.
 
-Other installable packs: `code-review`, `dtg-base`, `flow-diagram`, `odoo-commit`, `slide`.
+Other installable packs: `odoo-workflow`, `code-review`, `dtg-base`, `flow-diagram`, `odoo-commit`, `slide`.
 
 ### Option 3 — Claude Code plugin
 
-Install via the Claude plugin marketplace defined in [`.claude-plugin/marketplace.json`](.claude-plugin/marketplace.json). The plugin bundles Odoo skill packs (16–19), code review, DTG Base, Odoo Commit, Flow Diagram, slide decks, and the Odoo review/tracer agents.
+Install via the Claude plugin marketplace defined in [`.claude-plugin/marketplace.json`](.claude-plugin/marketplace.json). The plugin bundles Odoo skill packs (16–19), the `odoo-workflow` pre-code gate, code review, DTG Base, Odoo Commit, Flow Diagram, slide decks, and the Odoo review/tracer agents.
+
+### Odoo project setup (Claude Code)
+
+1. Pin the version so every agent picks the right pack: `echo 18.0 > .odoo-version`.
+2. Copy [`skills/odoo-workflow/templates/CLAUDE.md`](skills/odoo-workflow/templates/CLAUDE.md) into the project's `CLAUDE.md` — it runs `odoo-workflow` before any Odoo code and bans `ponytail:` comments and AI attribution.
+3. Stop the harness from adding `Co-Authored-By` / "Generated with" lines — in `.claude/settings.json` (or `~/.claude/settings.json`):
+
+   ```json
+   { "attribution": { "commit": "", "pr": "" } }
+   ```
 
 ---
 
@@ -163,6 +176,7 @@ In-depth guides written for AI consumption. Each Odoo pack includes 18 topic gui
 | **[Odoo 17.0](skills/odoo-17.0/)** | Odoo 17 development — `<tree>` views, direct-expression modifiers (no `attrs`), `group_operator=`, JSONB translations, OWL 2.8 |
 | **[Odoo 18.0](skills/odoo-18.0/)** | Odoo 18 development — `<list>` views, `aggregator=`, `<chatter/>` shortcut, ORM, security, OWL, reports, migrations, performance |
 | **[Odoo 19.0](skills/odoo-19.0/)** | Odoo 19 development — optional `_name`, `models.Constraint` / `models.Index`, current view and frontend conventions |
+| **[Odoo Workflow](skills/odoo-workflow/)** | Mandatory pre-code gate for any Odoo change (16–19) — resolves the version, traces the real source into a Context Brief (`file:line`), then a definition of done: tests, ACL, i18n `.pot`/`.po`, `_sudo` naming, no AI attribution. Ships a project `CLAUDE.md` template |
 | **[Odoo Commit](skills/odoo-commit/)** | Guides Odoo-style commit creation — message drafting, amend-vs-new-commit decisions, explicit staging, `git commit -F`, and local history cleanup before PRs |
 | **[Flow Diagram](skills/flow-diagram/)** | Interactive self-contained HTML+SVG flow/architecture diagrams — zoom/pan, click-to-highlight flows, traveling dots, collision checkers |
 | **[DTG Base](skills/dtg-base/)** | DTGBase utilities — date/period, timezone, batch processing, barcode, Vietnamese text, file helpers |
@@ -227,6 +241,7 @@ agent-skills/
 │   ├── odoo-17.0/             # Odoo 17 guides + api-highlights
 │   ├── odoo-18.0/             # Odoo 18 guides + api-highlights
 │   ├── odoo-19.0/             # Odoo 19 guides + api-highlights
+│   ├── odoo-workflow/         # Pre-code gate: trace → Context Brief → definition of done
 │   ├── odoo-commit/           # Odoo-style commit workflow and message guidance
 │   ├── flow-diagram/          # Interactive HTML+SVG flow/architecture diagrams
 │   ├── dtg-base/              # DTGBase utilities

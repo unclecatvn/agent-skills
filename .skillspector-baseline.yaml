@@ -4,407 +4,411 @@ version: 2
 scanner_version: 2.9.6
 rules: []
 fingerprints:
-- hash: sha256:1dffba0cdbe7c51dc346171d2b84ffc8b18ae2c24b1bb4ab05b8b99a4e42ce0b
+- hash: sha256:2eab6b908b06a9cd8532cd3f4b4054d70cf01643ec8957e23a673485b5893fbc
   rule_id: RP1
   file: odoo-16.0/AGENTS.md
-  reason: 'Accepted: static-analysis false positives in reference documentation'
-- hash: sha256:0ad4e8f8610d0d4ad572cf12eccf5290c4f51456d3ca05380757c32411b26b9a
+  reason: Accepted finding (auto-generated baseline)
+- hash: sha256:5a0b935d9ff7941a127cb66374c088cf9f6d66975f1f94afafe74768d7962856
   rule_id: RP1
   file: odoo-17.0/AGENTS.md
-  reason: 'Accepted: static-analysis false positives in reference documentation'
-- hash: sha256:c3db8e324bb217bd6f6d57f87f4f96fa16e0d940c0782c151c55d9cde9a49471
+  reason: Accepted finding (auto-generated baseline)
+- hash: sha256:ec0e3c1aab8d6161f8c43bc86470378ec289176e795404a208f10335c7cd774e
   rule_id: RP1
   file: odoo-17.0/AGENTS.md
-  reason: 'Accepted: static-analysis false positives in reference documentation'
-- hash: sha256:4cd5c34a9bf384664800138e7950a996343bbd9d1d510b7ea80ad3cb5a64de5a
+  reason: Accepted finding (auto-generated baseline)
+- hash: sha256:9d2044786efee335dc062ebff495d49bde511e2139b3dc6ce756d22385a62bfd
   rule_id: RP1
   file: odoo-17.0/AGENTS.md
-  reason: 'Accepted: static-analysis false positives in reference documentation'
-- hash: sha256:eba354af99a745194c126874f7e878243ce65bbed85391643d0e95e036757dae
+  reason: Accepted finding (auto-generated baseline)
+- hash: sha256:d0942ae3bec175a73bbb134c1b7bca740eb09e5635d66815f454dee5e684388b
   rule_id: RP1
   file: odoo-18.0/AGENTS.md
-  reason: 'Accepted: static-analysis false positives in reference documentation'
-- hash: sha256:785c1f72729751d8b653fee2d10288f543b00bffe368cc8f6f2ae2a6dd2f5409
+  reason: Accepted finding (auto-generated baseline)
+- hash: sha256:b39b1f1be84ef2dd72e7eeb9409dfc1bc6d3d0f6c45b07e81d3de4eb9b75b9f2
   rule_id: RP1
   file: odoo-18.0/AGENTS.md
-  reason: 'Accepted: static-analysis false positives in reference documentation'
-- hash: sha256:60fb1a35a72b9f24d2424c5ae71b93b022d5d139ecb910a3ac72fdd8cb372b79
+  reason: Accepted finding (auto-generated baseline)
+- hash: sha256:183bdcd5cfdf87cca884bbff385d868dab7838b1c8b32e56984fb883c784980d
   rule_id: RP1
   file: odoo-18.0/AGENTS.md
-  reason: 'Accepted: static-analysis false positives in reference documentation'
-- hash: sha256:ec586e9ac5a9ece3638be2211f396fe6b810e86eaa518d636d1c944e322d3ee8
+  reason: Accepted finding (auto-generated baseline)
+- hash: sha256:28d3695f136bbc61805075575f97e23f1e348d7c5b756e9aa4e3f594f0bd3757
   rule_id: RP1
   file: odoo-19.0/AGENTS.md
-  reason: 'Accepted: static-analysis false positives in reference documentation'
-- hash: sha256:8a7f77157b3bc062c618af2f31e04a6f6c7f3a0cbf4df2993b2beefd9ce99092
+  reason: Accepted finding (auto-generated baseline)
+- hash: sha256:09c7c5f125dcb1f2ebe3a92b613fc6a70cf5bdbf743bc4b153cec1a7b90a30a0
   rule_id: RP1
   file: odoo-19.0/AGENTS.md
-  reason: 'Accepted: static-analysis false positives in reference documentation'
-- hash: sha256:386cf38abffdd882601f4cc723025a4ee36085a7ccaacfac8aadef62f1eee3ca
+  reason: Accepted finding (auto-generated baseline)
+- hash: sha256:7fad904e6affb21e49284e4e937c477cec951cc49042203c8a9f7a428af38323
   rule_id: RP1
   file: odoo-19.0/AGENTS.md
-  reason: 'Accepted: static-analysis false positives in reference documentation'
+  reason: Accepted finding (auto-generated baseline)
 - hash: sha256:a0790fab0164c39f9c35494df26ec7aae6d3c3d7d577abe2376071c2a057b93c
   rule_id: E1
   file: dtg-base/odoo-18-dtg-base-guide.md
-  reason: 'Accepted: static-analysis false positives in reference documentation'
+  reason: Accepted finding (auto-generated baseline)
 - hash: sha256:6a8942a19ab439b7cd1a64398375996fe1706248f5d13eedc1a3305e83c69ec0
   rule_id: E1
   file: dtg-base/odoo-18-dtg-base-guide.md
-  reason: 'Accepted: static-analysis false positives in reference documentation'
+  reason: Accepted finding (auto-generated baseline)
 - hash: sha256:abe66de40745520b30871bf4d7b962b8d649504ff56739ac89c424121ea3bbf4
   rule_id: E1
   file: dtg-base/odoo-18-dtg-base-guide.md
-  reason: 'Accepted: static-analysis false positives in reference documentation'
+  reason: Accepted finding (auto-generated baseline)
 - hash: sha256:2310224f426f2ecffa1e2efc1e1091a5be1b7a7568a6ddae88eeae1c61938247
   rule_id: EA2
   file: code-review/SKILL.md
-  reason: 'Accepted: static-analysis false positives in reference documentation'
-- hash: sha256:54012d1f266b97a2cb0c96a580ef0925b3cbd0c63285c828b7a40ef603a1ca7b
+  reason: Accepted finding (auto-generated baseline)
+- hash: sha256:8bc44fafcd9831082e90c291399173d41727f7c0c2776d0113a1eaac4c6f4339
   rule_id: EA2
   file: flow-diagram/SKILL.md
-  reason: 'Accepted: static-analysis false positives in reference documentation'
+  reason: Accepted finding (auto-generated baseline)
 - hash: sha256:371247c930b5aeee0b0ac67ce4450255fc0c4e1c4c3fbec1823f59fd738935e3
   rule_id: MP3
   file: odoo-18.0/references/odoo-18-data-guide.md
-  reason: 'Accepted: static-analysis false positives in reference documentation'
-- hash: sha256:816d3686e8bc8bc30433515fc214e4e0636cd99e5e0acac4cd22891722ad52c3
+  reason: Accepted finding (auto-generated baseline)
+- hash: sha256:94352abf4eee5c5a1c1c73a48cb5ca2138b5f68863f4d06dd8e8740742a99eb4
   rule_id: MP3
   file: odoo-19.0/references/odoo-19-testing-guide.md
-  reason: 'Accepted: static-analysis false positives in reference documentation'
+  reason: Accepted finding (auto-generated baseline)
 - hash: sha256:5e1d5f17f4fcee87b63623739bd437f88bc92d37a2654dc82f602910083e9730
   rule_id: PE3
   file: odoo-16.0/references/odoo-16-controller-guide.md
-  reason: 'Accepted: static-analysis false positives in reference documentation'
+  reason: Accepted finding (auto-generated baseline)
 - hash: sha256:464b89d3031150d52eea053c357e4fd093c29fe0cd2b0c337562b0a41d66849d
   rule_id: PE3
   file: odoo-16.0/references/odoo-16-mixins-guide.md
-  reason: 'Accepted: static-analysis false positives in reference documentation'
+  reason: Accepted finding (auto-generated baseline)
 - hash: sha256:3023e81ab8b011c2610cc84e2841c7443c8da1223fc29bf6cf05450a2175cf61
   rule_id: PE3
   file: odoo-17.0/references/odoo-17-controller-guide.md
-  reason: 'Accepted: static-analysis false positives in reference documentation'
+  reason: Accepted finding (auto-generated baseline)
 - hash: sha256:b7e86743ea3d313be8ad79353e53cda9b4c2e990fddcc596b5fc860c57096742
   rule_id: PE3
   file: odoo-17.0/references/odoo-17-mixins-guide.md
-  reason: 'Accepted: static-analysis false positives in reference documentation'
+  reason: Accepted finding (auto-generated baseline)
 - hash: sha256:ca1111ae1b67d6f45fc6a1f6b849cf25075fb8f02c17337e5919c8cb5ce33f11
   rule_id: PE3
   file: odoo-18.0/references/odoo-18-controller-guide.md
-  reason: 'Accepted: static-analysis false positives in reference documentation'
+  reason: Accepted finding (auto-generated baseline)
 - hash: sha256:b811b6a8926d7d4a4c8c6b67bed9b2aa1575809cac2bc5b3ac30c8958db96852
   rule_id: PE3
   file: odoo-18.0/references/odoo-18-controller-guide.md
-  reason: 'Accepted: static-analysis false positives in reference documentation'
-- hash: sha256:b4725c9ee4dd51949fb8f85dac4ce3d13a76fbf2ad846a6f723ccae05a69629a
+  reason: Accepted finding (auto-generated baseline)
+- hash: sha256:05bfa8fc66a8fe70af8a5e3032f489b99ad1fe09e69d8e65882c8cd91d6ff98c
   rule_id: PE3
   file: odoo-19.0/references/odoo-19-model-guide.md
-  reason: 'Accepted: static-analysis false positives in reference documentation'
+  reason: Accepted finding (auto-generated baseline)
+- hash: sha256:1af431c63584df91bdf6de1332b6b5afc6a9c1c7c3c7c405020bfcee6c603623
+  rule_id: PE2
+  file: odoo-workflow/SKILL.md
+  reason: Accepted finding (auto-generated baseline)
+- hash: sha256:fe7f7103b2f30a58c7852cd9f2eaafb4e55fb03e50ef494b612bcb8ef22ed59a
+  rule_id: PE2
+  file: odoo-workflow/SKILL.md
+  reason: Accepted finding (auto-generated baseline)
 - hash: sha256:4d91ed09e57090f976bc768ddb587fe41f69a37f4def338f132db33c8f3ee75a
   rule_id: P2
   file: flow-diagram/assets/template.html
-  reason: 'Accepted: static-analysis false positives in reference documentation'
+  reason: Accepted finding (auto-generated baseline)
 - hash: sha256:c1997a48eee3e8394f1a1f40b55bc83ed295d25a68462043f4c1a8aec2206797
   rule_id: P2
   file: flow-diagram/assets/template.html
-  reason: 'Accepted: static-analysis false positives in reference documentation'
+  reason: Accepted finding (auto-generated baseline)
 - hash: sha256:6bdf30f076f852def2372d2de6ce6104380ae555c4dde88c16b2ce3fd641ea34
   rule_id: P2
   file: flow-diagram/assets/template.html
-  reason: 'Accepted: static-analysis false positives in reference documentation'
+  reason: Accepted finding (auto-generated baseline)
 - hash: sha256:41ed9bbd147f8f8ead1d9a01a7bdbcbc288f40f1c7e0aba1490718e715d69628
   rule_id: P2
   file: flow-diagram/references/flow-diagram-example.html
-  reason: 'Accepted: static-analysis false positives in reference documentation'
+  reason: Accepted finding (auto-generated baseline)
 - hash: sha256:f4c12caedb6c75660d2fb3135078ae0fa3d181826cff0e301246c03d6ca44c6e
   rule_id: P2
   file: flow-diagram/references/flow-diagram-example.html
-  reason: 'Accepted: static-analysis false positives in reference documentation'
+  reason: Accepted finding (auto-generated baseline)
 - hash: sha256:985006ff808856978a87253e4c40c53404cc028e701534ba3b41204b7a3442f8
   rule_id: P2
   file: flow-diagram/references/layout-patterns-guide.html
-  reason: 'Accepted: static-analysis false positives in reference documentation'
+  reason: Accepted finding (auto-generated baseline)
 - hash: sha256:c4a3ecaae54e161c64baa54305ad18d5ed536427210d1e2324905b73b7d77cb6
   rule_id: P2
   file: flow-diagram/references/layout-patterns-guide.html
-  reason: 'Accepted: static-analysis false positives in reference documentation'
+  reason: Accepted finding (auto-generated baseline)
 - hash: sha256:b9ebb39a2ff35a47003fa8f914766b0c9f7c9bcde088dfabc8a008ac06291877
   rule_id: P2
   file: flow-diagram/references/layout-patterns-guide.html
-  reason: 'Accepted: static-analysis false positives in reference documentation'
+  reason: Accepted finding (auto-generated baseline)
 - hash: sha256:2aebad9c693e1a8163f73bb29cbf12cfa546da9c5a8697130e131841cd211936
   rule_id: P2
   file: flow-diagram/references/layout-patterns-guide.html
-  reason: 'Accepted: static-analysis false positives in reference documentation'
+  reason: Accepted finding (auto-generated baseline)
 - hash: sha256:b30511bbdec6023a619a85fd52350224308edbaf513e7c19d69b0301432dba60
   rule_id: P2
   file: odoo-16.0/references/odoo-16-data-guide.md
-  reason: 'Accepted: static-analysis false positives in reference documentation'
+  reason: Accepted finding (auto-generated baseline)
 - hash: sha256:93ef7eca5b1c77404ebdc022935c1a375f5f75890521ed0f30e514a2e04c5abe
   rule_id: P2
   file: odoo-16.0/references/odoo-16-data-guide.md
-  reason: 'Accepted: static-analysis false positives in reference documentation'
+  reason: Accepted finding (auto-generated baseline)
 - hash: sha256:ac18dc2ffa6070f518315995fa9ba6b707c9cb95ca9b58b8380e5feeaa26e59e
   rule_id: P2
   file: odoo-16.0/references/odoo-16-reports-guide.md
-  reason: 'Accepted: static-analysis false positives in reference documentation'
+  reason: Accepted finding (auto-generated baseline)
 - hash: sha256:32f039e63fc3d6467f134c2b0013a0118eef42f98a1f9b895e4824b657f12c34
   rule_id: P2
   file: odoo-16.0/references/odoo-16-reports-guide.md
-  reason: 'Accepted: static-analysis false positives in reference documentation'
+  reason: Accepted finding (auto-generated baseline)
 - hash: sha256:a0e25f326a32301f2e74664ecd000611e1fe1e189cb1233489571bfc70cfd288
   rule_id: P2
   file: odoo-16.0/references/odoo-16-reports-guide.md
-  reason: 'Accepted: static-analysis false positives in reference documentation'
+  reason: Accepted finding (auto-generated baseline)
 - hash: sha256:8c647aca56c823fbf69605d4e6820a458785e206e48f6ea6298961b23d8b1818
   rule_id: P2
   file: odoo-16.0/references/odoo-16-reports-guide.md
-  reason: 'Accepted: static-analysis false positives in reference documentation'
+  reason: Accepted finding (auto-generated baseline)
 - hash: sha256:95520335f9859a630fb076df513589f55d68bb1af1cf8630168fbb458dd510c6
   rule_id: P2
   file: odoo-16.0/references/odoo-16-view-guide.md
-  reason: 'Accepted: static-analysis false positives in reference documentation'
+  reason: Accepted finding (auto-generated baseline)
 - hash: sha256:9b77ac1a216a7ab333cf48b86191d21e5be201be6e67a77f80d82e06c9977979
   rule_id: P2
   file: odoo-16.0/references/odoo-16-view-guide.md
-  reason: 'Accepted: static-analysis false positives in reference documentation'
+  reason: Accepted finding (auto-generated baseline)
 - hash: sha256:e0f9462f55547ed9d632df8705a93ca23329317d50a1cc7e67bd77b4763f2eb9
   rule_id: P2
   file: odoo-16.0/references/odoo-16-view-guide.md
-  reason: 'Accepted: static-analysis false positives in reference documentation'
+  reason: Accepted finding (auto-generated baseline)
 - hash: sha256:5d28710dd3a231f3e345cefa70408b6a4687b8e08914250b173f262129916693
   rule_id: P2
   file: odoo-16.0/references/odoo-16-view-guide.md
-  reason: 'Accepted: static-analysis false positives in reference documentation'
+  reason: Accepted finding (auto-generated baseline)
 - hash: sha256:a3601382ffa3064eb83e58f16ac9424073b2c7030c10090a120e2978ba05ae78
   rule_id: P2
   file: odoo-16.0/references/odoo-16-view-guide.md
-  reason: 'Accepted: static-analysis false positives in reference documentation'
+  reason: Accepted finding (auto-generated baseline)
 - hash: sha256:6119c00678c91706166d059701471f00637764600db7abbdd1d132f5d3644800
   rule_id: P2
   file: odoo-16.0/references/odoo-16-view-guide.md
-  reason: 'Accepted: static-analysis false positives in reference documentation'
+  reason: Accepted finding (auto-generated baseline)
 - hash: sha256:38d76325d1057ee78069aeece93facb86b60d3a1008da9358d70274f614f1e39
   rule_id: P2
   file: odoo-16.0/references/odoo-16-view-guide.md
-  reason: 'Accepted: static-analysis false positives in reference documentation'
+  reason: Accepted finding (auto-generated baseline)
 - hash: sha256:ee5a74e8269130f909e3de3e48be960addabab00dad783736e35a6cd92b70f85
   rule_id: P2
   file: odoo-16.0/references/odoo-16-view-guide.md
-  reason: 'Accepted: static-analysis false positives in reference documentation'
+  reason: Accepted finding (auto-generated baseline)
 - hash: sha256:76e68b7b5b13b8daf3a42177f7d9a9e6a4134e1e30d40ec4a28a6a214236e5a0
   rule_id: P2
   file: odoo-16.0/references/odoo-16-view-guide.md
-  reason: 'Accepted: static-analysis false positives in reference documentation'
+  reason: Accepted finding (auto-generated baseline)
 - hash: sha256:cdc4e570909c9b797da9ce27625ddc380e6364408ac18b990392fbb365c0df88
   rule_id: P2
   file: odoo-16.0/references/odoo-16-view-guide.md
-  reason: 'Accepted: static-analysis false positives in reference documentation'
+  reason: Accepted finding (auto-generated baseline)
 - hash: sha256:6e08ff17a7563f82c05419ed7705e3d283cdbc4502f38d5e1ed28faeded54a43
   rule_id: P2
   file: odoo-16.0/references/odoo-16-view-guide.md
-  reason: 'Accepted: static-analysis false positives in reference documentation'
+  reason: Accepted finding (auto-generated baseline)
 - hash: sha256:12118c49245f60d37176752133ba7746443dea2e0d47d99419cc918105342a31
   rule_id: P2
   file: odoo-16.0/references/odoo-16-view-guide.md
-  reason: 'Accepted: static-analysis false positives in reference documentation'
+  reason: Accepted finding (auto-generated baseline)
 - hash: sha256:3146da13ad47029ab6b5f311709cf7a33609923538eb3208871c3b847e97af09
   rule_id: P2
   file: odoo-16.0/references/odoo-16-view-guide.md
-  reason: 'Accepted: static-analysis false positives in reference documentation'
+  reason: Accepted finding (auto-generated baseline)
 - hash: sha256:27d2a91cedc2b4a5c1024644e380ad8c8c2cd8545bb6aa02a10808b5442c9789
   rule_id: P2
   file: odoo-16.0/references/odoo-16-view-guide.md
-  reason: 'Accepted: static-analysis false positives in reference documentation'
+  reason: Accepted finding (auto-generated baseline)
 - hash: sha256:f5ca25f95f721033110065b8ca1b6c3ddb32bfddd07087ecb638425d157772fc
   rule_id: P2
   file: odoo-16.0/references/odoo-16-view-guide.md
-  reason: 'Accepted: static-analysis false positives in reference documentation'
+  reason: Accepted finding (auto-generated baseline)
 - hash: sha256:9da103bd30527457cc1acabd8770371105a072444c604a03c426baf6c657bdd5
   rule_id: P2
   file: odoo-17.0/references/odoo-17-data-guide.md
-  reason: 'Accepted: static-analysis false positives in reference documentation'
+  reason: Accepted finding (auto-generated baseline)
 - hash: sha256:198b54f239b27ec8c826ff701750208259248c078cacff066e55f6d03a168468
   rule_id: P2
   file: odoo-17.0/references/odoo-17-data-guide.md
-  reason: 'Accepted: static-analysis false positives in reference documentation'
+  reason: Accepted finding (auto-generated baseline)
 - hash: sha256:90a002ea8b8b33e308c0bd2f9e64d6badc55f682348f9151742e96e2d35b5c81
   rule_id: P2
   file: odoo-17.0/references/odoo-17-reports-guide.md
-  reason: 'Accepted: static-analysis false positives in reference documentation'
+  reason: Accepted finding (auto-generated baseline)
 - hash: sha256:7f77bc92d69c4fe830ba304ce9592ae3bf30dfcaa1f366f35ec5c991b7d56858
   rule_id: P2
   file: odoo-17.0/references/odoo-17-reports-guide.md
-  reason: 'Accepted: static-analysis false positives in reference documentation'
+  reason: Accepted finding (auto-generated baseline)
 - hash: sha256:0e142f44b567797d0e1cbe227e7b68a5602f50f8d30d9e1bd144959e331eb9a0
   rule_id: P2
   file: odoo-17.0/references/odoo-17-reports-guide.md
-  reason: 'Accepted: static-analysis false positives in reference documentation'
+  reason: Accepted finding (auto-generated baseline)
 - hash: sha256:5413bb3be82f649e2ab46d3e321b3519e85c34c3d64c6264b32e240809f065b5
   rule_id: P2
   file: odoo-17.0/references/odoo-17-reports-guide.md
-  reason: 'Accepted: static-analysis false positives in reference documentation'
+  reason: Accepted finding (auto-generated baseline)
 - hash: sha256:9f9e9ea798e9f519254675aff488bc9cc5fe54a0e5c255ab7d928480dfcd01e8
   rule_id: P2
   file: odoo-17.0/references/odoo-17-view-guide.md
-  reason: 'Accepted: static-analysis false positives in reference documentation'
+  reason: Accepted finding (auto-generated baseline)
 - hash: sha256:be709b7453c39867ff3bb68c5eca94b73fee415313ab4e65d08e743ddfa015eb
   rule_id: P2
   file: odoo-17.0/references/odoo-17-view-guide.md
-  reason: 'Accepted: static-analysis false positives in reference documentation'
+  reason: Accepted finding (auto-generated baseline)
 - hash: sha256:7eaac81b896d10da086291520d64aa158a1cc7e9225f30571ec7423c421c0651
   rule_id: P2
   file: odoo-17.0/references/odoo-17-view-guide.md
-  reason: 'Accepted: static-analysis false positives in reference documentation'
+  reason: Accepted finding (auto-generated baseline)
 - hash: sha256:d1d46bf45949f43851672d6e13fcff7322494ec1927a0cc77471620a146b90c7
   rule_id: P2
   file: odoo-17.0/references/odoo-17-view-guide.md
-  reason: 'Accepted: static-analysis false positives in reference documentation'
+  reason: Accepted finding (auto-generated baseline)
 - hash: sha256:2ee3cfa74f120140f48f14a8d85e669fc7b64a1336eaa98e90795d1fdacec52b
   rule_id: P2
   file: odoo-17.0/references/odoo-17-view-guide.md
-  reason: 'Accepted: static-analysis false positives in reference documentation'
+  reason: Accepted finding (auto-generated baseline)
 - hash: sha256:b941eb5c68091fda638d7cb29fa0572b9e1a936239b9bd65a3612d6200f5e6c7
   rule_id: P2
   file: odoo-17.0/references/odoo-17-view-guide.md
-  reason: 'Accepted: static-analysis false positives in reference documentation'
+  reason: Accepted finding (auto-generated baseline)
 - hash: sha256:7fd2e6fa6b9bf804dd8029deb9ab5e1357170c7cc5088dd2d670107a3ed24581
   rule_id: P2
   file: odoo-17.0/references/odoo-17-view-guide.md
-  reason: 'Accepted: static-analysis false positives in reference documentation'
+  reason: Accepted finding (auto-generated baseline)
 - hash: sha256:94e24bf9eb8f9914bdd64b64a845a068c3b89a8e39f97c4929566933b18c93ad
   rule_id: P2
   file: odoo-17.0/references/odoo-17-view-guide.md
-  reason: 'Accepted: static-analysis false positives in reference documentation'
+  reason: Accepted finding (auto-generated baseline)
 - hash: sha256:a2cff5319fed571f4a5b2267dc88345c49460d581a19e7cab813923b48b23b4f
   rule_id: P2
   file: odoo-17.0/references/odoo-17-view-guide.md
-  reason: 'Accepted: static-analysis false positives in reference documentation'
+  reason: Accepted finding (auto-generated baseline)
 - hash: sha256:30b72265f5a056be6595cb73a4b7963e5c8ea7dec5305f20e0cc000d17178df5
   rule_id: P2
   file: odoo-17.0/references/odoo-17-view-guide.md
-  reason: 'Accepted: static-analysis false positives in reference documentation'
+  reason: Accepted finding (auto-generated baseline)
 - hash: sha256:a33f69f00e09e1fa3213a37830971a8d76b4fbb7bc92296a1f14de6143332164
   rule_id: P2
   file: odoo-17.0/references/odoo-17-view-guide.md
-  reason: 'Accepted: static-analysis false positives in reference documentation'
+  reason: Accepted finding (auto-generated baseline)
 - hash: sha256:a3ba7bc024130473facd74a08f78487e6f50d1ab0b51fec465e6216b89f62ebe
   rule_id: P2
   file: odoo-17.0/references/odoo-17-view-guide.md
-  reason: 'Accepted: static-analysis false positives in reference documentation'
+  reason: Accepted finding (auto-generated baseline)
 - hash: sha256:1d2cf44cf707670b0569dac22e5bd557e8f849a877e445ecf57102020414d7d0
   rule_id: P2
   file: odoo-17.0/references/odoo-17-view-guide.md
-  reason: 'Accepted: static-analysis false positives in reference documentation'
+  reason: Accepted finding (auto-generated baseline)
 - hash: sha256:e6c8cc62d4f799a3dc50a3347411640003ace66a48a422fd7b521fc071a03879
   rule_id: P2
   file: odoo-17.0/references/odoo-17-view-guide.md
-  reason: 'Accepted: static-analysis false positives in reference documentation'
+  reason: Accepted finding (auto-generated baseline)
 - hash: sha256:95d4b6cb337d7ecab1613ae2089c25d8403bc8245076d1335b1f74e0c149fc13
   rule_id: P2
   file: odoo-17.0/references/odoo-17-view-guide.md
-  reason: 'Accepted: static-analysis false positives in reference documentation'
+  reason: Accepted finding (auto-generated baseline)
 - hash: sha256:d0d83f3fce1a9eeb8553fa26eef76829d585fb429ffeba82591164bed4c1512e
   rule_id: P2
   file: odoo-18.0/references/odoo-18-data-guide.md
-  reason: 'Accepted: static-analysis false positives in reference documentation'
+  reason: Accepted finding (auto-generated baseline)
 - hash: sha256:0f596f0f0cd61b881eb83d610a88015c1d194d94c04a5f118032c041b418c8e0
   rule_id: P2
   file: odoo-18.0/references/odoo-18-data-guide.md
-  reason: 'Accepted: static-analysis false positives in reference documentation'
+  reason: Accepted finding (auto-generated baseline)
 - hash: sha256:0c481a847203bfabd8aaa7e1cbdcf21c9573d61b3e2f11c2eba962d92758f632
   rule_id: P2
   file: odoo-18.0/references/odoo-18-data-guide.md
-  reason: 'Accepted: static-analysis false positives in reference documentation'
+  reason: Accepted finding (auto-generated baseline)
 - hash: sha256:7e60e67ed3ad5607f5b52caf38c19c0bfe241a63bfaadb097ff5fc686d005f6f
   rule_id: P2
   file: odoo-18.0/references/odoo-18-data-guide.md
-  reason: 'Accepted: static-analysis false positives in reference documentation'
+  reason: Accepted finding (auto-generated baseline)
 - hash: sha256:3d1bdfe923bbd6087ee64c16cea42a49177a94e858aba089b83e289de8617169
   rule_id: P2
   file: odoo-18.0/references/odoo-18-development-guide.md
-  reason: 'Accepted: static-analysis false positives in reference documentation'
+  reason: Accepted finding (auto-generated baseline)
 - hash: sha256:91dbdd7fd87ab6374776b3e71077323c88ca270ff0451025f8ba6b72fa7023fc
   rule_id: P2
   file: odoo-18.0/references/odoo-18-development-guide.md
-  reason: 'Accepted: static-analysis false positives in reference documentation'
+  reason: Accepted finding (auto-generated baseline)
 - hash: sha256:601e008072c09d32a53ef585d33631dbf2a028ed74068125f5df3d09a11ebc36
   rule_id: P2
   file: odoo-18.0/references/odoo-18-development-guide.md
-  reason: 'Accepted: static-analysis false positives in reference documentation'
+  reason: Accepted finding (auto-generated baseline)
 - hash: sha256:a57d99289d89a235986f5a8369e777bd5524325ed3ae2c3b15ee13fccf02bceb
   rule_id: P2
   file: odoo-18.0/references/odoo-18-development-guide.md
-  reason: 'Accepted: static-analysis false positives in reference documentation'
+  reason: Accepted finding (auto-generated baseline)
 - hash: sha256:a74eccd83679fd4837305fee30b4e27fc7e12e7219d7c03affd0714ae206dacc
   rule_id: P2
   file: odoo-18.0/references/odoo-18-mixins-guide.md
-  reason: 'Accepted: static-analysis false positives in reference documentation'
+  reason: Accepted finding (auto-generated baseline)
 - hash: sha256:1feafb3c0338faa344dee2573b7d955cfd0dc094c07180a8e5cb134eaeab9b29
   rule_id: P2
   file: odoo-18.0/references/odoo-18-owl-guide.md
-  reason: 'Accepted: static-analysis false positives in reference documentation'
+  reason: Accepted finding (auto-generated baseline)
 - hash: sha256:8dcdc235c4bab8b7430bac07e8a339af3b5dc492c0e05afb09606f1db3a03076
   rule_id: P2
   file: odoo-18.0/references/odoo-18-reports-guide.md
-  reason: 'Accepted: static-analysis false positives in reference documentation'
-- hash: sha256:2ed5c1202dfbbed93f4e8c02c3d86d21892838c6754738dd43e971e9ec5174c5
+  reason: Accepted finding (auto-generated baseline)
+- hash: sha256:30df5fe395bb9bf8f7e416f7e02c7f4c69aaaaf2e12de23399ba5b00f331248a
   rule_id: P2
   file: odoo-18.0/references/odoo-18-security-guide.md
-  reason: 'Accepted: static-analysis false positives in reference documentation'
+  reason: Accepted finding (auto-generated baseline)
 - hash: sha256:71502e6727b6444b369a86c2505fe32c9afd12ac8c7c9f9f7737251c97626b04
   rule_id: P2
   file: odoo-18.0/references/odoo-18-view-guide.md
-  reason: 'Accepted: static-analysis false positives in reference documentation'
+  reason: Accepted finding (auto-generated baseline)
 - hash: sha256:7f699728a54d9e2d4b9913ddabf04a78df1e7f48ec2cf746bac39885bd8fce73
   rule_id: P2
   file: odoo-18.0/references/odoo-18-view-guide.md
-  reason: 'Accepted: static-analysis false positives in reference documentation'
+  reason: Accepted finding (auto-generated baseline)
 - hash: sha256:afa63bbf2075e12bc55ce90da8a72e7ecc6cffa15b9a207aa5ba4474f6dace5f
   rule_id: P2
   file: odoo-18.0/references/odoo-18-view-guide.md
-  reason: 'Accepted: static-analysis false positives in reference documentation'
+  reason: Accepted finding (auto-generated baseline)
 - hash: sha256:fabf60ccbdbe75379a12833186ecdec251064808515070423ec957828c0caf56
   rule_id: P2
   file: odoo-18.0/references/odoo-18-view-guide.md
-  reason: 'Accepted: static-analysis false positives in reference documentation'
+  reason: Accepted finding (auto-generated baseline)
 - hash: sha256:6d877fcf57bdfb4aa2f82f2a0485b9adc39e63d3de156c3f80a612114078db76
   rule_id: P2
   file: odoo-18.0/references/odoo-18-view-guide.md
-  reason: 'Accepted: static-analysis false positives in reference documentation'
+  reason: Accepted finding (auto-generated baseline)
 - hash: sha256:901f5e477a7e5c85ceca34c9f8e771642925ba79bcc4d72d171b4507e69d84f1
   rule_id: P2
   file: odoo-18.0/references/odoo-18-view-guide.md
-  reason: 'Accepted: static-analysis false positives in reference documentation'
+  reason: Accepted finding (auto-generated baseline)
 - hash: sha256:3a5dbddb13c71b73911e51a2f367b31bfa7b7cb8b135df9d369b65135f84052e
   rule_id: P2
   file: odoo-18.0/references/odoo-18-view-guide.md
-  reason: 'Accepted: static-analysis false positives in reference documentation'
+  reason: Accepted finding (auto-generated baseline)
 - hash: sha256:337dbc4e34d533bc547397039bc9daf60fe5a14b7ff56a39b08ad9e04e98abfb
   rule_id: P2
   file: odoo-18.0/references/odoo-18-view-guide.md
-  reason: 'Accepted: static-analysis false positives in reference documentation'
+  reason: Accepted finding (auto-generated baseline)
 - hash: sha256:2df02b803a350e5eb788e792a928134db00236d1ab7b7c33f4e6a1a701f4d81b
   rule_id: P2
   file: odoo-18.0/references/odoo-18-view-guide.md
-  reason: 'Accepted: static-analysis false positives in reference documentation'
+  reason: Accepted finding (auto-generated baseline)
 - hash: sha256:73516f622fd272ee7516a3248920d89fedac3c4c89e60bfab2abe177692914ee
   rule_id: P2
   file: odoo-18.0/references/odoo-18-view-guide.md
-  reason: 'Accepted: static-analysis false positives in reference documentation'
-- hash: sha256:6f035c49a4c606488028d148361b6116b57c5874282edc2458fb62816c3d069e
+  reason: Accepted finding (auto-generated baseline)
+- hash: sha256:58570d60f432c1514389193222edbf24777d5ba6bcba1277489cb2fbe4a6a32b
   rule_id: P1
   file: odoo-19.0/references/odoo-19-performance-guide.md
-  reason: 'Accepted: static-analysis false positives in reference documentation'
+  reason: Accepted finding (auto-generated baseline)
 - hash: sha256:9fb955c5e0b9c0423ee1ffc679fe374f854adf9dc46b3c2383525d12fb712698
   rule_id: P2
   file: odoo-19.0/references/odoo-19-reports-guide.md
-  reason: 'Accepted: static-analysis false positives in reference documentation'
-- hash: sha256:a18f857a8abd625316bae7d58a618394122decdc5d43dcade73a66b5fc69da1c
-  rule_id: P2
-  file: odoo-19.0/references/odoo-19-view-guide.md
-  reason: 'Accepted: static-analysis false positives in reference documentation'
+  reason: Accepted finding (auto-generated baseline)
 - hash: sha256:9d7b8f0900182277c10898cad8eb4034643dd2da182b68c56040c1bc5c48d398
   rule_id: YR4
   file: odoo-18.0/references/odoo-18-data-guide.md
-  reason: 'Accepted: static-analysis false positives in reference documentation'
+  reason: Accepted finding (auto-generated baseline)

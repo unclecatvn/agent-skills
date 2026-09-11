@@ -44,4 +44,6 @@ skills/odoo-16.0/
 - Prefer the `attrs` / `states` patterns documented in the 16 view guide for client-side dynamic modifiers; direct `invisible="..."` is valid only for static/context-time visibility.
 - Match the existing addon style when editing 16 code, but check `api-highlights.md` before mass-rewriting XML.
 - Treat `skills/odoo-16.0/references/api-highlights.md` as the authority when 16 and 17 guidance diverge.
+- Before writing code, run the `odoo-workflow` skill if it is installed (trace the real
+  source, Context Brief with `file:line`, definition of done); install it alongside this pack.
 - Apply the Coding Conventions section in the guide you open; Odoo 16 runtime behavior and the local stable-file style take precedence when they conflict.

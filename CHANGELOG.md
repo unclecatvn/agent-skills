@@ -2,6 +2,28 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.15]
+
+### Release Description
+Adds the `odoo-workflow` skill — a mandatory trace-before-code gate for Odoo 16–19 that turns a request into a Context Brief with `file:line` citations from the real addons before any code is written, then closes with a version-aware definition of done (tests, ACL, `.pot`/`.po` regeneration, no `ponytail:` markers, no AI attribution). Alongside it: the `sudo()` naming convention (`<name>_sudo`) across all packs and the review agent, correct Odoo 19 `odoo-bin i18n` commands, and Claude plugin manifests that pass `claude plugin validate`.
+
+### Added
+- `skills/odoo-workflow/` — pre-code gate + definition of done, with a project `CLAUDE.md` template (`templates/CLAUDE.md`) that pins the Odoo version and forbids `ponytail:` comments and AI attribution.
+- `sudo()` naming convention in the Coding Conventions of every `odoo-1[6-9]-security-guide.md`; one-line detector in the review agent, exercised by `npm test` against `tests/fixtures/sudo_naming.py`.
+- `agents/odoo-code-review/SKILL.md` — `_sudo` check under Security and a blocking Hygiene section (ponytail markers, attribution, stale `.pot`).
+- `skills/odoo-commit/SKILL.md` — Pull Requests section; explicit list of forbidden attribution lines.
+- Odoo 19 translation guide — Quick Checklist with `.pot`/`.po` steps; Odoo 18 checklist split into pot + po items.
+- `tests/test-skills.js` — version parity check across `package.json`, `plugin.json`, `marketplace.json`.
+
+### Changed
+- `skills/odoo-1[6-9].0/{SKILL,CLAUDE,AGENTS}.md` point to `odoo-workflow` from their Coding Conventions.
+- `README.md` — Odoo project setup steps (`.odoo-version`, CLAUDE.md template, `attribution` setting) and the new pack row.
+
+### Fixed
+- `.claude-plugin/plugin.json` / `marketplace.json` rewritten to the schema Claude Code loads (`author` object, `repository` string, explicit `agents`, marketplace `name`/`owner`/`plugins`); versions now track `package.json`.
+- `skills/flow-diagram/SKILL.md` frontmatter no longer fails YAML parsing (description moved to a folded block).
+- Odoo 19 translation guide used the removed `--i18n-export` / `--i18n-import` flags; replaced with `odoo-bin i18n export|import|loadlang`.
+
 ## [1.0.14]
 
 ### Release Description

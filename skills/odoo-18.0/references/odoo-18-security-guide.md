@@ -25,6 +25,11 @@ when_to_use:
 
 Keep ACLs, groups, and rules in discoverable dedicated files and load dependencies first.
 
+Bind any recordset obtained through `sudo()` to a name ending in `_sudo`
+(`partner_sudo = self.partner_id.sudo()`, `orders_sudo = self.env['sale.order'].sudo().search(domain)`);
+a one-shot call such as `record.sudo().write(vals)` needs no variable, and a `_sudo` recordset
+is never returned from a public method or kept on `self`.
+
 Complete reference for Odoo 18 security: access rights, record rules, field access, and preventing security pitfalls.
 
 ## Table of Contents

@@ -55,6 +55,9 @@ Master index for all Odoo 19 development guides. Read the appropriate guide from
 
 ## Coding Conventions
 
+Before writing code, run the `odoo-workflow` skill if it is installed (trace the real
+source, Context Brief with `file:line`, definition of done); install it alongside this pack.
+
 Apply the convention section in the guide you open. Odoo 19 runtime behavior,
 then existing stable-addon style, takes precedence; keep diffs focused.
 

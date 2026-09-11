@@ -6,6 +6,11 @@
   and ACLs in `ir.model.access.csv`; load groups and rules before ACLs.
 - Name ACL IDs `access_<model>_<role>` and rule IDs `<model>_<role>_rule`.
   Keep record-rule domains narrow and never rely on a UI restriction as access control.
+- Bind any recordset obtained through `sudo()` to a name ending in `_sudo`
+  (`partner_sudo = self.partner_id.sudo()`,
+  `orders_sudo = self.env['sale.order'].sudo().search(domain)`). A one-shot call
+  (`record.sudo().write(vals)`) needs no variable. Never return a `_sudo` recordset
+  from a public method or keep it on `self`.
 
 Guide for Odoo 19 security: access rights, record rules, field permissions, and security pitfalls.
 
