@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.17]
+
+### Release Description
+Makes the Odoo review and tracer agents actually load from the Claude Code plugin. Both lived at `agents/<name>/SKILL.md`, which the plugin loader never scans, and `plugin.json` listed them under an `agents` key that replaces default discovery instead of adding to it - so `claude plugin details agent-skills` reported `Agents (0)` while all ten skills loaded fine. The agents are now flat files next to `planner.md`, discovered the same way.
+
+### Fixed
+- `agents/odoo-code-review.md`, `agents/odoo-code-tracer.md` - moved out of per-agent directories (`git mv` from `<name>/SKILL.md`); the plugin loader only reads flat `.md` files in `agents/`.
+- `.claude-plugin/plugin.json` - dropped the `agents` key; an explicit list replaces default discovery and did not load these files.
+
+### Changed
+- `tests/test-skills.js` - validates flat agent files as well as skill directories.
+- `README.md` - agent links and the project-structure tree follow the new paths.
+
 ## [1.0.16]
 
 ### Release Description
