@@ -796,6 +796,7 @@ When adding translatable content:
 - [ ] Provide context for ambiguous terms
 - [ ] Use formatting for dynamic content
 - [ ] Don't concatenate translated strings
-- [ ] Update POT file after adding new strings
+- [ ] `i18n/<module>.pot` regenerated after adding/changing strings (`--i18n-export=... --modules=<module>`, see Export/Import)
+- [ ] Every shipped locale has a `.po` in `i18n/` refreshed from that `.pot` (`msgmerge --update`)
 - [ ] Test in multiple languages
 - [ ] Check RTL language support if needed

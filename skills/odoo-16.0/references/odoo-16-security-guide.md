@@ -757,6 +757,11 @@ Register both in the manifest (order matters - security XML must be loaded befor
   `<model>_rule_<concerned_group>`; use the same dotted name in record names.
 - Load groups before ACLs or rules that reference them, and keep security
   declarations ahead of views in the manifest.
+- Bind any recordset obtained through `sudo()` to a name ending in `_sudo`
+  (`partner_sudo = self.partner_id.sudo()`,
+  `orders_sudo = self.env['sale.order'].sudo().search(domain)`). A one-shot call
+  (`record.sudo().write(vals)`) needs no variable. Never return a `_sudo` recordset
+  from a public method or keep it on `self`.
 
 ## Base Code Reference
 

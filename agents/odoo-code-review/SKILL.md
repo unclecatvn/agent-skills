@@ -111,6 +111,13 @@ Rules below are version-neutral unless they reference `api-highlights.md`. Alway
 - Specific exceptions: `UserError`, `ValidationError`, `AccessError`
 - No bare `except Exception`
 - `sudo()` used narrowly with justification
+- `sudo()` results bound to a variable carry the `_sudo` suffix (`partner_sudo = self.partner_id.sudo()`);
+  one-shot calls (`record.sudo().write(vals)`) are fine; no `_sudo` recordset returned or stored on `self`.
+  Heuristic for one-line assignments - confirm the right-hand side is a recordset (`search_count()` and other scalars are exempt):
+  ```bash
+  grep -nE '^[[:space:]]*[A-Za-z_][A-Za-z0-9_]*[[:space:]]*=[[:space:]]*[^=].*\.sudo\(' <file> \
+    | grep -vE '^[0-9]+:[[:space:]]*[A-Za-z0-9_]*_sudo[[:space:]]*='
+  ```
 
 ### Controllers (3%)
 - Correct `auth=` (`user`, `public`, `none`)
@@ -138,6 +145,18 @@ Rules below are version-neutral unless they reference `api-highlights.md`. Alway
 - External deps listed
 - Hooks wired correctly
 - `noupdate="1"` for reference data
+
+### Hygiene (blocking, 0%)
+Not scored - any hit blocks the merge regardless of the total:
+- `ponytail:` or other "simplified for now" markers in added lines
+- `Co-Authored-By` / `Generated with` in added lines, commit messages, or the PR body
+- User-facing strings added or changed without a regenerated `i18n/<module>.pot` (and merged `.po` files) in the same change
+
+Check added lines only, so a deleted marker never trips it:
+```bash
+git diff <base>..HEAD -U0 | grep -E '^\+[^+]' | grep -nE 'ponytail:|Co-Authored-By|Generated with'
+git log <base>..HEAD --format=%B | grep -nE 'Co-Authored-By|Generated with'
+```
 
 ## Scoring
 

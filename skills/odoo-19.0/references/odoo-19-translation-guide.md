@@ -19,6 +19,7 @@ Guide for adding translations and localization in Odoo 19: Python, JavaScript, a
 - [Translated Fields](#translated-fields)
 - [Export/Import](#exportimport)
 - [Languages](#languages)
+- [Quick Checklist](#quick-checklist)
 
 ---
 
@@ -207,43 +208,33 @@ print(record_fr.name)  # French name
 
 ## Export/Import
 
-### Export Translations
+Odoo 19 replaced the `--i18n-export` / `--i18n-import` server flags with the `odoo-bin i18n`
+subcommand (`odoo/cli/i18n.py`). Update the module first (`-u <module>`) so new terms are in
+the database, then:
 
-**Via CLI**:
-
-```bash
-odoo-bin -d mydb -l fr --i18n-export=fr --stop-after-init
-```
-
-**Via UI**:
-
-1. Settings → Translations → Export Translations
-2. Select language
-3. Choose file format (PO)
-4. Export
-
-### Import Translations
-
-**Via CLI**:
+### Export the template (`.pot`)
 
 ```bash
-odoo-bin -d mydb -l fr --i18n-import=/path/to/fr.po --stop-after-init
+odoo-bin i18n export -c odoo.conf -d mydb my_module
+# writes my_module/i18n/my_module.pot ('pot' is the default language)
 ```
 
-**Via UI**:
-
-1. Settings → Translations → Import Translations
-2. Select language
-3. Upload PO file
-4. Import
-
-### Update Translations
-
-**Via CLI**:
+### Export a language (`.po`)
 
 ```bash
-odoo-bin -d mydb -l fr --i18n-overwrite --stop-after-init
+odoo-bin i18n loadlang -c odoo.conf -d mydb -l fr_FR     # once, if not installed yet
+odoo-bin i18n export -c odoo.conf -d mydb -l fr_FR my_module
+# writes my_module/i18n/fr.po (named by ISO code); -o file.po merges several modules into one file
 ```
+
+### Import translations
+
+```bash
+odoo-bin i18n import -c odoo.conf -d mydb -l fr_FR my_module/i18n/fr.po
+# -w / --overwrite replaces terms already translated in the database
+```
+
+**Via UI**: Settings → Translations → Export Translations / Import Translations.
 
 ---
 
@@ -314,6 +305,21 @@ message = _("Hello ") + name + _("!")
 # GOOD
 message = _("Hello %(name)s!") % {'name': name}
 ```
+
+---
+
+## Quick Checklist
+
+When adding translatable content to an Odoo 19 module:
+
+- [ ] Python runtime strings wrapped in `_()`, module-level constants in `_lt()`
+- [ ] JavaScript/OWL strings wrapped in `_t()`
+- [ ] Translatable field values declared with `translate=True` (or `html_translate`)
+- [ ] `string=` / `help=` / `placeholder=` present in views (auto-extracted)
+- [ ] `i18n/<module>.pot` regenerated with `odoo-bin i18n export -d <db> <module>` after `-u <module>`
+- [ ] Every shipped locale has a `.po` in `i18n/` refreshed from that `.pot` (`msgmerge --update` or re-export)
+- [ ] Dynamic content uses `%(name)s` placeholders, never f-strings / `+`
+- [ ] Tests cover at least one non-`en_US` language switch
 
 ---
 

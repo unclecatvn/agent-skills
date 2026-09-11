@@ -61,6 +61,9 @@ skills/odoo-17.0/
 
 Odoo 17 is the version *before* the big v18 API modernization. Code must use the v17 patterns:
 
+Before writing code, run the `odoo-workflow` skill if it is installed (trace the real
+source, Context Brief with `file:line`, definition of done); install it alongside this pack.
+
 Apply the Coding Conventions section in the guide you open. Prefer Odoo 17
 runtime behavior, then the surrounding stable-addon style, when they conflict
 with a convention.

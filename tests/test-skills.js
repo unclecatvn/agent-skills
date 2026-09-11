@@ -5,7 +5,11 @@
  * Checks:
  *   1. Every skills/* and agents/* folder has a SKILL.md with
  *      valid `name` and `description` in its YAML frontmatter.
- *   2. Every component path listed in .claude-plugin/plugin.json exists.
+ *   2. Every component path listed in .claude-plugin/plugin.json exists
+ *      and the manifest uses the field types Claude Code loads.
+ *   2b. package.json, plugin.json and marketplace.json agree on the version.
+ *   2c. The sudo() naming grep from the review agent flags exactly the
+ *      tagged lines in tests/fixtures/sudo_naming.py.
  *   3. package.json version has a matching section in CHANGELOG.md
  *   4. Versioned Odoo testing guides contain the generic testing guidance.
  *      (skipped if the version is still 0.x or under [Unreleased]).
@@ -14,6 +18,7 @@
  */
 const fs = require("fs");
 const path = require("path");
+const { execSync } = require("child_process");
 
 const ROOT = path.resolve(__dirname, "..");
 const RED = "\x1b[31m";
@@ -94,17 +99,69 @@ function validatePluginManifest() {
     return;
   }
 
-  const components = manifest.components || {};
-  for (const [kind, list] of Object.entries(components)) {
-    if (!Array.isArray(list)) continue;
+  // Component path fields per https://code.claude.com/docs/en/plugins-reference
+  for (const kind of ["skills", "commands", "agents", "hooks", "outputStyles"]) {
+    const value = manifest[kind];
+    if (value === undefined) continue;
+    const list = Array.isArray(value) ? value : typeof value === "string" ? [value] : [];
     for (const relPath of list) {
-      const abs = path.join(ROOT, relPath);
-      if (!fs.existsSync(abs)) {
+      if (!fs.existsSync(path.join(ROOT, relPath))) {
         fail(`plugin.json: ${kind} path does not exist: ${relPath}`);
       } else {
         ok(`plugin.json/${kind}: ${relPath}`);
       }
     }
+  }
+  if (typeof manifest.author === "string") {
+    fail("plugin.json: author must be an object {name, email?, url?}");
+  }
+  if (manifest.repository !== undefined && typeof manifest.repository !== "string") {
+    fail("plugin.json: repository must be a URL string");
+  }
+}
+
+function validateVersionParity() {
+  const read = (rel) => JSON.parse(fs.readFileSync(path.join(ROOT, rel), "utf8"));
+  const marketplace = read(".claude-plugin/marketplace.json");
+  const entry = (marketplace.plugins || []).find((p) => p.name === "agent-skills") || {};
+  const versions = {
+    "package.json": read("package.json").version,
+    "plugin.json": read(".claude-plugin/plugin.json").version,
+    "marketplace.json": entry.version,
+  };
+  const distinct = new Set(Object.values(versions));
+  if (distinct.size === 1 && versions["package.json"]) {
+    ok(`version ${versions["package.json"]} matches across package.json, plugin.json, marketplace.json`);
+  } else {
+    fail(`version mismatch: ${JSON.stringify(versions)}`);
+  }
+}
+
+// Keep identical to the pipeline in agents/odoo-code-review/SKILL.md ("Security").
+const SUDO_DETECTOR =
+  "grep -nE '^[[:space:]]*[A-Za-z_][A-Za-z0-9_]*[[:space:]]*=[[:space:]]*[^=].*\\.sudo\\(' \"$FIXTURE\"" +
+  " | grep -vE '^[0-9]+:[[:space:]]*[A-Za-z0-9_]*_sudo[[:space:]]*=' || true";
+
+function validateSudoDetector() {
+  const fixture = path.join(ROOT, "tests", "fixtures", "sudo_naming.py");
+  if (!fs.existsSync(fixture)) {
+    fail("missing tests/fixtures/sudo_naming.py");
+    return;
+  }
+  const out = execSync(SUDO_DETECTOR, {
+    encoding: "utf8",
+    env: { ...process.env, FIXTURE: fixture },
+  });
+  const got = out.split("\n").filter(Boolean).map((l) => Number(l.split(":")[0]));
+  const want = fs
+    .readFileSync(fixture, "utf8")
+    .split("\n")
+    .map((line, i) => (line.includes("# FLAG") ? i + 1 : 0))
+    .filter(Boolean);
+  if (JSON.stringify(got) === JSON.stringify(want)) {
+    ok(`sudo naming detector flags exactly lines ${want.join(",")} of the fixture`);
+  } else {
+    fail(`sudo naming detector: expected lines ${want.join(",")}, got ${got.join(",") || "none"}`);
   }
 }
 
@@ -179,6 +236,12 @@ function main() {
 
   console.log("\nValidating plugin manifest");
   validatePluginManifest();
+
+  console.log("\nValidating version parity");
+  validateVersionParity();
+
+  console.log("\nValidating sudo naming detector");
+  validateSudoDetector();
 
   console.log("\nValidating CHANGELOG");
   validateChangelog();

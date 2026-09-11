@@ -131,8 +131,16 @@ task-XXXX, opw-XXXXXX
 
 - "This commit does X" - the diff says what
 - "I", "we", "now", "currently"
-- AI attribution
+- AI attribution of any kind: `Co-Authored-By: Claude ...` trailers, `Generated with Claude Code`
+  lines, session links. If the tooling injects one, remove it before committing
 - Restating the file name or module when the subject already says it
+
+## Pull Requests
+
+- Title = the commit header (`[TAG] module: description`); one logical change per PR
+- Body explains WHY and how it was verified (test command, screenshots for views); the diff shows WHAT
+- No AI attribution anywhere in the body: no "Generated with" footer, no `Co-Authored-By`, no session links
+- Do not add or edit author/reviewer lines; git already records the author
 
 ## Examples
 

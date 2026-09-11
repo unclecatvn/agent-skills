@@ -78,6 +78,9 @@ skills/odoo-17.0/
 | `references/odoo-17-translation-guide.md` | Translations, localization, i18n | Adding translations |
 | `references/odoo-17-view-guide.md` | XML views, actions, menus | Writing view XML |
 
+Before writing code, run the `odoo-workflow` skill if it is installed (trace the real
+source, Context Brief with `file:line`, definition of done); install it alongside this pack.
+
 Apply the **Coding Conventions** section in the guide you open. Odoo 17
 runtime behavior, then the style of a stable addon being changed, take
 precedence over a convention; do not make style-only rewrites.
