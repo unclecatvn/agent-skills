@@ -198,8 +198,8 @@ Specialized agents that act as senior technical leads:
 
 | Agent | What it does |
 |-------|--------------|
-| **[Odoo Code Review](agents/odoo-code-review/SKILL.md)** | Reviews Odoo code with scoring and structured feedback. Version-aware (16 / 17 / 18 / 19). |
-| **[Odoo Code Tracer](agents/odoo-code-tracer/SKILL.md)** | Traces execution flow from an entry point through the call graph. Version-aware (16 / 17 / 18 / 19). |
+| **[Odoo Code Review](agents/odoo-code-review.md)** | Reviews Odoo code with scoring and structured feedback. Version-aware (16 / 17 / 18 / 19). |
+| **[Odoo Code Tracer](agents/odoo-code-tracer.md)** | Traces execution flow from an entry point through the call graph. Version-aware (16 / 17 / 18 / 19). |
 | **[Planner](agents/planner.md)** | Breaks down complex features into actionable implementation steps |
 
 ### Rules — Coding Standards
@@ -253,8 +253,8 @@ agent-skills/
 │   ├── code-review/           # Code review workflow
 │   └── slide/                 # HTML/React slide decks
 ├── agents/
-│   ├── odoo-code-review/      # Version-aware Odoo reviewer
-│   ├── odoo-code-tracer/      # Version-aware call-graph tracer
+│   ├── odoo-code-review.md    # Version-aware Odoo reviewer
+│   ├── odoo-code-tracer.md    # Version-aware call-graph tracer
 │   └── planner.md             # Feature planning agent
 ├── rules/                     # Coding style and security
 ├── bin/                       # CLI (`agent-skills`)

@@ -58,17 +58,22 @@ function readFrontmatter(filePath) {
 }
 
 function validateSkillDir(dir, label) {
-  const entries = fs
-    .readdirSync(dir, { withFileTypes: true })
-    .filter((e) => e.isDirectory());
+  const entries = fs.readdirSync(dir, { withFileTypes: true });
+  // A skill lives in <name>/SKILL.md; a plugin agent is a flat <name>.md
+  // (the plugin loader does not scan agents/<name>/SKILL.md).
+  const paths = [
+    ...entries.filter((e) => e.isDirectory()).map((e) => path.join(dir, e.name, "SKILL.md")),
+    ...entries
+      .filter((e) => e.isFile() && e.name.endsWith(".md"))
+      .map((e) => path.join(dir, e.name)),
+  ];
 
-  if (entries.length === 0) {
+  if (paths.length === 0) {
     warn(`${label}/ is empty`);
     return;
   }
 
-  for (const entry of entries) {
-    const skillPath = path.join(dir, entry.name, "SKILL.md");
+  for (const skillPath of paths) {
     const rel = path.relative(ROOT, skillPath);
     if (!fs.existsSync(skillPath)) {
       fail(`missing ${rel}`);
