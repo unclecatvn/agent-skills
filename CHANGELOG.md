@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.16]
+
+### Release Description
+Fixes the Claude plugin marketplace, which could not be added at all in 1.0.15: `agent-skills` is reserved for official Anthropic marketplaces, so `claude plugin marketplace add` refused the manifest even though `claude plugin validate` passed it. The marketplace is now `unclecat-agent-skills`; the plugin id stays `agent-skills`.
+
+### Fixed
+- `.claude-plugin/marketplace.json` — marketplace `name` renamed to `unclecat-agent-skills` (reserved-name rejection on `claude plugin marketplace add`).
+
+### Changed
+- `README.md` — plugin section now shows the actual `marketplace add` / `install agent-skills@unclecat-agent-skills` commands.
+
 ## [1.0.15]
 
 ### Release Description

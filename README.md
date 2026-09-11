@@ -96,7 +96,12 @@ Other installable packs: `odoo-workflow`, `code-review`, `dtg-base`, `flow-diagr
 
 ### Option 3 — Claude Code plugin
 
-Install via the Claude plugin marketplace defined in [`.claude-plugin/marketplace.json`](.claude-plugin/marketplace.json). The plugin bundles Odoo skill packs (16–19), the `odoo-workflow` pre-code gate, code review, DTG Base, Odoo Commit, Flow Diagram, slide decks, and the Odoo review/tracer agents.
+```bash
+claude plugin marketplace add unclecatvn/agent-skills
+claude plugin install agent-skills@unclecat-agent-skills
+```
+
+Marketplace defined in [`.claude-plugin/marketplace.json`](.claude-plugin/marketplace.json). Add `-s project` to `install` to scope it to one repository. The plugin bundles Odoo skill packs (16–19), the `odoo-workflow` pre-code gate, code review, DTG Base, Odoo Commit, Flow Diagram, slide decks, and the Odoo review/tracer agents.
 
 ### Odoo project setup (Claude Code)
 
