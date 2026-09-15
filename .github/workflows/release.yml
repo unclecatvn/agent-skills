@@ -10,6 +10,7 @@ on:
 
 permissions:
   contents: write
+  id-token: write # npm trusted publishing (OIDC), no npm token secret
 
 concurrency:
   group: release-${{ github.ref }}
@@ -28,7 +29,9 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          # Trusted publishing needs Node >= 22.14 and npm >= 11.5.1.
+          node-version: "24"
+          registry-url: "https://registry.npmjs.org"
 
       - name: Detect version bump
         id: ver
@@ -120,3 +123,17 @@ jobs:
           else
             gh release create "$TAG" --title "$TAG" --notes-file release-notes.md
           fi
+
+      - name: Publish to npm
+        if: steps.ver.outputs.bumped == 'true'
+        env:
+          VERSION: ${{ steps.ver.outputs.current }}
+        run: |
+          set -euo pipefail
+          NAME="$(node -p "require('./package.json').name")"
+          if [ "$(npm view "$NAME@$VERSION" version 2>/dev/null || true)" = "$VERSION" ]; then
+            echo "$NAME@$VERSION is already on npm; skipping publish."
+            exit 0
+          fi
+          npm install -g npm@^11.5.1
+          npm publish --access public

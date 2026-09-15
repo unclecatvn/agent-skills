@@ -1,6 +1,6 @@
 {
   "name": "@unclecat/agent-skills-cli",
-  "version": "1.0.18",
+  "version": "1.0.19",
   "description": "CLI and docs for installing agent skills by version.",
   "bin": {
     "agent-skills": "bin/agent-skills.js"
@@ -19,6 +19,10 @@
   ],
   "license": "MIT",
   "author": "UncleCat",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/unclecatvn/agent-skills.git"
+  },
   "engines": {
     "node": ">=18"
   }

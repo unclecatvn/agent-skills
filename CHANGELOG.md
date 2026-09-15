@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.19]
+
+### Release Description
+Publishes the CLI to npm again. `@unclecat/agent-skills-cli` stopped at 1.0.9 because no release since then ever ran `npm publish`: the release workflow only tagged and created GitHub releases. `npx @unclecat/agent-skills-cli` therefore still shipped the 1.0.9 pack set, without `odoo-16.0`, `odoo-workflow`, `odoo-commit`, or `flow-diagram`, so the README's CLI commands for those packs failed. Releases now publish through npm trusted publishing. Also replaces the README header with new showcase images.
+
+### Fixed
+- `.github/workflows/release.yml` - publish to npm after the GitHub release, through trusted publishing (`id-token: write`, Node 24, npm 11.5.1+), skipped when the version is already on npm.
+- `package.json` - add `repository`, which npm trusted publishing and provenance require to match the GitHub repository.
+
+### Changed
+- `README.md` - new hero and toolkit overview images; release section says how the CLI reaches npm; contributing section points to the real-source check for `odoo-workflow` grep commands; the workflow skill's version sources match 1.0.18 (`release.py`, short manifest versions ignored).
+- `lib/image/` - `hero.png` and `overview.png` replace `header-new.png`; `lib/image/README.md` records the prompts used to generate them.
+
 ## [1.0.18]
 
 ### Release Description
