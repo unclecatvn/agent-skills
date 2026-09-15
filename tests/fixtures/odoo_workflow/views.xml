@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Fixture for Step 1 command 9 in skills/odoo-workflow/SKILL.md. FLAG lines must match. -->
+<odoo>
+    <record id="view_order_form_inherit_x" model="ir.ui.view">
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/> <!-- FLAG:view-inherit -->
+    </record>
+    <template id="report_x" inherit_id="sale.view_order_form"> <!-- FLAG:view-inherit -->
+    </template>
+    <template id="report_y" inherit_id='sale.view_order_form'> <!-- FLAG:view-inherit -->
+    </template>
+    <record id="action_x" model="ir.actions.act_window">
+        <field name="view_id" ref="sale.view_order_form"/>
+    </record>
+    <record id="view_other_inherit" model="ir.ui.view">
+        <field name="inherit_id" ref="sale.view_order_form_extra"/>
+    </record>
+</odoo>
