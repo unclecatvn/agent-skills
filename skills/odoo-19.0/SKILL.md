@@ -96,9 +96,9 @@ skills/odoo-19.0/
 
 All guides are based on analysis of Odoo 19 source code:
 
-- `odoo/models.py` - ORM implementation
-- `odoo/fields.py` - Field types
-- `odoo/api.py` - Decorators
+- `odoo/orm/models.py` - ORM implementation
+- `odoo/orm/fields.py` - Field types
+- `odoo/orm/decorators.py` - Decorators
 - `odoo/http.py` - HTTP layer
 - `odoo/exceptions.py` - Exception types
 - `odoo/tools/translate.py` - Translation system

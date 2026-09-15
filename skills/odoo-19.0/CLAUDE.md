@@ -200,9 +200,9 @@ my_module/
 
 The guides are based on Odoo 19 source code. Reference these files in your Odoo installation:
 
-- `odoo/models.py` - ORM implementation
-- `odoo/fields.py` - Field types
-- `odoo/api.py` - Decorators
+- `odoo/orm/models.py` - ORM implementation
+- `odoo/orm/fields.py` - Field types
+- `odoo/orm/decorators.py` - Decorators
 - `odoo/http.py` - HTTP layer
 - `odoo/exceptions.py` - Exception types
 - `odoo/tools/translate.py` - Translation system

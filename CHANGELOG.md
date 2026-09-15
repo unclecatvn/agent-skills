@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.18]
+
+### Release Description
+Hardens the `odoo-workflow` trace against invented Odoo symbols. The Step 1 commands were measured against Odoo 18 and 19 source with an AST ground truth: the old `_inherit` grep missed every multi-line `_inherit` list (9 `mail.thread` extensions per version), the field grep missed annotated definitions such as `res.partner.country_id`, and the view-inheritance grep only matched QWeb templates, never `ir.ui.view` records. The skill now fixes those commands, adds hook, delegation, path, anchor-provenance and rename-impact tracing, and gives the Context Brief explicit `NOT FOUND` / `UNCERTAIN` / `AMBIGUOUS` states with version-checked rules for load order, generated xmlids, magic fields, and Odoo 19's changed `_name` inference.
+
+### Changed
+- `skills/odoo-workflow/SKILL.md` - Step 1 rewritten as a quoted command block (multi-line `_inherit`, chained `_name`, annotated fields, `_inherits`, method hooks, `ir.ui.view` and QWeb inheritors in either quote style, anchor nodes, rename impact); class-ownership and name-less class rules; `release.py` version source; Brief cell states and rules for redefined fields, paths, `depends`, override order, generated xmlids, magic fields, and xpath anchors; override the narrowest hook; fresh-install check in the definition of done. Examples no longer overlap the eval traps.
+- `skills/odoo-19.0/SKILL.md`, `skills/odoo-19.0/CLAUDE.md` - core references point to `odoo/orm/models.py`, `odoo/orm/fields.py`, `odoo/orm/decorators.py`.
+
+### Added
+- `tests/test-skills.js` + `tests/fixtures/odoo_workflow/` - the Step 1 commands must appear verbatim in the skill and flag exactly the tagged fixture lines.
+- `tests/odoo-workflow-greps.sh` - runs the Step 1 commands against a real Odoo checkout (`ODOO_ROOT=...`) and checks hand-verified evidence.
+- `tests/evals/odoo-workflow/` - twelve anti-hallucination traps with fixture modules (`x_eval`, `x_eval_port`) in skill-creator `evals.json` format.
+
 ## [1.0.17]
 
 ### Release Description

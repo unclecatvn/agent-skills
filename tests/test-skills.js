@@ -10,6 +10,9 @@
  *   2b. package.json, plugin.json and marketplace.json agree on the version.
  *   2c. The sudo() naming grep from the review agent flags exactly the
  *      tagged lines in tests/fixtures/sudo_naming.py.
+ *   2d. The odoo-workflow Step 1 grep commands still appear verbatim in
+ *      skills/odoo-workflow/SKILL.md and flag exactly the tagged lines in
+ *      tests/fixtures/odoo_workflow/.
  *   3. package.json version has a matching section in CHANGELOG.md
  *   4. Versioned Odoo testing guides contain the generic testing guidance.
  *      (skipped if the version is still 0.x or under [Unreleased]).
@@ -170,6 +173,72 @@ function validateSudoDetector() {
   }
 }
 
+// Step 1 commands from skills/odoo-workflow/SKILL.md, verbatim. Placeholders are
+// filled in for the fixture; the check fails if SKILL.md no longer contains the command.
+const WORKFLOW_GREPS = [
+  {
+    tag: "model",
+    cmd: `grep -rnE --include='*.py' "_name\\s*=\\s*([A-Za-z_]+\\s*=\\s*)?['\\"]MODEL['\\"]" $ROOTS`,
+  },
+  {
+    tag: "inherit",
+    cmd: `grep -rnE --include='*.py' "_inherit\\s*=.*['\\"]MODEL['\\"]" $ROOTS`,
+  },
+  {
+    tag: "inherit-multi",
+    cmd: `grep -rnE --include='*.py' -A12 "_inherit\\s*=\\s*[[(][^])]*$" $ROOTS | grep -E "['\\"]MODEL['\\"]"`,
+  },
+  {
+    tag: "field",
+    cmd: `grep -nE "^\\s+FIELD(\\s*:\\s*[A-Za-z_.]+)?\\s*=\\s*fields\\." MODEL_FILES`,
+  },
+  {
+    tag: "view-inherit",
+    cmd: `grep -rnE --include='*.xml' "name=['\\"]inherit_id['\\"] ref=['\\"](MODULE\\.)?VIEW['\\"]|inherit_id=['\\"](MODULE\\.)?VIEW['\\"]" $ROOTS`,
+  },
+];
+
+function validateWorkflowGreps() {
+  const skill = fs.readFileSync(path.join(ROOT, "skills", "odoo-workflow", "SKILL.md"), "utf8");
+  const dir = path.join(ROOT, "tests", "fixtures", "odoo_workflow");
+  const fixtures = ["models.py", "views.xml"].map((f) => path.join(dir, f));
+  const tagged = (tag) =>
+    fixtures.flatMap((file) =>
+      fs
+        .readFileSync(file, "utf8")
+        .split("\n")
+        .flatMap((line, i) => (new RegExp(`FLAG:${tag}(?![\\w-])`).test(line) ? [`${path.basename(file)}:${i + 1}`] : []))
+    );
+
+  for (const { tag, cmd } of WORKFLOW_GREPS) {
+    if (!skill.includes(cmd)) {
+      fail(`odoo-workflow: the ${tag} command in SKILL.md differs from the tested one`);
+      continue;
+    }
+    const run = cmd
+      .replace("MODEL_FILES", JSON.stringify(fixtures[0]))
+      .replace(/MODEL/g, "x\\.thing")
+      .replace("FIELD", "note")
+      .replace(/MODULE/g, "sale")
+      .replace(/VIEW/g, "view_order_form")
+      .replace("$ROOTS", JSON.stringify(dir));
+    const out = execSync(`${run} || true`, { encoding: "utf8" });
+    const got = out
+      .split("\n")
+      .filter(Boolean)
+      .map((l) => {
+        const m = /^(?:.*?(models\.py|views\.xml)[:-])?(\d+)[:-]/.exec(l);
+        return m ? `${m[1] || "models.py"}:${m[2]}` : l;
+      });
+    const want = tagged(tag);
+    if (JSON.stringify([...new Set(got)].sort()) === JSON.stringify(want.sort())) {
+      ok(`odoo-workflow ${tag} command flags exactly ${want.join(", ")}`);
+    } else {
+      fail(`odoo-workflow ${tag} command: expected ${want.join(", ")}, got ${got.join(", ") || "none"}`);
+    }
+  }
+}
+
 function validateChangelog() {
   const pkgPath = path.join(ROOT, "package.json");
   const changelogPath = path.join(ROOT, "CHANGELOG.md");
@@ -247,6 +316,9 @@ function main() {
 
   console.log("\nValidating sudo naming detector");
   validateSudoDetector();
+
+  console.log("\nValidating odoo-workflow grep commands");
+  validateWorkflowGreps();
 
   console.log("\nValidating CHANGELOG");
   validateChangelog();

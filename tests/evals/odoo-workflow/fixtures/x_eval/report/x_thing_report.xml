@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="x_thing_report_document">
+        <t t-foreach="docs" t-as="doc">
+            <p t-esc="doc.name"/>
+            <p t-esc="doc.x_note"/>
+        </t>
+    </template>
+</odoo>
