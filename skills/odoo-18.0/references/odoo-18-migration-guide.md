@@ -388,7 +388,8 @@ records.check_access_rights(operation, raise_exception=True)
 records.check_access_rule(operation)
 
 # Use instead
-records.check_access(operations=[operation])
+records.check_access(operation)        # raises AccessError
+records.has_access(operation)          # returns bool
 ```
 
 ### XML Declaration Deprecation

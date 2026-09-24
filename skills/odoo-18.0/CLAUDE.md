@@ -73,6 +73,9 @@ skills/odoo-18.0/
 Before writing code, run the `odoo-workflow` skill if it is installed (trace the real
 source, Context Brief with `file:line`, definition of done); install it alongside this pack.
 
+Read `references/api-highlights.md` before writing code and apply its Quick review
+checks: the ❌ items are what not to use in Odoo 18.
+
 Apply the Coding Conventions section in the guide you open. Odoo 18 runtime
 behavior takes precedence, followed by the surrounding stable-addon style;
 keep convention-only changes focused. The common source is the [Odoo Coding
@@ -91,8 +94,8 @@ Guidelines](https://raw.githubusercontent.com/odoo/documentation/17.0/content/co
 |--------------|---------|------------------|
 | `attrs="{'invisible': [...]}"` | Deprecated in Odoo 18 | Use `invisible="..."` direct attribute |
 | `@api.depends('partner_id')` then accessing `partner_id.email` | N queries per record | Add `@api.depends('partner_id.email')` |
-| `search()` inside loop | N+1 queries | Use `search()` with `IN` domain or `read_group()` |
-| Using `_read_group()` instead of `read_group()` | Returns raw tuples, no lazy grouping, no metadata | Use `read_group()` for normal aggregation |
+| `search()` inside loop | N+1 queries | Use `search()` with `IN` domain or `_read_group()` |
+| Using `read_group()` in backend code | Builds UI-formatted dicts (labels, `__domain`, lazy groups) to unpack again | Use `_read_group()` (tuples with recordsets); keep `read_group()` for UI/RPC |
 | `create()` in loop | N INSERT statements | Batch: `create([{...}, {...}])` |
 | Overriding `unlink()` for validation | Breaks module uninstall | Use `@api.ondelete(at_uninstall=False)` |
 | Using `<tree>` in Odoo 18 | Deprecated tag | Use `<list>` instead |

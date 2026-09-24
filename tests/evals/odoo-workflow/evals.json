@@ -1,113 +1,138 @@
 {
   "skill_name": "odoo-workflow",
-  "notes": "Anti-hallucination traps. Run each prompt with ODOO_ROOT set to a community checkout and fixtures/ added as the last addons root. Expected line numbers are for 18.0 33c7b160 / 19.0 1a13ceea; paths and symbols are what graders check. Every eval has a 'do not invent' expectation and a 'cite the real answer' expectation, so answering UNCERTAIN everywhere fails.",
+  "notes": "Anti-hallucination traps. Each eval names the Odoo version it runs on ('odoo_version'). Run it in a workspace holding fixtures/ with the runtime reachable the way users set it up (.claude/odoo.json or a conf whose addons_path lists the workspace), or tell the agent the core checkout path. Expected line numbers are for 18.0 33c7b160 / 19.0 1a13ceea; paths and symbols are what graders check. Most evals pair a 'do not invent' expectation with a 'cite the real answer' expectation, and 19-21 grade the command or code they ask for, so answering UNCERTAIN everywhere fails. tests/bench_odoo_workflow.py prints the mechanical trace benchmark; benchmark.md records the last old-vs-new agent run on these evals.",
   "evals": [
     {
       "id": 1,
       "name": "field-that-does-not-exist",
       "prompt": "In module x_eval, show the sale order's delivery_date on the sale order form view.",
-      "expected_output": "sale.order has no delivery_date in any addon; the closest real field is commitment_date. delivery_date exists on account.move, a different model.",
-      "files": ["fixtures/x_eval"],
+      "expected_output": "sale.order has no delivery_date in any addon; the closest real field is commitment_date (label 'Delivery Date', addons/sale/models/sale_order.py 18: 103, 19: 88). delivery_date exists on account.move (addons/account/models/account_move.py 18: 359, 19: 386) and, in 18, on stock.lot.report: different models.",
+      "files": [
+        "fixtures/x_eval"
+      ],
       "expectations": [
         "The answer marks delivery_date on sale.order as NOT FOUND and writes no view XML using delivery_date on sale.order",
         "The answer cites commitment_date on sale.order at addons/sale/models/sale_order.py (18: line 103, 19: line 88)",
         "The answer does not cite addons/account/models/account_move.py as a definition of a sale.order field"
-      ]
+      ],
+      "odoo_version": "18.0"
     },
     {
       "id": 2,
       "name": "anchor-added-by-another-module",
       "prompt": "In module x_eval (it depends only on sale), add a boolean field x_rush to sale.order and place it right after warehouse_id on the sale order form.",
-      "expected_output": "warehouse_id is not in sale's own views; it is added to the form by sale_stock (addons/sale_stock/views/sale_order_views.xml, 18: two nodes at lines 23-24, the first invisible; 19: line 26). x_eval must depend on sale_stock or use another anchor.",
-      "files": ["fixtures/x_eval"],
+      "expected_output": "warehouse_id is not in sale's own views; it is added to the form by sale_stock (addons/sale_stock/views/sale_order_views.xml). 18: two sale.order nodes at lines 23-24 inside group sale_shipping (the first invisible), plus sale.order.line warehouse_id nodes inside the order_line form (:125) and list (:139), which come earlier in the arch, so a bare //field[@name='warehouse_id'] or <field name=\"warehouse_id\" position=...> hits the invisible order-line form node; 19: one node at line 26. x_eval must depend on sale_stock and scope the locator (e.g. //group[@name='sale_shipping']/field[@name='warehouse_id'][last()]), or use another anchor.",
+      "files": [
+        "fixtures/x_eval"
+      ],
       "expectations": [
         "The answer states that warehouse_id is not present in addons/sale/views/sale_order_views.xml and is added by sale_stock",
         "The answer either adds sale_stock to x_eval depends or picks a different anchor that exists in the base sale view; it does not xpath on warehouse_id while depending only on sale",
-        "If the answer anchors on warehouse_id in 18, it addresses that two warehouse_id nodes exist and a locator hits the first (invisible) one"
-      ]
+        "If the answer anchors on warehouse_id in 18, its locator targets the visible sale.order warehouse_id in group sale_shipping (e.g. //group[@name='sale_shipping']/field[@name='warehouse_id'][last()]); a bare //field[@name='warehouse_id'] or <field name=\"warehouse_id\" position=...> fails this, because it hits the invisible sale.order.line warehouse_id inside the order_line form (sale_stock/views/sale_order_views.xml:125) first"
+      ],
+      "odoo_version": "18.0"
     },
     {
       "id": 3,
       "name": "existing-view-inheritors",
       "prompt": "In module x_eval, add a new notebook page 'Rush' to sale.view_order_form. Before writing it, list which addons already inherit that view so we can check for xpath collisions.",
       "expected_output": "About 21 (18) / 20 (19) addons inherit sale.view_order_form via <field name=\"inherit_id\" ref=\"sale.view_order_form\"/>, including sale_stock, sale_margin, sale_management, delivery.",
-      "files": ["fixtures/x_eval"],
+      "files": [
+        "fixtures/x_eval"
+      ],
       "expectations": [
         "The answer lists sale_stock and sale_margin among the inheritors",
         "Every addon the answer names as an inheritor really contains inherit_id ref to sale.view_order_form (no invented inheritors)",
         "The answer does not claim that no other module inherits sale.view_order_form"
-      ]
+      ],
+      "odoo_version": "18.0"
     },
     {
       "id": 4,
       "name": "hook-not-public-method",
       "prompt": "In module x_eval, after a sale order is confirmed and its delivery pickings have been created, post a chatter message listing the picking names.",
-      "expected_output": "Base action_confirm calls self.with_context(...)._action_confirm() (18: sale_order.py:1174 -> :1217; 19: :1233); sale_stock creates pickings by overriding _action_confirm (18: sale_stock/models/sale_order.py:180; 19: :213). Override _action_confirm, call super first, and depend on sale_stock.",
-      "files": ["fixtures/x_eval"],
+      "expected_output": "Base action_confirm calls self.with_context(...)._action_confirm() (18: sale_order.py:1174 -> :1217; 19: :1192 -> :1233); sale_stock creates pickings by overriding _action_confirm (18: sale_stock/models/sale_order.py:180; 19: :213). Override _action_confirm, call super first, and depend on sale_stock.",
+      "files": [
+        "fixtures/x_eval"
+      ],
       "expectations": [
         "The answer overrides _action_confirm (not only action_confirm) and calls super() before reading pickings",
         "The answer adds sale_stock to x_eval depends",
         "The answer cites the sale_stock override of _action_confirm with its file path"
-      ]
+      ],
+      "odoo_version": "18.0"
     },
     {
       "id": 5,
       "name": "partial-field-override",
       "prompt": "What values can sale.order.line.qty_delivered_method take when sale_stock is installed, and where is each value defined? Answer with a Context Brief only, no code.",
-      "expected_output": "Base selection in addons/sale/models/sale_order_line.py (18: 225, 19: 217) extended by selection_add [('stock_move', 'Stock Moves')] in addons/sale_stock/models/sale_order_line.py (18: 16, 19: 15).",
+      "expected_output": "Base selection in addons/sale/models/sale_order_line.py (18: 225, 19: 217) with values manual and analytic, extended by selection_add [('stock_move', 'Stock Moves')] in addons/sale_stock/models/sale_order_line.py (18: 16, 19: 15). timesheet (sale_timesheet) and milestones (sale_project) are added only when those modules are installed.",
       "files": [],
       "expectations": [
         "The answer cites the base definition in addons/sale/models/sale_order_line.py and lists its selection values from that file",
         "The answer cites the selection_add in addons/sale_stock/models/sale_order_line.py adding stock_move",
         "The answer does not present stock_move as the only value"
-      ]
+      ],
+      "odoo_version": "18.0"
     },
     {
       "id": 6,
       "name": "broken-path-hop",
       "prompt": "In module x_eval, add a stored related field x_country_code on sale.order with related='partner_id.country.code'.",
-      "expected_output": "Hop 1 partner_id on sale.order -> res.partner; hop 2 'country' does not exist on res.partner, the field is country_id -> res.country (annotated line in odoo/addons/base/models/res_partner.py, 18: 276, 19: 268); hop 3 code on res.country.",
-      "files": ["fixtures/x_eval"],
+      "expected_output": "Hop 1 partner_id on sale.order -> res.partner; hop 2 'country' does not exist on res.partner (only other models such as res.bank have it), the field is country_id -> res.country (annotated line in odoo/addons/base/models/res_partner.py, 18: 276, 19: 268); hop 3 code on res.country (odoo/addons/base/models/res_country.py:40). res.partner also has country_code = related country_id.code (res_partner.py 18: 277, 19: 269), so partner_id.country_code is an equivalent path.",
+      "files": [
+        "fixtures/x_eval"
+      ],
       "expectations": [
-        "The answer flags 'country' as not found on res.partner and uses partner_id.country_id.code",
+        "The answer flags 'country' as not found on res.partner and uses partner_id.country_id.code (or the equivalent partner_id.country_code)",
         "The answer cites res.partner.country_id at odoo/addons/base/models/res_partner.py (not a country_id belonging to another model such as account.fiscal.position)",
-        "The answer cites res.country.code in odoo/addons/base/models/res_country.py"
-      ]
+        "The answer cites res.country.code in odoo/addons/base/models/res_country.py, or res.partner.country_code in odoo/addons/base/models/res_partner.py if it uses that field"
+      ],
+      "odoo_version": "18.0"
     },
     {
       "id": 7,
       "name": "group-xmlid-that-does-not-exist",
       "prompt": "In module x_eval, make the 'Cancel' button of the sale order form visible only to group sales_team.group_sale_admin.",
       "expected_output": "sales_team.group_sale_admin does not exist. Real groups: sales_team.group_sale_manager (sales_team/security/sales_team_security.xml, 18: 22, 19: 25), group_sale_salesman, group_sale_salesman_all_leads.",
-      "files": ["fixtures/x_eval"],
+      "files": [
+        "fixtures/x_eval"
+      ],
       "expectations": [
         "The answer marks sales_team.group_sale_admin as NOT FOUND and writes no XML using it",
         "The answer cites sales_team.group_sale_manager with its security file"
-      ]
+      ],
+      "odoo_version": "18.0"
     },
     {
       "id": 8,
       "name": "generated-model-xmlid",
       "prompt": "Module x_eval defines model x.thing but ships no access rule for it. Add the missing access rule for base.group_user.",
       "expected_output": "Add a row with model_id:id model_x_thing to x_eval/security/ir.model.access.csv. model_x_thing is generated at install from the model defined in x_eval/models/x_thing.py; it has no XML record.",
-      "files": ["fixtures/x_eval"],
+      "files": [
+        "fixtures/x_eval"
+      ],
       "expectations": [
         "The answer adds a csv row whose model_id:id is model_x_thing (or x_eval.model_x_thing)",
         "The answer cites the x.thing class in x_eval/models/x_thing.py as what the xmlid reflects",
         "The answer does not report model_x_thing as missing and does not create an ir.model record for it"
-      ]
+      ],
+      "odoo_version": "18.0"
     },
     {
       "id": 9,
       "name": "magic-field",
       "prompt": "In module x_eval, add a stored computed integer field x_age_days on sale.order.line: days since the line's create_date.",
-      "expected_output": "sale.order.line has no explicit create_date definition; create_date comes from _log_access (18: odoo/models.py LOG_ACCESS_COLUMNS; 19: odoo/orm/models.py). sale.order does declare create_date explicitly (18: sale_order.py:101), which is a different model.",
-      "files": ["fixtures/x_eval"],
+      "expected_output": "sale.order.line has no explicit create_date definition; create_date is added by the ORM when _log_access, which defaults to _auto, is true (18: odoo/models.py:285-293, LOG_ACCESS_COLUMNS :334; 19: odoo/orm/models.py:283-292, LOG_ACCESS_COLUMNS :296). sale.order does declare create_date explicitly (18: sale_order.py:101; 19: :86), which is a different model.",
+      "files": [
+        "fixtures/x_eval"
+      ],
       "expectations": [
         "The answer treats create_date on sale.order.line as existing and does not redeclare it",
         "The answer justifies it with the ORM log-access mechanism (a path under odoo/models.py for 18 or odoo/orm/models.py for 19), not with sale.order's explicit create_date",
         "The answer does not mark create_date as NOT FOUND or UNCERTAIN"
-      ]
+      ],
+      "odoo_version": "18.0"
     },
     {
       "id": 10,
@@ -119,29 +144,213 @@
         "The answer cites odoo/addons/base/models/res_partner.py with the parent_id line of the res.partner.category class",
         "The answer gives comodel res.partner.category and ondelete cascade",
         "The answer does not cite res.partner.parent_id (the Related Company field) as the answer"
-      ]
+      ],
+      "odoo_version": "18.0"
     },
     {
       "id": 11,
       "name": "impact-before-rename",
       "prompt": "In module x_eval, rename field x.thing.x_note to x_memo. List every place that must change before writing any code.",
-      "expected_output": "Definition x_thing.py:9 and five uses: @api.depends x_thing.py:12, compute body x_thing.py:15, related= x_thing_line.py:9, form view x_thing_views.xml:11, QWeb report x_thing_report.xml:6.",
-      "files": ["fixtures/x_eval"],
+      "expected_output": "Definition x_thing.py:9 and five uses: @api.depends x_thing.py:12, compute body x_thing.py:15, related= x_thing_line.py:9, form view x_thing_views.xml:11, QWeb report x_thing_report.xml:6 (x_note_length and _compute_x_note_length only contain the string; renaming them is optional). x_note is a stored Text column, so the rename also needs a manifest version bump (1.0 -> 1.1) and a migrations/1.1/ script: a pre-*.py that renames the column (ALTER TABLE x_thing RENAME COLUMN x_note TO x_memo), or a post-*.py that copies x_note into x_memo, which works because the old column is only dropped by ir.model.data._process_end after the post scripts (18: odoo/modules/loading.py:233 then :545). Without it -u drops x_note and its data: the no-longer-loaded field record is unlinked (odoo/addons/base/models/ir_model.py:2638) and ir.model.fields._drop_column runs ALTER TABLE ... DROP COLUMN (ir_model.py:1015 -> :872-886).",
+      "files": [
+        "fixtures/x_eval"
+      ],
       "expectations": [
         "The answer lists the QWeb use in report/x_thing_report.xml and the related= use in models/x_thing_line.py",
         "The answer lists the @api.depends, the compute body, and the form view uses",
-        "The answer does not list places that do not exist in x_eval"
-      ]
+        "The answer does not list places that do not exist in x_eval",
+        "The answer requires a manifest version bump and a migration script under migrations/<new version>/ that keeps the x_note data (a pre- script renaming the column, or a post- script copying it into x_memo); it does not present the rename as a code-only change"
+      ],
+      "odoo_version": "18.0"
     },
     {
       "id": 12,
       "name": "nameless-class-by-version",
       "prompt": "Module x_eval_port was written for an earlier Odoo. Its class SaleOrderExtra has _inherit = ['sale.order'] and no _name. On the Odoo version you are working with, which model gets the field x_priority? Answer with a Context Brief only, no code.",
-      "expected_output": "16-18: a one-item _inherit list gives _name, so sale.order gets x_priority (18: odoo/models.py around line 249). 19: only a string _inherit sets _name; otherwise the name is derived from the class name, so this defines a new model sale.order.extra (odoo/orm/models.py around lines 241-249).",
-      "files": ["fixtures/x_eval_port"],
+      "expected_output": "18: a one-item _inherit list gives _name (odoo/models.py:249-250), so sale.order gets x_priority. 19: only a string _inherit sets _name (odoo/orm/models.py:241-243); otherwise the name is derived from the class name (:246-249, which also logs 'Class ... has no _name'), so this defines a new model sale.order.extra.",
+      "files": [
+        "fixtures/x_eval_port"
+      ],
       "expectations": [
         "The answer gives the version-correct model: sale.order on 18, sale.order.extra on 19",
         "The answer cites the metaclass code that decides _name in this version's core file (odoo/models.py for 18, odoo/orm/models.py for 19)"
+      ],
+      "odoo_version": "19.0"
+    },
+    {
+      "id": 13,
+      "name": "field-from-mixin",
+      "odoo_version": "18.0",
+      "prompt": "In module x_eval, add the sale order's portal link field access_url as an optional column in the sale order list view.",
+      "expected_output": "access_url exists on sale.order through its _inherit parent portal.mixin (addons/portal/models/portal_mixin.py:13 in 18; sale.order lists portal.mixin in _inherit at addons/sale/models/sale_order.py:51 and overrides _compute_access_url at :809); sale reaches portal through account_payment -> payment -> portal (addons/sale/__manifest__.py:14, addons/payment/__manifest__.py:8). No new field is needed.",
+      "files": [
+        "fixtures/x_eval"
+      ],
+      "expectations": [
+        "The answer treats access_url on sale.order as existing and does not mark it NOT FOUND or UNCERTAIN",
+        "The answer cites the definition in addons/portal/models/portal_mixin.py (portal.mixin)",
+        "The answer does not declare a new access_url field on sale.order"
+      ]
+    },
+    {
+      "id": 14,
+      "name": "prototype-copy-is-another-model",
+      "odoo_version": "18.0",
+      "prompt": "In module x_eval (add depends if needed), add a stored related field x_renter_name on event.type.booth with related='partner_id.name'.",
+      "expected_output": "event.type.booth has no partner_id. partner_id (Renter) is defined at addons/event_booth/models/event_booth.py:21 on event.booth, a new model (_name='event.booth') that copies event.type.booth through _inherit; its fields are not on event.type.booth.",
+      "files": [
+        "fixtures/x_eval"
+      ],
+      "expectations": [
+        "The answer marks partner_id on event.type.booth as NOT FOUND and writes no related field on event.type.booth using it",
+        "The answer explains that event_booth.py:21 belongs to event.booth, not event.type.booth",
+        "The answer does not invent a partner_id field definition in event_type_booth.py"
+      ]
+    },
+    {
+      "id": 15,
+      "name": "xmlid-defined-in-csv",
+      "odoo_version": "18.0",
+      "prompt": "Is there an xmlid for the Vietnamese language record (res.lang) in base? Give the exact xmlid and where it is defined. Answer with a Context Brief only, no code.",
+      "expected_output": "base.lang_vi_VN, defined as a row of odoo/addons/base/data/res.lang.csv (18: line 91, 19: line 92), not in any XML file.",
+      "files": [],
+      "expectations": [
+        "The answer gives the xmlid base.lang_vi_VN and does not mark it NOT FOUND",
+        "The answer cites odoo/addons/base/data/res.lang.csv as the definition",
+        "The answer does not cite an XML file as the definition of base.lang_vi_VN"
+      ]
+    },
+    {
+      "id": 16,
+      "name": "report-model-has-no-create-date",
+      "odoo_version": "18.0",
+      "prompt": "In module x_eval, add a 'Created this month' filter on create_date to the Sales Analysis (sale.report) search view.",
+      "expected_output": "sale.report sets _auto = False (addons/sale/report/sale_report.py:11), so _log_access defaults to False (odoo/models.py:285) and it has no create_date. Its date field is the order date (sale_report.py:21); filter on date instead, say that creation date is not available, or first add a create_date field to the report SQL (field + _select_additional_fields + _group_by_sale, as addons/sale_stock/report/sale_report.py:10-21 does for warehouse_id).",
+      "files": [
+        "fixtures/x_eval"
+      ],
+      "expectations": [
+        "The answer states that sale.report has no create_date",
+        "The answer cites _auto = False in addons/sale/report/sale_report.py",
+        "The answer filters on the existing date field, asks, or first adds create_date to sale.report (field plus _select_additional_fields and _group_by_sale); it never writes a create_date filter on sale.report without that field"
+      ]
+    },
+    {
+      "id": 17,
+      "name": "owl-template-inheritors",
+      "odoo_version": "18.0",
+      "prompt": "In module x_eval we want to extend the OWL template web.ControlPanel. First list which templates in the community addons already inherit it with t-inherit, and in which mode. Answer with a Context Brief only, no code.",
+      "expected_output": "Three primary-mode templates in two files: project_todo/static/src/views/todo_form/todo_form_control_panel.xml:4 (project_todo.TodoFormControlPanel) and website/static/src/components/views/theme_preview.xml:12 and :64 (website.ThemePreviewForm.ControlPanel, website.ThemePreviewKanban.ControlPanel). The template itself is defined in addons/web/static/src/search/control_panel/control_panel.xml:4.",
+      "files": [],
+      "expectations": [
+        "The answer lists the project_todo and website templates with t-inherit=\"web.ControlPanel\" and says they use primary mode",
+        "Every template the answer names as an inheritor really has t-inherit=\"web.ControlPanel\" (no invented inheritors)",
+        "The answer does not claim that no template inherits web.ControlPanel"
+      ]
+    },
+    {
+      "id": 18,
+      "name": "controller-route-override",
+      "odoo_version": "18.0",
+      "prompt": "In module x_eval, override the website shop cart page (/shop/cart) so it logs the cart amount before rendering.",
+      "expected_output": "The route is declared at addons/website_sale/controllers/main.py:757-758 on class WebsiteSale (main.py:96). Subclass WebsiteSale (from odoo.addons.website_sale.controllers.main import WebsiteSale), re-declare @route() on cart, call super(), and add website_sale to depends.",
+      "files": [
+        "fixtures/x_eval"
+      ],
+      "expectations": [
+        "The answer cites the /shop/cart route in addons/website_sale/controllers/main.py and the WebsiteSale class",
+        "The answer subclasses WebsiteSale (not a new http.Controller with a duplicate route) and calls super()",
+        "The answer adds website_sale to x_eval depends"
+      ]
+    },
+    {
+      "id": 19,
+      "name": "odoo19-po-export",
+      "odoo_version": "19.0",
+      "prompt": "Module x_eval on Odoo 19 changed several field labels. Give me the exact commands to regenerate its .pot and update its Vietnamese translation file i18n/vi_VN.po, keeping that file name.",
+      "expected_output": "Export the template with 'odoo-bin i18n export -c <conf> -d <db> x_eval' on a database where x_eval is installed (-l defaults to pot, written to i18n/x_eval.pot: odoo/cli/i18n.py:86, :224-225), then either msgmerge --update --no-fuzzy-matching i18n/vi_VN.po i18n/x_eval.pot, or, after 'odoo-bin i18n loadlang -l vi_VN', 'odoo-bin i18n export -c <conf> -d <db> x_eval -l vi_VN -o <path>/i18n/vi_VN.po'. '-l vi_VN x_eval' fails with 'the following arguments are required: MODULE' because -l takes several values (odoo/cli/i18n.py:85-89), and without -o the file is named after iso_code, vi.po (odoo/cli/i18n.py:227). --i18n-export no longer exists in 19 (odoo/tools/config.py:401-411 keeps only --load-language and --i18n-overwrite).",
+      "files": [
+        "fixtures/x_eval"
+      ],
+      "expectations": [
+        "The answer never writes the module name directly after the -l value(s), as in '-l vi_VN x_eval' (another option such as -o between them, or the module before -l, is fine)",
+        "The answer keeps the file name vi_VN.po (msgmerge into it, or -o pointing at it) and does not silently produce vi.po",
+        "The answer uses the Odoo 19 'odoo-bin i18n export' subcommand, not --i18n-export"
+      ]
+    },
+    {
+      "id": 20,
+      "name": "multi-company-new-model",
+      "odoo_version": "18.0",
+      "prompt": "In module x_eval, add a new model x.thing.budget with name, amount (Monetary) and company_id, usable by internal users in a multi-company database.",
+      "expected_output": "New model with company_id and a currency field (e.g. related company_id.currency_id; a Monetary field with no currency field fails at setup, odoo/fields.py:1729-1740), an ir.model.access.csv row for model_x_thing_budget, and a multi-company ir.rule whose domain uses company_ids as core does (e.g. addons/sale/security/ir_rules.xml:8: [('company_id', 'in', company_ids)]; company_ids is the active companies, odoo/addons/base/models/ir_rule.py:48).",
+      "files": [
+        "fixtures/x_eval"
+      ],
+      "expectations": [
+        "The answer adds an access rule row for model_x_thing_budget",
+        "The answer adds a record rule whose domain uses company_ids, not user.company_ids",
+        "The answer gives amount a currency field (currency_field or a currency_id field) instead of a Monetary field with no currency"
+      ]
+    },
+    {
+      "id": 21,
+      "name": "portal-sudo-needs-access-check",
+      "odoo_version": "18.0",
+      "prompt": "In module x_eval, add a portal page /my/things/<int:thing_id> that shows an x.thing record to portal users.",
+      "expected_output": "Portal users have no ACL on x.thing (x_eval/security/ir.model.access.csv has no x.thing row), so the page needs either a portal ACL plus an ownership record rule, or sudo after an explicit access check. The core pattern _document_check_access (addons/portal/controllers/portal.py:383) runs check_access('read') as the current user and otherwise accepts only a valid access_token (portal.mixin, addons/portal/models/portal_mixin.py:16), so on x.thing it needs that ACL/rule or portal.mixin; an explicit ownership or token check before sudo also works. The sudo recordset is bound to a *_sudo name and not returned from a public method.",
+      "files": [
+        "fixtures/x_eval"
+      ],
+      "expectations": [
+        "The answer does not return or render a record fetched with sudo() without first checking the user's access, ownership, or an access token",
+        "Any sudo() recordset bound to a variable is named with a _sudo suffix",
+        "The answer states how portal users get read access to x.thing: which ACL or record rule the sudo bypasses and why, or the portal ACL and ownership record rule it adds instead of sudo"
+      ]
+    },
+    {
+      "id": 22,
+      "name": "traceback-entry",
+      "odoo_version": "18.0",
+      "prompt": "Installing x_eval fails with:\nodoo.tools.convert.ParseError: while parsing /path/x_eval/views/x_rush_views.xml:4\nError while parsing or validating view:\n\nElement '<xpath expr=\"//field[@name=&#39;warehouse_id&#39;]\">' cannot be located in parent view\n\nThe view inherits sale.view_order_form to show a new sale.order field right after warehouse_id; x_eval depends only on sale. Fix it.",
+      "expected_output": "The message is raised by odoo/tools/template_inheritance.py:333 (quotes escaped by html_escape at :327) and wrapped by ir_ui_view.py:373 and odoo/tools/convert.py:594. warehouse_id is not in sale's own form view; sale_stock adds it (addons/sale_stock/views/sale_order_views.xml, 18: lines 23-24 inside group sale_shipping). Add sale_stock to depends and scope the xpath to that group (e.g. //group[@name='sale_shipping']/field[@name='warehouse_id'][last()]): in 18 the unchanged //field[@name='warehouse_id'] would hit the invisible sale.order.line warehouse_id inside the order_line form (:125) first and fail again, since the new sale.order field does not exist on sale.order.line. Or anchor on a node that exists in addons/sale/views/sale_order_views.xml.",
+      "files": [
+        "fixtures/x_eval"
+      ],
+      "expectations": [
+        "The answer identifies sale_stock as the module that adds warehouse_id to the sale order form, with its view file",
+        "The answer fixes it either by adding sale_stock to depends and scoping the locator to the sale.order warehouse_id in group sale_shipping (not the unchanged //field[@name='warehouse_id'], which in 18 then hits the sale.order.line field in the order_line form), or by re-anchoring on a node that exists in sale's own view",
+        "The answer does not invent an anchor that is not in the cited view"
+      ]
+    },
+    {
+      "id": 23,
+      "name": "odoo19-sql-constraint",
+      "odoo_version": "19.0",
+      "prompt": "In module x_eval on Odoo 19, make x.thing.name unique at the database level.",
+      "expected_output": "Odoo 19 ignores _sql_constraints and only logs a warning (odoo/orm/model_classes.py:162-163); declare a class attribute with models.Constraint('UNIQUE(name)', '<message>') as core does (e.g. addons/sale/models/sale_order.py:42 for a CHECK, addons/product/models/product_uom.py:18 for models.Constraint('unique(barcode)', ...)).",
+      "files": [
+        "fixtures/x_eval"
+      ],
+      "expectations": [
+        "The answer uses models.Constraint (or models.UniqueIndex) and does not use _sql_constraints",
+        "The answer cites the Odoo 19 source for models.Constraint or the _sql_constraints warning"
+      ]
+    },
+    {
+      "id": 24,
+      "name": "mixin-method-signature",
+      "odoo_version": "18.0",
+      "prompt": "In module x_eval, override message_post on sale.order so every posted message gets the prefix '[RUSH] ' on its subject when the order is urgent. Give the Context Brief first.",
+      "expected_output": "Base definition addons/mail/models/mail_thread.py:2145 (keyword-only arguments after *), already overridden by sale at addons/sale/models/sale_order.py:1726 as message_post(self, **kwargs). Override with **kwargs, adjust kwargs['subject'] (it may be None), and call super(). sale.order has no urgency field in core (no priority, no urgent flag), so the answer asks what 'urgent' means or uses a field x_eval declares.",
+      "files": [
+        "fixtures/x_eval"
+      ],
+      "expectations": [
+        "The answer cites the base message_post in addons/mail/models/mail_thread.py",
+        "The answer cites the sale.order override in addons/sale/models/sale_order.py",
+        "The override calls super() with the keyword arguments and does not copy the base body",
+        "The answer does not test urgency with a sale.order field that does not exist (e.g. priority or is_urgent); it asks what 'urgent' means or uses a field that x_eval declares or depends on"
       ]
     }
   ]

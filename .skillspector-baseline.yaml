@@ -4,46 +4,54 @@ version: 2
 scanner_version: 2.9.6
 rules: []
 fingerprints:
-- hash: sha256:2eab6b908b06a9cd8532cd3f4b4054d70cf01643ec8957e23a673485b5893fbc
+- hash: sha256:a56ec5191af1053a8495fe51d00c7f1f6201f4a98400ed59341f3edee33167e6
   rule_id: RP1
   file: odoo-16.0/AGENTS.md
   reason: Accepted finding (auto-generated baseline)
-- hash: sha256:5a0b935d9ff7941a127cb66374c088cf9f6d66975f1f94afafe74768d7962856
+- hash: sha256:be52fa27a8118188ea27239f2affd18420773bad7318c539ed9b0de1a40b1847
   rule_id: RP1
   file: odoo-17.0/AGENTS.md
   reason: Accepted finding (auto-generated baseline)
-- hash: sha256:ec0e3c1aab8d6161f8c43bc86470378ec289176e795404a208f10335c7cd774e
+- hash: sha256:e9b706431b20edd9a23e96fee33bcda431eb05791e7772456420ba281505e6df
   rule_id: RP1
   file: odoo-17.0/AGENTS.md
   reason: Accepted finding (auto-generated baseline)
-- hash: sha256:9d2044786efee335dc062ebff495d49bde511e2139b3dc6ce756d22385a62bfd
+- hash: sha256:81223d6a3a1da603d8d3659e9cc67ee1ffd215a4b422e00c7e7ba0f59365762d
   rule_id: RP1
   file: odoo-17.0/AGENTS.md
   reason: Accepted finding (auto-generated baseline)
-- hash: sha256:d0942ae3bec175a73bbb134c1b7bca740eb09e5635d66815f454dee5e684388b
+- hash: sha256:e9d2b0aedecc7aca0ebd14f4b530c1f870f70ea2514726c8e78376de07501ef8
   rule_id: RP1
   file: odoo-18.0/AGENTS.md
   reason: Accepted finding (auto-generated baseline)
-- hash: sha256:b39b1f1be84ef2dd72e7eeb9409dfc1bc6d3d0f6c45b07e81d3de4eb9b75b9f2
+- hash: sha256:e933c9a91dc208fd61ebde76d9f447ef5978516def6b4c1e32e81d74ea02410e
   rule_id: RP1
   file: odoo-18.0/AGENTS.md
   reason: Accepted finding (auto-generated baseline)
-- hash: sha256:183bdcd5cfdf87cca884bbff385d868dab7838b1c8b32e56984fb883c784980d
+- hash: sha256:6a0f73798534488fd9e3cb80419767a91c7dd2bcfadd11cc7ff50116935503a4
   rule_id: RP1
   file: odoo-18.0/AGENTS.md
   reason: Accepted finding (auto-generated baseline)
-- hash: sha256:28d3695f136bbc61805075575f97e23f1e348d7c5b756e9aa4e3f594f0bd3757
+- hash: sha256:ea963f288af8156c87c9406353d2ae684f7013653237625f4eb5c1fe2c1d569c
   rule_id: RP1
   file: odoo-19.0/AGENTS.md
   reason: Accepted finding (auto-generated baseline)
-- hash: sha256:09c7c5f125dcb1f2ebe3a92b613fc6a70cf5bdbf743bc4b153cec1a7b90a30a0
+- hash: sha256:b155b0f6c07c742f5b7e60421f077f2d3c5d3cbebf1486f3718c92a5079aa80e
   rule_id: RP1
   file: odoo-19.0/AGENTS.md
   reason: Accepted finding (auto-generated baseline)
-- hash: sha256:7fad904e6affb21e49284e4e937c477cec951cc49042203c8a9f7a428af38323
+- hash: sha256:cd1780ff1e1aefdf9fbb2777e87b830084fcc40c382a758261ac9fced7b3e253
   rule_id: RP1
   file: odoo-19.0/AGENTS.md
   reason: Accepted finding (auto-generated baseline)
+- hash: sha256:e52bc55bc6d0248b52b32bae3d15c110b66fbfa241003c15100e19913f4a89be
+  rule_id: AS1
+  file: odoo-workflow/scripts/odoo_trace.py
+  reason: Reads only the project runtime pointers .claude/odoo.json and .claude/launch.json (Odoo core path, conf, db name) to locate the Odoo source; read-only, nothing sent anywhere.
+- hash: sha256:57eb0301810f6d47bcb29bab7762f5d8ceb1d8331f7ba52e8418a8f50ac23f16
+  rule_id: AS1
+  file: odoo-workflow/scripts/odoo_trace.py
+  reason: Reads only the project runtime pointers .claude/odoo.json and .claude/launch.json (Odoo core path, conf, db name) to locate the Odoo source; read-only, nothing sent anywhere.
 - hash: sha256:a0790fab0164c39f9c35494df26ec7aae6d3c3d7d577abe2376071c2a057b93c
   rule_id: E1
   file: dtg-base/odoo-18-dtg-base-guide.md
@@ -64,11 +72,11 @@ fingerprints:
   rule_id: EA2
   file: flow-diagram/SKILL.md
   reason: Accepted finding (auto-generated baseline)
-- hash: sha256:371247c930b5aeee0b0ac67ce4450255fc0c4e1c4c3fbec1823f59fd738935e3
+- hash: sha256:55410b4cc8cedcea3d707d5dceb981cd68230caecd85be5d9ff996c4300e4474
   rule_id: MP3
   file: odoo-18.0/references/odoo-18-data-guide.md
   reason: Accepted finding (auto-generated baseline)
-- hash: sha256:94352abf4eee5c5a1c1c73a48cb5ca2138b5f68863f4d06dd8e8740742a99eb4
+- hash: sha256:dbf5162eb35e0334a383e001561ec9682d5a7c89cc97edc4490dad9f9e82e8ee
   rule_id: MP3
   file: odoo-19.0/references/odoo-19-testing-guide.md
   reason: Accepted finding (auto-generated baseline)
@@ -96,18 +104,22 @@ fingerprints:
   rule_id: PE3
   file: odoo-18.0/references/odoo-18-controller-guide.md
   reason: Accepted finding (auto-generated baseline)
-- hash: sha256:05bfa8fc66a8fe70af8a5e3032f489b99ad1fe09e69d8e65882c8cd91d6ff98c
+- hash: sha256:612f2d5f253c84311a4d4539da49370a04ea3f25bfa168e5687103825ecf9b6d
   rule_id: PE3
   file: odoo-19.0/references/odoo-19-model-guide.md
   reason: Accepted finding (auto-generated baseline)
-- hash: sha256:1af431c63584df91bdf6de1332b6b5afc6a9c1c7c3c7c405020bfcee6c603623
+- hash: sha256:d1ccbca573caad9c8ee8d2b6a352327c04e323d9a8850d0c7acef2867505628a
   rule_id: PE2
   file: odoo-workflow/SKILL.md
-  reason: Accepted finding (auto-generated baseline)
-- hash: sha256:fe7f7103b2f30a58c7852cd9f2eaafb4e55fb03e50ef494b612bcb8ef22ed59a
+  reason: Odoo ORM recordset.sudo(), not the shell sudo command.
+- hash: sha256:8585143f5783fb0d4370ede67778cb0061e666f52da85c6245718217c16071d8
   rule_id: PE2
   file: odoo-workflow/SKILL.md
-  reason: Accepted finding (auto-generated baseline)
+  reason: Odoo ORM recordset.sudo(), not the shell sudo command.
+- hash: sha256:3a8c555aa002b0b6b720229cf45f408daa825f9031088fede210054e28a49c36
+  rule_id: PE3
+  file: odoo-workflow/SKILL.md
+  reason: Odoo portal access tokens (access_token on portal.mixin) as an access check before sudo(); no credential files.
 - hash: sha256:4d91ed09e57090f976bc768ddb587fe41f69a37f4def338f132db33c8f3ee75a
   rule_id: P2
   file: flow-diagram/assets/template.html
@@ -312,35 +324,35 @@ fingerprints:
   rule_id: P2
   file: odoo-17.0/references/odoo-17-view-guide.md
   reason: Accepted finding (auto-generated baseline)
-- hash: sha256:d0d83f3fce1a9eeb8553fa26eef76829d585fb429ffeba82591164bed4c1512e
+- hash: sha256:a721fc447ae144dd716f1159d3c985ed232242147d0d14a9d9513bc3687dfd4e
   rule_id: P2
   file: odoo-18.0/references/odoo-18-data-guide.md
   reason: Accepted finding (auto-generated baseline)
-- hash: sha256:0f596f0f0cd61b881eb83d610a88015c1d194d94c04a5f118032c041b418c8e0
+- hash: sha256:58f3c1508de6f4c686818d10b8115abd3e9516dba4d94fc38a068ba410bd12f3
   rule_id: P2
   file: odoo-18.0/references/odoo-18-data-guide.md
   reason: Accepted finding (auto-generated baseline)
-- hash: sha256:0c481a847203bfabd8aaa7e1cbdcf21c9573d61b3e2f11c2eba962d92758f632
+- hash: sha256:49334d999bbc84b51c5cb380376d4fae8699eab10e76b5905c2448de8f7866e3
   rule_id: P2
   file: odoo-18.0/references/odoo-18-data-guide.md
   reason: Accepted finding (auto-generated baseline)
-- hash: sha256:7e60e67ed3ad5607f5b52caf38c19c0bfe241a63bfaadb097ff5fc686d005f6f
+- hash: sha256:2b8f8acf2c354271bb847a1d5baa1db125f88eeca3acc2947130d82fb20fa4a6
   rule_id: P2
   file: odoo-18.0/references/odoo-18-data-guide.md
   reason: Accepted finding (auto-generated baseline)
-- hash: sha256:3d1bdfe923bbd6087ee64c16cea42a49177a94e858aba089b83e289de8617169
+- hash: sha256:c64d6bd5f08638be70a009a290464184dc48c15367fdd43d70d64e53fbe50e2d
   rule_id: P2
   file: odoo-18.0/references/odoo-18-development-guide.md
   reason: Accepted finding (auto-generated baseline)
-- hash: sha256:91dbdd7fd87ab6374776b3e71077323c88ca270ff0451025f8ba6b72fa7023fc
+- hash: sha256:523076d3713337ec633cde845b14fe6d088984388aaf3f04770bb014b4611212
   rule_id: P2
   file: odoo-18.0/references/odoo-18-development-guide.md
   reason: Accepted finding (auto-generated baseline)
-- hash: sha256:601e008072c09d32a53ef585d33631dbf2a028ed74068125f5df3d09a11ebc36
+- hash: sha256:a102b5703d4e896d837984380939eb24226deb58f68740c50e09dee7b6823964
   rule_id: P2
   file: odoo-18.0/references/odoo-18-development-guide.md
   reason: Accepted finding (auto-generated baseline)
-- hash: sha256:a57d99289d89a235986f5a8369e777bd5524325ed3ae2c3b15ee13fccf02bceb
+- hash: sha256:9d17e5cbc4919f6d873085d386608816d4a684790d67bb16c1ff4722d68b7486
   rule_id: P2
   file: odoo-18.0/references/odoo-18-development-guide.md
   reason: Accepted finding (auto-generated baseline)
@@ -352,11 +364,11 @@ fingerprints:
   rule_id: P2
   file: odoo-18.0/references/odoo-18-owl-guide.md
   reason: Accepted finding (auto-generated baseline)
-- hash: sha256:8dcdc235c4bab8b7430bac07e8a339af3b5dc492c0e05afb09606f1db3a03076
+- hash: sha256:1760eeff8436c396c585e240fff7db2a1bef6cd49936d8f1388a21b1c2540282
   rule_id: P2
   file: odoo-18.0/references/odoo-18-reports-guide.md
   reason: Accepted finding (auto-generated baseline)
-- hash: sha256:30df5fe395bb9bf8f7e416f7e02c7f4c69aaaaf2e12de23399ba5b00f331248a
+- hash: sha256:66a3f753650091abd4b5f43e6f6225664e58642631ac036707038af225d4233c
   rule_id: P2
   file: odoo-18.0/references/odoo-18-security-guide.md
   reason: Accepted finding (auto-generated baseline)
@@ -404,11 +416,15 @@ fingerprints:
   rule_id: P1
   file: odoo-19.0/references/odoo-19-performance-guide.md
   reason: Accepted finding (auto-generated baseline)
-- hash: sha256:9fb955c5e0b9c0423ee1ffc679fe374f854adf9dc46b3c2383525d12fb712698
+- hash: sha256:1bf68e72e84846418b58e1c789920ae969adb231da8589e6343897aadc3bdb24
   rule_id: P2
   file: odoo-19.0/references/odoo-19-reports-guide.md
   reason: Accepted finding (auto-generated baseline)
-- hash: sha256:9d7b8f0900182277c10898cad8eb4034643dd2da182b68c56040c1bc5c48d398
+- hash: sha256:7264d5d9d2d0b7bcfc16f982941257f5fec7674fe13bccf3b8149956ef5b8442
+  rule_id: RA2
+  file: odoo-workflow/scripts/odoo_trace.py
+  reason: Error text telling the user which .claude/odoo.json to write; the helper never writes files.
+- hash: sha256:379d0060ebc264c3f9d530c0bb24ad6de382aeabfb397f0a1673fc97b3bddf45
   rule_id: YR4
   file: odoo-18.0/references/odoo-18-data-guide.md
   reason: Accepted finding (auto-generated baseline)

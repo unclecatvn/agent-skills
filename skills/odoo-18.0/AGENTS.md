@@ -169,6 +169,9 @@ After installing via `npx skills add unclecatvn/agent-skills`, the skill is plac
 Before writing code, run the `odoo-workflow` skill if it is installed (trace the real
 source, Context Brief with `file:line`, definition of done); install it alongside this pack.
 
+Read `references/api-highlights.md` before writing code and apply its Quick review
+checks: the ❌ items are what not to use in Odoo 18.
+
 Apply the Coding Conventions section in the guide you open. Odoo 18 runtime
 behavior takes precedence, followed by the surrounding stable-addon style;
 keep convention-only changes focused. The common source is the [Odoo Coding

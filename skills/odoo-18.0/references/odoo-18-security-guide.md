@@ -236,16 +236,17 @@ Record rules restrict which specific records a user can access based on domain f
 
 ### Domain Force Variables
 
-Available variables in `domain_force`:
+Available variables in `domain_force` (the whole context built by `ir.rule._eval_context()` in `base`; the `website` module adds `website`; `datetime`, `uid` and `context` are not available):
 
 | Variable | Type | Description |
 |----------|------|-------------|
-| `user` | Recordset | Current user (singleton) |
-| `user.id` | Int | Current user ID |
-| `user.company_id` | Int | Current user's main company ID |
-| `user.company_ids` | List[Int] | All company IDs user has access to |
+| `user` | Recordset | Current user (singleton, empty context), e.g. `user.id`, `user.partner_id` |
+| `company_id` | Int | Current company ID (`self.env.company.id`) |
+| `company_ids` | List[Int] | IDs of the companies active in the company switcher (`self.env.companies.ids`) |
 | `time` | Module | Python `time` module |
-| `datetime` | Module | Python `datetime` module |
+
+Use `company_ids` for multi-company rules, as core does. `user.company_ids` is the
+recordset of every company the user may access and ignores the company switcher.
 
 ### Rule Evaluation Context
 
@@ -254,7 +255,7 @@ Available variables in `domain_force`:
 domain_force = [('user_id', '=', user.id)]
 
 # Example: Multi-company
-domain_force = [('company_id', 'in', user.company_ids)]
+domain_force = [('company_id', 'in', company_ids)]
 
 # Example: Time-based
 domain_force = [('create_date', '>=', time.strftime('%Y-%m-%d'))]
@@ -263,7 +264,7 @@ domain_force = [('create_date', '>=', time.strftime('%Y-%m-%d'))]
 domain_force = [
     '|',
     ('company_id', '=', False),
-    ('company_id', 'in', user.company_ids)
+    ('company_id', 'in', company_ids)
 ]
 ```
 
@@ -290,7 +291,7 @@ domain_force = [
 <record id="rule_company" model="ir.rule">
     <field name="name">User Company</field>
     <field name="model_id" ref="model_business_trip"/>
-    <field name="domain_force">[('company_id', 'in', user.company_ids)]</field>
+    <field name="domain_force">[('company_id', 'in', company_ids)]</field>
     <field name="global" eval="True"/>
 </record>
 
@@ -358,10 +359,23 @@ domain_force = [
     <field name="domain_force">
         ['|',
         ('company_id', '=', False),
-        ('company_id', 'in', user.company_ids)]
+        ('company_id', 'in', company_ids)]
     </field>
     <field name="global" eval="True"/>
 </record>
+```
+
+The rule filters which trips a user sees; it does not stop a trip from pointing at
+another company's records. Pair it with `_check_company_auto` on the model and
+`check_company=True` on company-scoped relations (core pattern, e.g. `sale.order`):
+
+```python
+class BusinessTrip(models.Model):
+    _name = 'business.trip'
+    _check_company_auto = True  # create()/write() call _check_company()
+
+    company_id = fields.Many2one('res.company', required=True, default=lambda self: self.env.company)
+    partner_id = fields.Many2one('res.partner', check_company=True)  # also adds a company domain in the UI
 ```
 
 #### Read-Own, Write-Manager
@@ -407,11 +421,11 @@ domain_force = [
 ```python
 def test_record_rules(self):
     # Test as regular user
-    trips = self.env['business.trip'].sudo(self.user_employee).search([])
+    trips = self.env['business.trip'].with_user(self.user_employee).search([])
     assert trips, "Employee should see their trips"
 
     # Test as manager
-    all_trips = self.env['business.trip'].sudo(self.user_manager).search([])
+    all_trips = self.env['business.trip'].with_user(self.user_manager).search([])
     assert len(all_trips) >= len(trips), "Manager should see all trips"
 ```
 
@@ -613,11 +627,10 @@ def action_archive(self):
     # Archive as current user (ACL checked)
     self.write({'active': False})
 
-# GOOD: Use sudo() to access related model for permission check
-def check_access(self):
-    # Check if partner is accessible
-    partner = self.partner_id.sudo()
-    if not partner.check_access_rights('read'):
+# GOOD: check the related record as the current user (never under sudo(),
+# which always passes, and never by overriding the ORM's check_access())
+def _check_partner_access(self):
+    if not self.partner_id.has_access('read'):
         raise AccessError("Cannot access partner")
 ```
 
@@ -644,19 +657,19 @@ def process_payment(self):
         # ... time passes ...
         self.write({'state': 'processed'})  # Use (state might have changed)
 
-# GOOD: Use database constraints
-_state_constraint = sql_constraint(
-    'check_state_before_process',
-    'CHECK (state = ''paid'')',
-    'Can only process paid records'
-)
+# GOOD: lock the rows, then re-read, check and write in the same transaction
+from odoo.exceptions import UserError
+from odoo.tools import SQL  # not psycopg2.sql.SQL
 
-# Or use @api.constrains
-@api.constrains('state')
-def _check_state(self):
-    for record in self:
-        if record.state == 'processed' and record.state != 'paid':
-            raise ValidationError("Must be paid to process")
+def process_payment(self):
+    self.env.cr.execute(SQL(
+        "SELECT id FROM %s WHERE id IN %s FOR UPDATE",
+        SQL.identifier(self._table), tuple(self.ids),
+    ))
+    self.invalidate_recordset(['state'])
+    if any(record.state != 'paid' for record in self):
+        raise UserError("Only paid records can be processed")
+    self.write({'state': 'processed'})
 ```
 
 ---
@@ -711,14 +724,16 @@ access_model_user,model_my_model,base.group_user,1,0,0,0
 
 ```python
 # Model
+_check_company_auto = True
 company_id = fields.Many2one('res.company', default=lambda s: s.env.company)
+partner_id = fields.Many2one('res.partner', check_company=True)
 ```
 
 ```xml
 <!-- Global rule -->
 <record id="model_company_rule" model="ir.rule">
     <field name="domain_force">
-        ['|', ('company_id', '=', False), ('company_id', 'in', user.company_ids)]
+        ['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]
     </field>
     <field name="global" eval="True"/>
 </record>
@@ -733,13 +748,14 @@ self.env.user.groups_id  # All groups
 # Check specific group
 self.env.user.has_group('base.group_system')
 
-# Check access rights
-model.check_access_rights('read')
-model.check_access_rights('write', raise_exception=False)
+# Check model access (ACL only, on an empty recordset)
+model.browse().check_access('read')     # raises AccessError
+model.browse().has_access('write')      # returns bool
 
-# Check record access
-record.check_access_rule('read')
-record.check_access_rule('write')
+# Check record access (ACL + record rules)
+records.check_access('write')
+readable = records._filtered_access('read')
+# check_access_rights() / check_access_rule() are deprecated since 18.0
 ```
 
 ---

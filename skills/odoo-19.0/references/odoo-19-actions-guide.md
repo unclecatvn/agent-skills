@@ -189,7 +189,7 @@ Available variables in server actions:
 | `report_type` | string | `qweb-pdf` or `qweb-html` |
 | `report_name` | string | External ID of the qweb template |
 | `print_report_name` | string | Python expression for report name |
-| `groups_id` | Many2many | Groups allowed to view/use the report |
+| `group_ids` | Many2many | Groups allowed to view/use the report |
 | `multi` | boolean | If True, not displayed on form view |
 | `paperformat_id` | Many2one | Paper format to use |
 | `attachment_use` | boolean | Generate once, then reprint from stored report |

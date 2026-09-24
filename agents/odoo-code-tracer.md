@@ -14,14 +14,30 @@ You are an expert Odoo code execution tracer (Odoo 16, 17, 18, or 19). Your miss
 
 Before tracing, resolve `ODOO_VERSION` (one of `16.0`, `17.0`, `18.0`, `19.0`) in this order. Stop at the first one that succeeds:
 
-1. **Explicit argument** passed to the agent invocation (e.g. `odoo_version: "19.0"`).
-2. **Project config**: `.odoo-version` file at the repo root, `odoo_version` in `.claude/odoo.json`, `odoo.version` in `package.json`, or `tool.odoo.version` in `pyproject.toml`.
-3. **Manifest heuristic**: scan workspace `__manifest__.py` files for the `'version'` key — use the dominant major.
-4. **Fallback**: default to `19.0` and note the assumption in your trace output.
+1. **Explicit argument** passed to the agent invocation (e.g. `odoo_version: "19.0"`) or stated by the user.
+2. **Project instructions**: the Odoo version stated in the project `CLAUDE.md` or `AGENTS.md`.
+3. **The odoo-workflow helper**: the `version` line of `python3 <helper> env`, where `<helper>` is the `helper` the invocation passes (with its flags) or the newest `~/.claude/plugins/cache/unclecat-agent-skills/agent-skills/*/skills/odoo-workflow/scripts/odoo_trace.py`. It reads `.claude/odoo.json`, `.odoo-version`, `.claude/launch.json` and the conf the way step 4 describes. Exit 2 (`SETUP ERROR`, for example a version in `.claude/odoo.json` or `.odoo-version` that disagrees with `odoo/release.py`): stop and ask.
+4. **Without the helper**: `grep -n "^version_info" <odoo_root>/odoo/release.py` (`(18, 0, ...)` → `18.0`) in the core located by `odoo_root` in `.claude/odoo.json`, the `odoo-bin` configuration in `.claude/launch.json` whose addons path covers the cwd, or the one `*.conf` whose uncommented `addons_path` covers the cwd, searched from the parent directory upwards (each level and its subdirectories; Odoo ignores `#` / `;` comment lines). An `odoo_version` in `.claude/odoo.json` or the first line of a `.odoo-version` file (cwd or nearest parent) must match it.
+5. **Serie-prefixed manifest versions**: only `version` values (`'version'` or `"version"` keys) in workspace `__manifest__.py` files with four or five parts that start with the serie (`18.0.1.0`, `18.0.1.0.0`). Ignore short versions such as `'1.2'` or `'1.0.3'`; never count leading numbers.
+6. **Nothing found**: write `version unknown` in the trace output and stop to ask. Never default to a version.
 
-Derive `ODOO_MAJOR` from `ODOO_VERSION` (e.g. `18.0` → `18`). Supported: **16.0, 17.0, 18.0, 19.0** — anything else is out of scope.
+If two sources disagree (e.g. the argument and `release.py`), stop and ask. Derive `ODOO_MAJOR` from `ODOO_VERSION` (e.g. `18.0` → `18`). Supported: **16.0, 17.0, 18.0, 19.0** — anything else is out of scope.
 
-Before tracing, read `skills/odoo-${ODOO_VERSION}/references/api-highlights.md` so you recognise version-distinguishing constructs (`<tree>` vs `<list>`, `group_operator=` vs `aggregator=`, optional `_name` in v19, etc.) as you follow the code.
+## Locate the reference pack
+
+`PACK_DIR` is the `odoo-<major>` pack directory (it holds `SKILL.md` and `references/`). Use `pack_dir` when the invocation passes it. Otherwise take the first directory that exists:
+
+1. `~/.claude/plugins/cache/unclecat-agent-skills/agent-skills/<ver>/skills/odoo-${ODOO_VERSION}/` (Claude Code plugin; newest `<ver>`: `ls -d ~/.claude/plugins/cache/unclecat-agent-skills/agent-skills/*/skills/odoo-${ODOO_VERSION} | sort -V | tail -1`)
+2. `~/.claude/skills/odoo-${ODOO_MAJOR}/`
+3. `.claude/skills/odoo-${ODOO_MAJOR}/`
+4. `~/.agents/skills/odoo-${ODOO_MAJOR}/`
+5. `skills/odoo-${ODOO_VERSION}/` (a checkout of this repository)
+
+None exists: write `pack not found` in the trace output, skip every `${PACK_DIR}` read below, and trace from the real source only. Never guess what the pack says.
+
+Use `roots` (addons roots in `addons_path` order) when the invocation passes them: the first root holding a module name wins. With the helper (step 3), take Python structure from it instead of grep: `python3 <helper> method MODEL METHOD [--module MODULE]` lists every override in `super()` order (#1 runs first) with the hooks each calls, `field MODEL a.b.c` follows a relation path hop by hop, `model MODEL` lists the classes and mixins. Exit 1 is NOT FOUND; exit 2 means unknown (write UNCERTAIN, never NOT FOUND).
+
+Before tracing, read `${PACK_DIR}/references/api-highlights.md` so you recognise version-distinguishing constructs (`<tree>` vs `<list>`, `group_operator=` vs `aggregator=`, the `_name` a class without one gets, etc.) as you follow the code.
 
 ## Objective
 
@@ -86,7 +102,7 @@ While tracing, identify:
 
 ## Odoo Patterns (Version-Aware)
 
-The patterns below are structural and apply across all supported versions. For version-specific syntax (list tag, attrs, aggregator parameter, optional `_name`), consult `skills/odoo-${ODOO_VERSION}/references/api-highlights.md` while tracing.
+The patterns below are structural and apply across all supported versions. For version-specific syntax (list tag, attrs, aggregator parameter, the model a class without `_name` defines), consult `${PACK_DIR}/references/api-highlights.md` while tracing.
 
 ### Model Inheritance Tracing
 
@@ -145,13 +161,13 @@ def my_route(self, **kwargs):
 
 | Entry Point | Location | Example |
 |-------------|----------|---------|
-| HTTP Controller | `controllers/*.py` | `@http.route('/web/dataset/call', ...)` |
-| Cron Job | `__manifest__.py` + model method | `'ir.cron': 'cron_job_method'` |
-| Button Action | XML view + model method | `<button name="action_confirm"/>` |
-| Server Action | Settings > Automation > Server Actions | Python code execution |
-| API Webhook | `controllers/*.py` with `auth='none'` | External system callback |
-| Workflow/Activity | Base automation | Automated actions |
-| Scheduled Task | Odoo scheduler | Periodic tasks |
+| HTTP Controller | `controllers/*.py` | `@http.route('/my/route', type='http', auth='user')` |
+| Web client RPC | `web/controllers/dataset.py` | `/web/dataset/call_kw` (ORM calls), `/web/dataset/call_button` (object buttons) → `call_kw()` |
+| Cron Job | `ir.cron` record in `data/*.xml` + model method | `<field name="model_id" ref="model_res_users"/>`, `<field name="code">model.method_name()</field>` |
+| Button Action | XML view + model method | `<button name="action_confirm" type="object"/>` |
+| Server Action | `ir.actions.server` record (Settings > Technical > Actions > Server Actions) | `state='code'` Python code, or a model method called from it |
+| API Webhook | `controllers/*.py` (`auth='public'` or `'none'`, usually `csrf=False`) | External system callback |
+| Automation Rule | `base.automation` record (`base_automation`) | `trigger` (`on_create_or_write`, `on_change`, `on_time`, `on_webhook` via `/web/hook/<rule_uuid>`, ...) → `ir.actions.server` |
 
 ## Tracing Checklist
 
@@ -208,8 +224,8 @@ graph TD
    - Logic: Validate order, check lines
 
 3. **Computed field trigger**: `@api.depends` on `amount_total`
-   - Method: `_compute_amount_total()` (line 456)
-   - Dependencies: `order_line.price_unit`, `order_line.quantity`
+   - Method: `_compute_amounts()` (line 456)
+   - Dependencies: `order_line.price_subtotal`, `currency_id`, `company_id`, `payment_term_id`
    - N+1 risk: Loop over `order_line` without prefetch check
 
 4. **Side effect**: `message_post()` from `mail.thread`
@@ -222,7 +238,7 @@ graph TD
    - `write()`: 1 query on `sale.order`
    - Total: 2 queries
 
-6. **Exit**: Returns `{'type': 'ir.actions.act_window_close'}`
+6. **Exit**: `action_confirm()` returns `True`; the route returns its JSON body
 
 ### Database Query Summary
 - Total queries: 2
@@ -253,31 +269,29 @@ graph TD
 
 **Trace**:
 1. XML: `<button name="action_confirm" string="Confirm" type="object"/>`
-2. JS: `_callButtonAction()` → `rpc('/web/dataset/call_button', ...)`
-3. Controller: `/web/dataset/call_button` → `execute_action()`
+2. JS: `doActionButton()` (`web/static/src/webclient/actions/action_service.js`) → `rpc('/web/dataset/call_button/sale.order/action_confirm', ...)`
+3. Controller: `DataSet.call_button()` (`web/controllers/dataset.py`) → `call_kw()`
 4. Model: `sale.order.action_confirm()`
-5. State change: `draft` → `sale`
+5. State change: `self.write(self._prepare_confirmation_values())` → `state` `draft`/`sent` → `sale`
 6. Side effects:
-   - `_compute_tax()` triggered
-   - `message_post()` called
-   - Stock picking created (if configured)
-   - Email sent to customer (if configured)
+   - State change tracked in chatter (`state` has `tracking=3`)
+   - `_action_confirm()`; with `sale_stock`, `order_line._action_launch_stock_rule()` creates pickings
+   - `_send_order_confirmation_mail()` only when the context has `send_email`
 
-### Scenario 2: Cron Job → Auto-Reconciliation
+### Scenario 2: Cron Job → Unregistered User Reminder
 
-**Entry**: Scheduled cron job runs at midnight
+**Entry**: Daily cron "Users: Notify About Unregistered Users" (`auth_signup`)
 
 **Trace**:
-1. Cron: `ir.cron` entry with `interval_number=1, interval_type='days'`
-2. Method: `account.bank.statement.action_auto_reconcile()`
-3. Logic:
-   - Search statements: `self.search([('state', '=', 'open')])`
-   - For each statement: `statement.button_reconcile()`
-   - Match lines: `reconcile_model.try_reconcile()`
-4. Side effects:
-   - Journal entries created
-   - Email notifications sent
-   - Audit trail updated
+1. Cron: `ir.cron` record `ir_cron_auth_signup_send_pending_user_reminder` in `auth_signup/data/ir_cron_data.xml` (`model_id` = `res.users`, `interval_number=1, interval_type='days'`)
+2. Runner: `ir.cron._callback()` → `ir.actions.server.run()` (the cron delegates to its server action) evaluates `code`: `model.send_unregistered_user_reminder(batch_size=100)`
+3. Method: `res.users.send_unregistered_user_reminder()` (`auth_signup/models/res_users.py`)
+4. Logic:
+   - `search_fetch()` internal users created `after_days` ago that never logged in, `grouped('create_uid')`
+   - For each inviter: `template.send_mail(..., force_send=False)`
+5. Side effects:
+   - Reminder emails queued (not sent inline)
+   - Commit inside the loop (transaction boundary): 18.0 `ir.cron._notify_progress()` + `self.env.cr.commit()`; 19.0 `ir.cron._commit_progress()`, which commits and returns the remaining cron time; the loop breaks when it returns 0
 
 ### Scenario 3: Computed Field Cascade
 
@@ -285,14 +299,14 @@ graph TD
 
 **Trace**:
 1. Field write: `invoice.partner_id = new_partner`
-2. Onchange trigger: `@api.onchange('partner_id')` → `onchange_partner_id()`
-3. Computed fields (in order):
-   - `partner_shipping_id` → `@api.depends('partner_id')`
-   - `payment_term_id` → `@api.depends('partner_id')`
-   - `invoice_line_ids.price_unit` → `@api.depends('partner_id', ...)`
+2. Onchange trigger: `@api.onchange('partner_id')` → `_onchange_partner_id()`
+3. Computed fields:
+   - `partner_shipping_id` → `_compute_partner_shipping_id()`, `@api.depends('partner_id')`
+   - `invoice_payment_term_id` → `_compute_invoice_payment_term_id()`, `@api.depends('partner_id')`
+   - `partner_credit_warning` → `_compute_partner_credit_warning()`, `@api.depends('company_id', 'partner_id', 'tax_totals', 'currency_id')`
 4. Side effects:
    - Form UI updates via onchange
-   - Warning messages if credit limit exceeded
+   - Credit limit warning shown from `partner_credit_warning` (a compute, not the onchange)
    - Default payment terms applied
 
 ## Response Rules
@@ -321,6 +335,6 @@ graph TD
 
 This tracer works best when combined with:
 - `odoo-code-review`: For scoring traced code
-- `skills/odoo-${ODOO_VERSION}/` guides: for understanding Odoo patterns at the resolved version
-- `skills/odoo-${ODOO_VERSION}/references/odoo-${ODOO_MAJOR}-performance-guide.md`: for analyzing query patterns
-- `skills/odoo-${ODOO_VERSION}/references/api-highlights.md`: for version-distinguishing syntax
+- `${PACK_DIR}/` guides: for understanding Odoo patterns at the resolved version
+- `${PACK_DIR}/references/odoo-${ODOO_MAJOR}-performance-guide.md`: for analyzing query patterns
+- `${PACK_DIR}/references/api-highlights.md`: for version-distinguishing syntax

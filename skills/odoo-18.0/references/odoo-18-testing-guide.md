@@ -229,6 +229,8 @@ Run a test method multiple times with different users.
 from odoo.tests import users
 
 class TestAccessRights(TransactionCase):
+    # 'demo' and 'portal' come from base demo data (loaded by default on new
+    # 18 databases, absent with --without-demo=all); create users otherwise
     @users('admin', 'demo', 'portal')
     def test_with_different_users(self):
         """Test runs 3 times, once for each user."""

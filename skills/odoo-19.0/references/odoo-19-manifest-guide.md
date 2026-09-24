@@ -187,7 +187,8 @@ Data files always loaded at installation and update.
 
 ### demo (list(str))
 
-Data files only loaded in demonstration mode.
+Data files only loaded in demonstration mode. Odoo 19 creates new databases **without**
+demo data unless the server runs with `--with-demo`.
 
 ```python
 'demo': [

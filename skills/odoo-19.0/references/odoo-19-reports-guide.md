@@ -31,21 +31,13 @@ Reports consist of:
 
 ## Report Declaration
 
-### Using report Tag (Simple)
+### No `<report>` Shortcut
 
-```xml
-<report
-    id="account_invoice_report"
-    string="Invoice"
-    model="account.move"
-    report_type="qweb-pdf"
-    name="account.report_invoice"
-    file="account.report_invoice"
-    print_report_name="'Invoice - %s' % (object.name)"
-/>
-```
+Odoo 19 has no `<report>` tag (the XML loader only accepts `record`, `template`,
+`menuitem`, `function`, `delete` and `asset`); a `<report .../>` element fails validation.
+Always declare an `ir.actions.report` record.
 
-### Using record Tag (Advanced)
+### Using record Tag
 
 ```xml
 <record id="my_report" model="ir.actions.report">
@@ -55,7 +47,7 @@ Reports consist of:
     <field name="report_name">my_module.my_template</field>
     <field name="print_report_name">'My Report - %s' % (object.name)</field>
     <field name="binding_model_id" ref="model_my_model"/>
-    <field name="paperformat_id" ref="paperformat_euro"/>
+    <field name="paperformat_id" ref="base.paperformat_euro"/>
 </record>
 ```
 
@@ -63,16 +55,16 @@ Reports consist of:
 
 | Attribute           | Description                               |
 | ------------------- | ----------------------------------------- |
-| `id`                | External identifier                       |
-| `string`            | Report name                               |
+| `id`                | External identifier of the record         |
+| `name`              | Report name                               |
 | `model`             | Model for the report                      |
 | `report_type`       | `qweb-pdf` or `qweb-html`                 |
-| `name`              | External ID of QWeb template              |
-| `file`              | Same as name (for backward compatibility) |
+| `report_name`       | External ID of QWeb template              |
+| `report_file`       | Path of the main report file              |
 | `print_report_name` | Python expression for filename            |
 | `paperformat_id`    | Paper format                              |
 | `binding_model_id`  | Model to show in Print menu               |
-| `groups_id`         | Groups allowed to use report              |
+| `group_ids`         | Groups allowed to use report              |
 | `multi`             | If True, don't show on form view          |
 | `attachment_use`    | Generate once, reprint from stored        |
 | `attachment`        | Python expression for attachment          |
@@ -188,11 +180,12 @@ Use custom values in template:
 
 ### Built-in Paper Formats
 
-| Format                 | Size   |
-| ---------------------- | ------ |
-| `paperformat_euro`     | A4     |
-| `paperformat_us`       | Letter |
-| `paperformat_us_legal` | Legal  |
+| Format                  | Size   |
+| ----------------------- | ------ |
+| `base.paperformat_euro` | A4     |
+| `base.paperformat_us`   | Letter |
+
+For another size (e.g. `Legal`), define a `report.paperformat` record with that `format`.
 
 ### Custom Paper Format
 

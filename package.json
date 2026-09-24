@@ -1,6 +1,6 @@
 {
   "name": "@unclecat/agent-skills-cli",
-  "version": "1.0.19",
+  "version": "1.0.20",
   "description": "CLI and docs for installing agent skills by version.",
   "bin": {
     "agent-skills": "bin/agent-skills.js"

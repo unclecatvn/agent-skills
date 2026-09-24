@@ -147,13 +147,14 @@ Evaluate a Python expression:
 
 ```xml
 <field name="active" eval="True"/>
-<field name="date_today" eval="datetime.date.today()"/>
+<field name="date_today" eval="time.strftime('%Y-%m-%d')"/>
 <field name="partner_id" eval="ref('base.main_partner')"/>
 ```
 
 Evaluation context:
 
-- `time`, `datetime`, `timedelta`, `relativedelta` modules
+- `time` module; `datetime` / `DateTime`, `timedelta`, `relativedelta` are the classes, not the
+  modules (`datetime.now()`, not `datetime.datetime.now()`)
 - `ref()` function to resolve external IDs
 - `obj` for current field's model
 

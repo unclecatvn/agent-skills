@@ -56,28 +56,33 @@ Reports in Odoo are written in HTML/QWeb and rendered to PDF using `wkhtmltopdf`
 
 ### Report Declaration
 
+Odoo 18 has no `<report>` shortcut tag (the XML loader and `import_xml.rng` only accept
+`record`, `template`, `menuitem`, `function`, `delete` and `asset`); declare an
+`ir.actions.report` record:
+
 ```xml
-<report
-    id="account_invoices"
-    model="account.move"
-    string="Invoices"
-    report_type="qweb-pdf"
-    name="account.report_invoice"
-    file="account_report_invoice"
-    print_report_name="'Invoice-{}-{}'.format(object.number or 'n/a', object.state)"
-/>
+<record id="account_invoices" model="ir.actions.report">
+    <field name="name">Invoices</field>
+    <field name="model">account.move</field>
+    <field name="report_type">qweb-pdf</field>
+    <field name="report_name">account.report_invoice</field>
+    <field name="report_file">account.report_invoice</field>
+    <field name="print_report_name">'Invoice-%s' % (object.name or 'n/a')</field>
+    <field name="binding_model_id" ref="account.model_account_move"/>
+    <field name="binding_type">report</field>
+</record>
 ```
 
 ### Report Attributes
 
 | Attribute | Type | Description | Required |
 |-----------|------|-------------|----------|
-| `id` | string | Unique identifier (external ID) | Yes |
+| `id` | string | Record external ID (`<record id="...">`) | Yes |
 | `model` | string | Model to report on | Yes |
-| `string` / `name` | string | Human-readable name | Yes |
+| `name` | string | Human-readable name | Yes |
 | `report_type` | string | `qweb-pdf` or `qweb-html` | No (default: qweb-pdf) |
-| `name` | string | External ID of QWeb template | Yes |
-| `file` | string | Output file name pattern | No |
+| `report_name` | string | External ID of QWeb template | Yes |
+| `report_file` | string | Path of the main report file | No |
 | `print_report_name` | string | Python expression for file name | No |
 | `groups_id` | Many2many | Groups allowed to view/use | No |
 | `multi` | boolean | Don't show on form view if True | No |
@@ -88,21 +93,12 @@ Reports in Odoo are written in HTML/QWeb and rendered to PDF using `wkhtmltopdf`
 
 ### Report Action vs Record
 
-The `<report>` tag creates two records:
+A report needs two records, each declared explicitly (there is no `<report>` shortcut in 18):
 
 1. **ir.actions.report** - The report action
-2. **ir.ui.view** - The QWeb template
+2. **ir.ui.view** - The QWeb template (`<template>`)
 
 ```xml
-<!-- Shortcut: creates both records -->
-<report
-    id="my_report"
-    model="my.model"
-    name="my_module.my_report_template"
-    report_type="qweb-pdf"
-/>
-
-<!-- Equivalent to: -->
 <record id="my_report" model="ir.actions.report">
     <field name="name">My Report</field>
     <field name="model">my.model</field>
@@ -371,13 +367,13 @@ Letter, Legal, Tabloid
 ### Using Paper Format
 
 ```xml
-<report
-    id="my_report"
-    model="my.model"
-    name="my_module.my_report"
-    report_type="qweb-pdf"
-    paperformat_id="my_module.paperformat_euro"
-/>
+<record id="my_report" model="ir.actions.report">
+    <field name="name">My Report</field>
+    <field name="model">my.model</field>
+    <field name="report_type">qweb-pdf</field>
+    <field name="report_name">my_module.my_report</field>
+    <field name="paperformat_id" ref="my_module.paperformat_euro"/>
+</record>
 ```
 
 ---
@@ -684,19 +680,19 @@ Barcodes are returned by a controller and can be embedded in reports.
 ### Report Declaration
 
 ```xml
-<report
-    id="my_report"
-    model="my.model"
-    string="My Report"
-    report_type="qweb-pdf"
-    name="my_module.my_template"
-    file="my_report"
-    print_report_name="'Report-' + str(object.id)"
-    groups_id="base.group_user"
-    paperformat_id="my_module.paperformat_custom"
-    attachment_use="False"
-    binding_model_id="model_my_model"
-/>
+<record id="my_report" model="ir.actions.report">
+    <field name="name">My Report</field>
+    <field name="model">my.model</field>
+    <field name="report_type">qweb-pdf</field>
+    <field name="report_name">my_module.my_template</field>
+    <field name="report_file">my_module.my_template</field>
+    <field name="print_report_name">'Report-' + str(object.id)</field>
+    <field name="groups_id" eval="[Command.link(ref('base.group_user'))]"/>
+    <field name="paperformat_id" ref="my_module.paperformat_custom"/>
+    <field name="attachment_use" eval="False"/>
+    <field name="binding_model_id" ref="model_my_model"/>
+    <field name="binding_type">report</field>
+</record>
 ```
 
 ### Template Skeleton

@@ -2,6 +2,31 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.20]
+
+### Release Description
+`odoo-workflow` now finds the Odoo runtime and traces Python symbols with a bundled read-only helper instead of hand-written greps. Measured on Odoo 18 and 19 source (`tests/evals/odoo-workflow/benchmark.md`): the 1.0.19 recipe answered 12 of 34 trace questions correctly under zsh, the shell Claude Code runs on macOS, because `$ROOTS` does not split there and every lookup came back empty, which reads as NOT FOUND. Under bash it answered 20 of 34, missing fields from mixins and prototype parents, xmlids defined in CSV files, base method signatures, and report models without log fields. The helper answers 34 of 34 with about a tenth of the output. It also finds the Odoo core when the conf lives outside the project, which the 1.0.19 fallback never did in any of the three real projects checked. With Opus agents on the 24 evals, answer quality is at the ceiling for both versions (70/71 vs 71/71 expectations, 0 vs 2 wrong citations); the new version needs 12-18% fewer tool calls and 7-16% less context. Against no skill at all, it passes 23/23 expectations vs 21/23 when the agent is not told where Odoo is, and a blind grader prefers it in 16 of 32 pairs (6 for no skill, 10 ties), at about twice the output tokens. The definition of done was run end to end on scratch databases on 18 and 19 and rewritten from what actually happened. The Odoo 16-19 packs and both agents lose several claims the source disproves.
+
+### Added
+- `skills/odoo-workflow/scripts/odoo_trace.py` - stdlib-only, read-only helper: `env`/`roots` (`.claude/odoo.json`, `.claude/launch.json`, conf discovery, `.odoo-version` checked against `release.py`, addons roots in Odoo's own order), `model`, `field` (own, `_inherit` parents, `_inherits`, `base`, magic fields from `_log_access`/`_auto`, dotted paths), `method` (`super()` order, hooks with absolute lines, AMBIGUOUS overrides), `depends`, `xmlid` (loaded XML/CSV records, generated `model_`/`field_`/`selection__`/`module_`/chart-template ids), `unlisted` (files the manifest or `__init__.py` never load). Exit 0 found, 1 NOT FOUND, 2 setup error; long lists are capped, `--all` lifts the cap.
+- `skills/odoo-workflow/references/definition-of-done.md` - the Step 5 commands, each run on 18 and 19: one scratch database for install and tests (`--http-port`, `--workers=0`, a summary counting more than 0 tests), upgrade test on an `odoo-bin db duplicate` copy with the migration version rules, `unlisted`, i18n (18 needs `i18n/` first; 19 takes the module before `-l`, `-o` keeps `vi_VN.po`), `msgmerge --no-fuzzy-matching --backup=none`, `odoo-bin db drop`, a security list, and hygiene checks per git repository.
+- `tests/test_odoo_trace.sh` + `tests/fixtures/odoo_trace/` - 67 fixture checks in `npm test`, 107 with `ODOO_ROOT_18`/`ODOO_ROOT_19`, under bash and zsh.
+- `tests/bench_odoo_workflow.py` - the 1.0.19 grep recipe (zsh and bash) against the helper on real checkouts, plus a core-in-roots check for real project directories.
+- `tests/evals/odoo-workflow/` - twelve new evals (mixin field, prototype copy, CSV xmlid, report model create_date, OWL t-inherit, controller override, Odoo 19 i18n export, multi-company model, portal sudo, traceback entry, Odoo 19 constraint, mixin method signature); eval 11 now requires the migration; every reference answer re-checked against source. `benchmark.md` records the agent runs: 1.0.19 vs 1.0.20, and no skill vs 1.0.20 (32 blind-graded pairs).
+
+### Changed
+- `skills/odoo-workflow/SKILL.md` - Step 0 resolves the runtime through the helper; Step 1 uses the helper for Python symbols and zsh-safe greps over `$(odoo_trace roots)` for views (including `inherit_id` split over two lines), OWL `t-inherit`, JS `patch()`, routes and controller subclasses, ACLs and rename impact; Brief rules for company rules, schema changes (manifest bump plus migration script), `sudo()` audits, xmlids, magic fields and missing `groups=`; Brief-only and fast paths; the description also triggers on pasted tracebacks and symbol questions. `globs` is dropped: Claude Code skills do not read it.
+- `skills/odoo-workflow/templates/CLAUDE.md` - machine-local `.claude/odoo.json`, scratch databases only, migrations for stored-field changes, one commit and PR per repository.
+- `agents/odoo-code-tracer.md`, `agents/odoo-code-review.md` - version resolution matches the workflow (no "dominant manifest major", no 19.0 default); pack, roots and helper are passed in or located, else `pack not found`; `read_group` advice per version; `sudo()` needs a stated bypass and a prior access check; multi-company checks; hygiene per repository; invented symbols removed from the tracer's entry-point table and scenarios.
+- `skills/odoo-1[6-9].0/` - record rules use `company_ids` (not `user.company_ids`) with the real evaluation context; rule tests use `with_user()`; `check_company` / `_check_company_auto`; Odoo 19 ignores `_sql_constraints` (`models.Constraint` / `Index` / `UniqueIndex`), `@api.private`, `read_group` deprecated; Odoo 18 `check_access` / `has_access`; Odoo 19 `i18n export` argument order and ISO-code file names; `msgmerge` without fuzzy matching; demo defaults per version; no `<report>` tag in 18/19; XML `eval` context; invented translation APIs removed from the 19 guide. Each pack's `SKILL.md`, `CLAUDE.md` and `AGENTS.md` points at `references/api-highlights.md` before writing code.
+- `README.md` - rewritten for users: why the toolkit exists, a real task run with and without the skill (same model, blind-graded against the Odoo 18 source) with the aggregate numbers and their cost, installation routes, first run in an Odoo project, how the workflow and its helper work, everyday prompts, runtime and version resolution, limits, and testing.
+- `tests/test-skills.js` - the Step 1 greps run on fixtures under bash and zsh; the helper suite runs in `npm test`.
+- `tests/odoo-workflow-greps.sh` - the new greps against real source under both shells.
+- `.skillspector-baseline.yaml` - regenerated with SkillSpector 2.9.6 after the intentional changes; new entries carry a reason.
+
+### Removed
+- `tests/fixtures/odoo_workflow/models.py` - the Python greps it tested are replaced by the helper.
+
 ## [1.0.19]
 
 ### Release Description

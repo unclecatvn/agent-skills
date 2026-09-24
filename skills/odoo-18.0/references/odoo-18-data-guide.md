@@ -159,7 +159,7 @@ If `id` exists, record is updated instead of created:
 ```xml
 <field name="value" eval="42"/>
 <field name="total" eval="10 + 20"/>
-<field name="now" eval="datetime.datetime.now()"/>
+<field name="now" eval="datetime.now()"/>
 <field name="list" eval="[(4, ref('base.group_user'))]"/>
 ```
 
@@ -170,15 +170,15 @@ Available in `eval`:
 | Variable | Description |
 |----------|-------------|
 | `time` | Python `time` module |
-| `datetime` | Python `datetime` module |
-| `timedelta` | Python `timedelta` module |
-| `relativedelta` | `dateutil.relativedelta` |
+| `datetime` / `DateTime` | The `datetime.datetime` class (`datetime.now()`), not the module |
+| `timedelta` | The `datetime.timedelta` class |
+| `relativedelta` | The `dateutil.relativedelta.relativedelta` class |
 | `ref()` | Resolve external ID |
-| `obj` | Current model (for field-specific) |
+| `obj` | `browse` of the field's comodel (or of its `model=` attribute) |
 
 ```xml
-<field name="date" eval="datetime.date.today()"/>
-<field name="next_week" eval="datetime.date.today() + relativedelta.relativedelta(weeks=1)"/>
+<field name="date" eval="time.strftime('%Y-%m-%d')"/>
+<field name="next_week" eval="(datetime.today() + relativedelta(weeks=1)).strftime('%Y-%m-%d')"/>
 ```
 
 #### ref - External ID Reference
@@ -645,8 +645,9 @@ Data in `<data noupdate="1">` is only loaded at installation:
     </record>
 </data>
 
-<!-- Demo data: only in demo mode -->
-<data noupdate="1" demo="true">
+<!-- Demo data: put it in a file listed under the manifest 'demo' key
+     (<data> accepts only noupdate, auto_sequence, uid and context) -->
+<data noupdate="1">
     <record id="demo_partner" model="res.partner">
         <field name="name">Demo Partner</field>
     </record>

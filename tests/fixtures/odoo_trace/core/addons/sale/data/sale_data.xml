@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="report_saleorder">
+        <div id="wrap">no record id on a div</div>
+    </template>
+</odoo>

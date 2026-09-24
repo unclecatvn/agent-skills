@@ -347,11 +347,12 @@ access_my_model_portal,my.model.portal,model_my_model,base.group_portal,1,0,0,0
 
 | Variable | Description |
 |----------|-------------|
-| `user` | Current user record |
-| `uid` | Current user ID |
-| `company_ids` | Allowed companies for current user |
-| `company_id` | Current company |
-| `context` | Current context |
+| `user` | Current user record (use `user.id` for the ID) |
+| `company_ids` | IDs of the companies active in the company switcher |
+| `company_id` | Current company ID |
+| `time` | Python `time` module |
+
+`uid`, `context` and `datetime` are not in the rule evaluation context.
 
 ### Groups Definition
 

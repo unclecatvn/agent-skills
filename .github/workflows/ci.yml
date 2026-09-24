@@ -60,6 +60,21 @@ jobs:
       - name: Run skill and manifest validator
         run: npm test
 
+  trace-helper-py38:
+    # odoo_trace.py promises Python >= 3.8 (Odoo 16 hosts); the validate job only runs the runner's default 3.12.
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: Run odoo_trace.py fixtures on Python 3.8
+        run: |
+          uv python install 3.8
+          PYTHON="$(uv python find 3.8)" bash tests/test_odoo_trace.sh
+
   skill-security-scan:
     runs-on: ubuntu-latest
     permissions:

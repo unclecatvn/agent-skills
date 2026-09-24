@@ -28,3 +28,6 @@ pnpm-debug.log*
 
 # CI artifacts
 skillspector.sarif
+
+# Python
+__pycache__/

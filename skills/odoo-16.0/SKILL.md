@@ -42,6 +42,9 @@ Master index for all Odoo 16 development guides. Read the appropriate guide from
 Before writing code, run the `odoo-workflow` skill if it is installed (trace the real
 source, Context Brief with `file:line`, definition of done); install it alongside this pack.
 
+Read `references/api-highlights.md` before writing code and apply its Quick review
+checks: the "Wrong:" items are what not to use in Odoo 16.
+
 Apply the relevant convention section in the guide you open. The conventions
 are advisory: preserve the style of an existing stable addon and keep diffs
 focused. When guidance conflicts, prefer Odoo 16 runtime/source behavior,
