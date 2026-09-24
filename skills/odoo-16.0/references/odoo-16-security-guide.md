@@ -248,7 +248,7 @@ Record rules filter which records of a model a given user can access.
 | `user.id` | Current user ID |
 | `user.partner_id` | Partner linked to user |
 | `user.company_id` | User's current main company |
-| `user.company_ids` | IDs of companies the user can access (legacy alias) |
+| `user.company_ids` | Recordset of all companies the user may switch to (ignores the company switcher; prefer `company_ids`) |
 | `company_id` | Current allowed company (`self.env.company.id`) |
 | `company_ids` | List of IDs of allowed companies (`self.env.companies.ids`) |
 | `time` | Python `time` module |

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Fixture for Step 1 command 9 in skills/odoo-workflow/SKILL.md. FLAG lines must match. -->
+<!-- Fixture for the odoo-workflow Step 1 greps. A line tagged FLAG:<command> must be reported by that command; every other line stays silent. -->
 <odoo>
     <record id="view_order_form_inherit_x" model="ir.ui.view">
         <field name="model">sale.order</field>
@@ -9,10 +9,20 @@
     </template>
     <template id="report_y" inherit_id='sale.view_order_form'> <!-- FLAG:view-inherit -->
     </template>
+    <record id="view_split_inherit" model="ir.ui.view">
+        <field name="inherit_id"
+               ref="sale.view_order_form"/> <!-- FLAG:view-inherit -->
+    </record>
     <record id="action_x" model="ir.actions.act_window">
         <field name="view_id" ref="sale.view_order_form"/>
     </record>
     <record id="view_other_inherit" model="ir.ui.view">
         <field name="inherit_id" ref="sale.view_order_form_extra"/>
+        <field name="view_id" ref="sale.view_order_form"/>
     </record>
+    <t t-name="web.ControlPanel"> <!-- FLAG:owl-template -->
+        <t t-call="web.ControlPanel"/>
+    </t>
+    <t t-name="x.ControlPanel" t-inherit="web.ControlPanel" t-inherit-mode="primary"/> <!-- FLAG:owl-template -->
+    <t t-inherit="web.ControlPanelExtra" t-inherit-mode="extension"/>
 </odoo>

@@ -67,14 +67,17 @@ message = _("Hello %(name)s") % {'name': name}
 ### Lazy Translation
 
 ```python
-from odoo import _
+from odoo.tools.translate import LazyTranslate
 
-# Lazy translation (evaluated when displayed, not when imported)
-ERROR_MESSAGE = _("Error occurred")
+_lt = LazyTranslate(__name__)
+
+# Lazy translation (evaluated when displayed, not when imported); a module-level
+# _() runs at import time without a language and stays untranslated
+ERROR_MESSAGE = _lt("Error occurred")
 
 def my_method(self):
-    # ERROR_MESSAGE is translated when needed
-    return {'error': ERROR_MESSAGE}
+    # translated in the environment's language
+    return {'error': self.env._(ERROR_MESSAGE)}
 ```
 
 ### Multi-Line Translation
@@ -89,8 +92,10 @@ message = _(
 ### Context Translation
 
 ```python
-# Provide context for translators
-message = _("Cancel", default_code="refund_cancel")
+# _() has no translator-context argument: keyword arguments are %-format
+# parameters. Terms are looked up per module, so disambiguate with a more
+# specific source string.
+message = _("Cancel Refund")
 ```
 
 ---
@@ -114,18 +119,21 @@ const message = _t("Hello %(name)s", { name: "John" });
 ### Lazy Translation
 
 ```javascript
-import { lazyTranslation } from "@web/core/l10n/translation";
+import { _t } from "@web/core/l10n/translation";
 
-const lt = lazyTranslation(() => _t("Error occurred"));
+// _t() returns a lazy TranslatedString while translations are not loaded yet,
+// so it is safe at module level (there is no _lt or lazyTranslation export in 19)
+const ERROR_MESSAGE = _t("Error occurred");
 ```
 
 ### Class Translation
 
 ```javascript
-import { _lt } from "@web/core/l10n/translation";
+import { Component } from "@odoo/owl";
+import { _t } from "@web/core/l10n/translation";
 
-class MyClass {
-  errorMessage = _lt("Error occurred");
+class MyDialog extends Component {
+  static title = _t("Error occurred");
 }
 ```
 
@@ -144,8 +152,11 @@ class MyClass {
 ### Translate in Code
 
 ```xml
+<!-- There is no translate() helper: static text and string attributes are
+     extracted and translated; pass dynamic strings translated from Python -->
 <template id="my_template">
-    <h1><t t-out="translate('Hello World')"/></h1>
+    <h1>Hello World</h1>
+    <h2 t-out="title"/>
 </template>
 ```
 
@@ -184,8 +195,8 @@ description = fields.Text(translate=True)
 # Enable translation
 name = fields.Char(translate=True)
 
-# Translation with context (Odoo 19+)
-notes = fields.Text(translate=True, translation_modifiable=True)
+# HTML / XML content: translate term by term
+body = fields.Html(translate=html_translate)  # from odoo.tools.translate import html_translate
 ```
 
 ### Read Translated Field
@@ -222,15 +233,24 @@ odoo-bin i18n export -c odoo.conf -d mydb my_module
 ### Export a language (`.po`)
 
 ```bash
-odoo-bin i18n loadlang -c odoo.conf -d mydb -l fr_FR     # once, if not installed yet
-odoo-bin i18n export -c odoo.conf -d mydb -l fr_FR my_module
-# writes my_module/i18n/fr.po (named by ISO code); -o file.po merges several modules into one file
+odoo-bin i18n loadlang -c odoo.conf -d mydb -l fr        # once, if not installed yet
+odoo-bin i18n export -c odoo.conf -d mydb my_module -l pot fr
+# writes my_module/i18n/my_module.pot and my_module/i18n/fr.po
+# -o file.po (with a single -l value) merges several modules into one file
 ```
+
+- Put the module names **before** `-l`: `-l/--languages` takes one or more values and
+  swallows a module written after it (`... -l fr my_module` fails with
+  `the following arguments are required: MODULE`).
+- Pass the language's `iso_code` (`fr` for `fr_FR`, `vi` for `vi_VN`); the `.po` is named after
+  it (`fr.po`, `vi.po`). The locale code (`fr_FR`) also matches but logs a misleading
+  `Ignoring not found languages` warning.
+- `export` skips a language that is not installed (warning only), so run `loadlang` first.
 
 ### Import translations
 
 ```bash
-odoo-bin i18n import -c odoo.conf -d mydb -l fr_FR my_module/i18n/fr.po
+odoo-bin i18n import -c odoo.conf -d mydb -l fr my_module/i18n/fr.po
 # -w / --overwrite replaces terms already translated in the database
 ```
 
@@ -243,8 +263,9 @@ odoo-bin i18n import -c odoo.conf -d mydb -l fr_FR my_module/i18n/fr.po
 ### Install Language
 
 ```python
-# Load language
-language = self.env['res.lang'].load_lang(self.env.cr, self._uid, 'fr_FR')
+# Activate the language record (module terms are loaded by `odoo-bin i18n loadlang`
+# or the Settings > Languages wizard)
+language = self.env['res.lang']._activate_lang('fr_FR')
 ```
 
 ### Available Languages
@@ -289,11 +310,11 @@ message = _("Hello ") + name
 ### Provide Context When Needed
 
 ```python
-# GOOD (with context)
-message = _("Cancel", default_code="refund_cancel")
+# GOOD (unambiguous source string)
+message = _("Cancel Refund")
 
-# BAD (ambiguous)
-message = _("Cancel")
+# BAD (ambiguous; keyword arguments are format parameters, not translator context)
+message = _("Cancel", default_code="refund_cancel")
 ```
 
 ### Don't Concatenate Translations
@@ -316,8 +337,8 @@ When adding translatable content to an Odoo 19 module:
 - [ ] JavaScript/OWL strings wrapped in `_t()`
 - [ ] Translatable field values declared with `translate=True` (or `html_translate`)
 - [ ] `string=` / `help=` / `placeholder=` present in views (auto-extracted)
-- [ ] `i18n/<module>.pot` regenerated with `odoo-bin i18n export -d <db> <module>` after `-u <module>`
-- [ ] Every shipped locale has a `.po` in `i18n/` refreshed from that `.pot` (`msgmerge --update` or re-export)
+- [ ] `i18n/<module>.pot` regenerated with `odoo-bin i18n export -c <conf> -d <db> <module>` after `-u <module>`
+- [ ] Every shipped locale has a `.po` in `i18n/` refreshed from that `.pot` (`msgmerge --quiet --update --no-fuzzy-matching --backup=none <lang>.po <module>.pot`, or re-export with `<module> -l <iso_code>`); fuzzy entries are loaded as real translations
 - [ ] Dynamic content uses `%(name)s` placeholders, never f-strings / `+`
 - [ ] Tests cover at least one non-`en_US` language switch
 

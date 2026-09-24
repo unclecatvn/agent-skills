@@ -339,7 +339,7 @@ Need to define method behavior?
 
 ## @api.private
 
-New in Odoo 19. Marks a method as **not callable via RPC** (external API).
+Marks a method as **not callable via RPC** (external API). Also available in Odoo 18.
 
 ### Usage
 
@@ -350,29 +350,29 @@ class MyModel(models.Model):
     _name = 'my.model'
 
     @api.private
-    def _internal_computation(self):
-        """This method cannot be called via XML-RPC/JSON-RPC."""
+    def compute_totals(self):
+        """Public name, but cannot be called via XML-RPC/JSON-RPC."""
         return self._do_heavy_work()
 
     def public_action(self):
         """This method CAN be called via RPC."""
-        return self._internal_computation()
+        return self.compute_totals()
 ```
 
 ### When to Use
 
 - Methods that should only be called internally (not via API/button)
-- Replaces the convention of prefixing with `_` for security-critical methods
+- Public (non-`_`) method names that must not be exposed, e.g. kept for backward compatibility
 - ORM override methods that you don't want exposed
 
 ### @api.private vs Underscore Convention
 
 ```python
-# Convention: underscore prefix = private (but NOT enforced by ORM)
-def _do_stuff(self):  # Cannot be called from action buttons, but still convention-based
+# Underscore prefix: refused over RPC by odoo/service/model.py (get_public_method)
+def _do_stuff(self):
     pass
 
-# Odoo 19: @api.private = explicitly enforced by framework
+# @api.private: same RPC refusal for a method whose name has no underscore
 @api.private
 def compute_sensitive_data(self):  # Name doesn't need underscore
     pass
@@ -384,33 +384,9 @@ def compute_sensitive_data(self):  # Name doesn't need underscore
 
 ## @api.returns
 
-**Purpose**: Specify the return model of a method for API compatibility.
-
-```python
-from odoo import api, models
-
-class SaleOrder(models.Model):
-    _name = 'sale.order'
-
-    @api.returns('res.partner')
-    def get_partner(self):
-        """Returns partner record(s)"""
-        return self.mapped('partner_id')
-
-    @api.returns('self')
-    def copy(self, default=None):
-        """Returns new record(s) of same model"""
-        return super().copy(default)
-```
-
-**Common usage in Odoo base**:
-```python
-# Many methods use @api.returns
-@api.returns('mail.message', lambda value: value.id)
-def message_post(self, ...):
-    # Post a message, return the message
-    return message
-```
+**Removed in Odoo 19.** `odoo.api` no longer exports `returns` (it existed up to 18), so
+`@api.returns(...)` fails when the module is imported. Drop the decorator and return the
+recordset directly; overrides such as `copy()` or `message_post()` need no decorator.
 
 ---
 

@@ -303,7 +303,8 @@ this.message = _t("Hello %(name)s", { name: "John" });
 ### Translate in Template
 
 ```xml
-<span t-out="translate('Hello World')"/>
+<!-- Static text in OWL templates is extracted and translated; there is no translate() helper -->
+<span>Hello World</span>
 ```
 
 ---

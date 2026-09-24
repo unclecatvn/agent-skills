@@ -350,18 +350,19 @@ Triggers the printing of a report.
 ### Report Action Examples
 
 ```xml
-<report
-    id="account_invoices"
-    model="account.move"
-    string="Invoices"
-    report_type="qweb-pdf"
-    name="account.report_invoice"
-    file="account_report_invoice"
-    print_report_name="'Invoice-{}-{}'.format(object.number or 'n/a', object.state)"
-    groups_id="account.group_account_user"
-    paperformat_id="account.paperformat_euro"
-    attachment_use="True"
-    attachment="'Invoice-'+str(object.number)+'.pdf'"/>
+<!-- Odoo 18 has no <report> shortcut tag: declare the ir.actions.report record -->
+<record id="account_invoices" model="ir.actions.report">
+    <field name="name">Invoices</field>
+    <field name="model">account.move</field>
+    <field name="report_type">qweb-pdf</field>
+    <field name="report_name">account.report_invoice</field>
+    <field name="report_file">account.report_invoice</field>
+    <field name="print_report_name">'Invoice-%s' % (object.name or 'n/a')</field>
+    <field name="groups_id" eval="[Command.link(ref('account.group_account_user'))]"/>
+    <field name="paperformat_id" ref="base.paperformat_euro"/>
+    <field name="attachment_use" eval="True"/>
+    <field name="attachment">'Invoice-' + (object.name or '') + '.pdf'</field>
+</record>
 ```
 
 ### Binding to Print Menu

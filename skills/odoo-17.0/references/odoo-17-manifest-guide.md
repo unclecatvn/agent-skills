@@ -370,7 +370,7 @@ Paths are relative to the module root. Absolute paths and `../` are rejected.
 ],
 ```
 
-Loaded **only** when the database is created with `--demo=all` (or equivalent).
+Loaded on install unless demo data is disabled with `--without-demo` (see the data guide).
 `data` is loaded on install *and* update; `demo` is loaded on install *only*
 when demo mode is active.
 

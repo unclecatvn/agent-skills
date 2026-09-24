@@ -322,7 +322,8 @@ Files loaded at **both** installation and update.
 ],
 ```
 
-Files loaded **only in demo mode**.
+Files loaded **only in demo mode**. Odoo 18 creates new databases with demo data unless the
+server runs with `--without-demo=all`.
 
 ```python
 # Demo mode vs regular mode

@@ -12,7 +12,8 @@
  *      tagged lines in tests/fixtures/sudo_naming.py.
  *   2d. The odoo-workflow Step 1 grep commands still appear verbatim in
  *      skills/odoo-workflow/SKILL.md and flag exactly the tagged lines in
- *      tests/fixtures/odoo_workflow/.
+ *      tests/fixtures/odoo_workflow/, under bash and zsh.
+ *   2e. The odoo-workflow trace helper passes tests/test_odoo_trace.sh on its fixture.
  *   3. package.json version has a matching section in CHANGELOG.md
  *   4. Versioned Odoo testing guides contain the generic testing guidance.
  *      (skipped if the version is still 0.x or under [Unreleased]).
@@ -145,7 +146,7 @@ function validateVersionParity() {
   }
 }
 
-// Keep identical to the pipeline in agents/odoo-code-review/SKILL.md ("Security").
+// Keep identical to the pipeline in agents/odoo-code-review.md ("Security").
 const SUDO_DETECTOR =
   "grep -nE '^[[:space:]]*[A-Za-z_][A-Za-z0-9_]*[[:space:]]*=[[:space:]]*[^=].*\\.sudo\\(' \"$FIXTURE\"" +
   " | grep -vE '^[0-9]+:[[:space:]]*[A-Za-z0-9_]*_sudo[[:space:]]*=' || true";
@@ -173,35 +174,36 @@ function validateSudoDetector() {
   }
 }
 
-// Step 1 commands from skills/odoo-workflow/SKILL.md, verbatim. Placeholders are
-// filled in for the fixture; the check fails if SKILL.md no longer contains the command.
+// Step 1 greps from skills/odoo-workflow/SKILL.md, verbatim. Placeholders are filled in
+// for the fixture; the check fails if SKILL.md no longer contains the command. The Python-side
+// trace (model, field, method, xmlid) is the bundled helper, tested by tests/test_odoo_trace.sh.
 const WORKFLOW_GREPS = [
   {
-    tag: "model",
-    cmd: `grep -rnE --include='*.py' "_name\\s*=\\s*([A-Za-z_]+\\s*=\\s*)?['\\"]MODEL['\\"]" $ROOTS`,
-  },
-  {
-    tag: "inherit",
-    cmd: `grep -rnE --include='*.py' "_inherit\\s*=.*['\\"]MODEL['\\"]" $ROOTS`,
-  },
-  {
-    tag: "inherit-multi",
-    cmd: `grep -rnE --include='*.py' -A12 "_inherit\\s*=\\s*[[(][^])]*$" $ROOTS | grep -E "['\\"]MODEL['\\"]"`,
-  },
-  {
-    tag: "field",
-    cmd: `grep -nE "^\\s+FIELD(\\s*:\\s*[A-Za-z_.]+)?\\s*=\\s*fields\\." MODEL_FILES`,
-  },
-  {
     tag: "view-inherit",
-    cmd: `grep -rnE --include='*.xml' "name=['\\"]inherit_id['\\"] ref=['\\"](MODULE\\.)?VIEW['\\"]|inherit_id=['\\"](MODULE\\.)?VIEW['\\"]" $ROOTS`,
+    cmd: `grep -rnE -A1 --include='*.xml' "name=['\\"]inherit_id['\\"]|inherit_id=['\\"]" ROOTS | grep -E ":[0-9]+:.*(ref|inherit_id)=['\\"](MODULE\\.)?VIEW['\\"]|-[0-9]+-\\s*ref=['\\"](MODULE\\.)?VIEW['\\"]"`,
+  },
+  {
+    tag: "owl-template",
+    cmd: `grep -rnE --include='*.xml' "t-name=['\\"]TEMPLATE['\\"]|t-inherit=['\\"]TEMPLATE['\\"]" ROOTS`,
+  },
+  {
+    tag: "js-class",
+    cmd: `grep -rnE --include='*.js' "^export (default )?(class|function|const) NAME[^A-Za-z0-9_]|patch\\(\\s*NAME[^A-Za-z0-9_]" ROOTS`,
+  },
+  {
+    tag: "route",
+    cmd: `grep -rnE --include='*.py' "@(http\\.)?route\\(.*['\\"]URL['\\"]|^\\s*(route=)?\\[?\\s*['\\"]URL['\\"]" ROOTS`,
+  },
+  {
+    tag: "controller-class",
+    cmd: `grep -rnE --include='*.py' "^class \\w+\\(([^)]*[ ,])?([A-Za-z_.]+\\.)?CLASS[,)]|import.*[ ,]CLASS as " ROOTS`,
   },
 ];
 
 function validateWorkflowGreps() {
   const skill = fs.readFileSync(path.join(ROOT, "skills", "odoo-workflow", "SKILL.md"), "utf8");
   const dir = path.join(ROOT, "tests", "fixtures", "odoo_workflow");
-  const fixtures = ["models.py", "views.xml"].map((f) => path.join(dir, f));
+  const fixtures = fs.readdirSync(dir).map((f) => path.join(dir, f));
   const tagged = (tag) =>
     fixtures.flatMap((file) =>
       fs
@@ -216,26 +218,45 @@ function validateWorkflowGreps() {
       continue;
     }
     const run = cmd
-      .replace("MODEL_FILES", JSON.stringify(fixtures[0]))
-      .replace(/MODEL/g, "x\\.thing")
-      .replace("FIELD", "note")
       .replace(/MODULE/g, "sale")
       .replace(/VIEW/g, "view_order_form")
-      .replace("$ROOTS", JSON.stringify(dir));
-    const out = execSync(`${run} || true`, { encoding: "utf8" });
-    const got = out
-      .split("\n")
-      .filter(Boolean)
-      .map((l) => {
-        const m = /^(?:.*?(models\.py|views\.xml)[:-])?(\d+)[:-]/.exec(l);
-        return m ? `${m[1] || "models.py"}:${m[2]}` : l;
-      });
-    const want = tagged(tag);
-    if (JSON.stringify([...new Set(got)].sort()) === JSON.stringify(want.sort())) {
-      ok(`odoo-workflow ${tag} command flags exactly ${want.join(", ")}`);
-    } else {
-      fail(`odoo-workflow ${tag} command: expected ${want.join(", ")}, got ${got.join(", ") || "none"}`);
+      .replace(/TEMPLATE/g, "web\\.ControlPanel")
+      .replace(/NAME/g, "XRenderer")
+      .replace(/URL/g, "/x/cart")
+      .replace(/CLASS/g, "WebsiteSale")
+      .replace("ROOTS", JSON.stringify(dir));
+    for (const shell of ["/bin/bash", "/bin/zsh"]) {
+      if (!fs.existsSync(shell)) continue;
+      const out = execSync(`${run} || true`, { encoding: "utf8", shell });
+      const got = out
+        .split("\n")
+        .filter(Boolean)
+        .map((l) => {
+          const m = /([\w.]+\.(?:py|xml|js))[:-](\d+)[:-]/.exec(l);
+          return m ? `${m[1]}:${m[2]}` : l;
+        });
+      const want = tagged(tag);
+      const label = `odoo-workflow ${tag} command (${path.basename(shell)})`;
+      if (JSON.stringify([...new Set(got)].sort()) === JSON.stringify(want.sort())) {
+        ok(`${label} flags exactly ${want.join(", ")}`);
+      } else {
+        fail(`${label}: expected ${want.join(", ")}, got ${got.join(", ") || "none"}`);
+      }
     }
+  }
+}
+
+function validateTraceHelper() {
+  const script = path.join(ROOT, "tests", "test_odoo_trace.sh");
+  if (!fs.existsSync(script)) {
+    fail("missing tests/test_odoo_trace.sh");
+    return;
+  }
+  try {
+    const out = execSync(`bash ${JSON.stringify(script)}`, { encoding: "utf8", env: { ...process.env, ODOO_ROOT_18: "", ODOO_ROOT_19: "" } });
+    ok(`odoo_trace.py fixture checks pass (${out.trim().split("\n").pop()})`);
+  } catch (e) {
+    fail(`odoo_trace.py fixture checks failed:\n${(e.stdout || "") + (e.stderr || "")}`);
   }
 }
 
@@ -319,6 +340,9 @@ function main() {
 
   console.log("\nValidating odoo-workflow grep commands");
   validateWorkflowGreps();
+
+  console.log("\nValidating odoo-workflow trace helper");
+  validateTraceHelper();
 
   console.log("\nValidating CHANGELOG");
   validateChangelog();

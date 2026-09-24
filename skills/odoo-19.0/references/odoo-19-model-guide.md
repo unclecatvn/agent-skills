@@ -40,14 +40,13 @@ Guide for working with Odoo 19 ORM, recordsets, CRUD operations, and domain filt
 
 ### Defining a Model
 
-> **Odoo 19 Change**: `_name` is now **optional**. Odoo derives it automatically from the CamelCase class name (each capital letter → `.` separator). E.g. `ResPartner` → `res.partner`, `SaleOrder` → `sale.order`.
+> **Odoo 19 Change**: when `_name` is missing, Odoo derives it from the CamelCase class name (each capital letter → `.` separator, e.g. `ResPartner` → `res.partner`, `SaleOrder` → `sale.order`) and logs the warning `Class ... has no _name, please make it explicit`. Keep `_name` explicit on new models. A string `_inherit` without `_name` still sets `_name = _inherit`; a list `_inherit` does not (a one-item list meant `_inherit[0]` in Odoo 18), so `class Partner` with `_inherit = ['res.partner']` and no `_name` creates a new model `partner`.
 
 ```python
 from odoo import models, fields
 
-# Odoo 19: _name auto-derived from class name
 class MyModel(models.Model):
-    # _name = 'my.model'  ← auto-derived, can be omitted
+    _name = 'my.model'  # omitting it works (derived from the class name) but logs a warning
     _description = 'My Model'
 
     field1 = fields.Char()
@@ -67,7 +66,7 @@ class CustomNameModel(models.Model):
 
 | Attribute       | Description                                                                   |
 | --------------- | ----------------------------------------------------------------------------- |
-| `_name`         | Model name (**optional in Odoo 19** — auto-derived from CamelCase class name) |
+| `_name`         | Model name (derived from the CamelCase class name with a warning if missing)  |
 | `_description`  | Model description                                                             |
 | `_order`        | Default sort order                                                            |
 | `_rec_name`     | Field to use as name representation                                           |
@@ -233,7 +232,10 @@ class MyModel(models.Model):
 
 ### Constraint Naming
 
-If you omit the `_name` in the constraint, Odoo auto-generates a unique name based on model + attribute name.
+The attribute name must start with `_`; the SQL name is `<table>_<attribute name without the leading _>`
+(`_unique_name` on `my_model` → `my_model_unique_name`). There is no separate name argument, and
+`_sql_constraints` is ignored in 19 (warning only). For a unique index with a message, use
+`models.UniqueIndex('(name)', 'Name must be unique!')`.
 
 ### Migration from `_sql_constraints`
 

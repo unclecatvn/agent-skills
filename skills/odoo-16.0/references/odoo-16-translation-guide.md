@@ -549,7 +549,7 @@ importer.save(overwrite=True)
 After you add new `_()` / `_t()` / `translate=True` strings:
 
 1. Regenerate `.pot` (`--i18n-export`)
-2. Merge into existing `.po` files with `msgmerge` (or re-export from DB)
+2. Merge into existing `.po` files with `msgmerge --quiet --update --no-fuzzy-matching --backup=none <lang>.po <module>.pot` (or re-export from DB)
 3. Translate the new `msgid` entries
 4. `--i18n-import --i18n-overwrite` to push back
 5. Or reinstall the module, which calls `_load_module_terms`

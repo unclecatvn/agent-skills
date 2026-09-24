@@ -72,8 +72,8 @@ skills/odoo-19.0/
 | Kanban template    | `t-name="kanban-box"`          | `t-name="card"`                            |
 | QWeb output        | `t-esc`                        | `t-out` (t-esc deprecated)                 |
 | Security groups    | `category_id` on `res.groups`  | `privilege_id` + `res.groups.privilege`    |
-| Private methods    | `_` prefix convention          | `@api.private` decorator (enforced)        |
-| Model naming       | `_name = 'res.users'` required | CamelCase class → auto-derive `_name`      |
+| Private methods    | `_` prefix convention          | `_` prefix, or `@api.private` if public    |
+| Model naming       | `_name = 'res.users'` required | Class name + warning unless str `_inherit` |
 | read_group         | `read_group()`                 | `_read_group()` / `formatted_read_group()` |
 
 ## Critical Anti-Patterns
@@ -95,6 +95,9 @@ skills/odoo-19.0/
 
 Before writing code, run the `odoo-workflow` skill if it is installed (trace the real
 source, Context Brief with `file:line`, definition of done); install it alongside this pack.
+
+Read `references/api-highlights.md` before writing code and apply its Quick review
+checks: the ❌ items are what not to use in Odoo 19.
 
 Apply the Coding Conventions section in the guide you open. Odoo 19 runtime
 behavior takes precedence, followed by the surrounding stable-addon style;

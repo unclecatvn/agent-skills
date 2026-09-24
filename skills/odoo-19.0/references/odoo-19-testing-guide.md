@@ -488,6 +488,11 @@ odoo-bin -i my_module --test-enable
 odoo-bin -u my_module --test-enable
 ```
 
+Odoo 19 creates new databases **without** demo data unless `--with-demo` is passed, so a
+fresh `-d test_db -i my_module --test-enable` run has no demo records and no `demo` /
+`portal` users. Create fixtures in `setUpClass` (e.g. `new_test_user()`) instead of
+referencing demo XML IDs.
+
 ---
 
 ## Screenshot and Screencast
