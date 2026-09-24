@@ -13,6 +13,8 @@ assistants work from your real Odoo source instead of from memory. Odoo 16–19.
 [![MIT license](https://img.shields.io/badge/license-MIT-714B67?style=flat-square)](LICENSE)
 [![CI](https://github.com/unclecatvn/agent-skills/actions/workflows/ci.yml/badge.svg)](https://github.com/unclecatvn/agent-skills/actions/workflows/ci.yml)
 
+**English** · [Tiếng Việt](README.vi.md)
+
 [Why](#why-it-exists) · [With vs without](#with-and-without-the-skill-one-real-task) · [Quick start](#quick-start) · [First run](#first-run-in-an-odoo-project) · [How it works](#how-the-odoo-workflow-works) · [Prompts](#everyday-prompts) · [Toolkit](#whats-in-the-toolkit) · [Versions](#odoo-versions-and-runtime) · [Contributing](#contributing)
 
 </div>
