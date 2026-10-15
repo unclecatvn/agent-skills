@@ -4,6 +4,9 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Added
+- `lib/video/`: the 64-second intro film, as code. `intro.html` draws every frame as a function of time (the HUD, the architecture diagram, the `sale.order` trace graph, the pipeline, the benchmark charts); `score.mjs` synthesizes a 120 BPM score and a sound for every motion on the picture's cues; `render.py` renders both to a 1080p60 MP4 with Playwright and ffmpeg. Every `odoo_trace` line in it is the helper's output on Odoo 18.0 source, every number is from the benchmark. The rendered MP4 is ignored here.
+
 ### Changed
 - Removed the `slide`, `flow-diagram` and generic `code-review` skill packs and the `planner` agent: the toolkit is now Odoo-only. Odoo review stays with the `odoo-code-review` agent.
 

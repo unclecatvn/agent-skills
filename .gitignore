@@ -31,3 +31,6 @@ skillspector.sarif
 
 # Python
 __pycache__/
+
+# the intro film, rendered by lib/video/render.py (the published copy is website/intro.mp4)
+lib/video/*.mp4
