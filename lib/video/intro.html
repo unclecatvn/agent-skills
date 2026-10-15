@@ -1,0 +1,718 @@
+<!doctype html>
+<!-- The Agent Skills intro: a product film rendered frame by frame by render.py (no screen recording). One take with no hard
+     cuts and no bouncy springs; the shots change on the bar lines of the score (score.mjs, 96 BPM, a bar = 2.5 s): wide,
+     close on a line, across to the plugin's rail, back. The page is drawn still at twice the size; the camera (camAt) and
+     the chapter captions (#hud) are applied by render.py afterwards, so text is never re-rasterised while the camera moves.
+     Every odoo_trace and grep line is real output on Odoo 18.0 source; every number is from the README.
+       0–7.5      "AI writes Odoo code from memory." becomes "from your source."
+       7.5–12.5   Agent Skills, a Claude Code plugin for Odoo 16 · 17 · 18 · 19
+       12.5–49    the session: "Show the delivery date on the Sales Orders list." The workflow resolves the runtime, loads the
+                  18.0 pack, traces (delivery_date NOT FOUND, the music holds its breath; commitment_date FOUND, already in
+                  the list, hidden), cites the brief, builds, proves on a scratch database, hands off to review, commits
+       49–59.5    under the hood: your agent, the plugin, your source
+       59.5–67.5  benchmarks, one at a time
+       67.5–80    install
+     Times are in seconds; every frame is a pure function of t: window.renderAt(t) draws it and returns the camera and
+     whether a caption shows. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Agent Skills · intro</title>
+<style>
+  :root { --bg: #09090b; --fg: #fafafa; --fg2: #d4d4d8; --mut: #a1a1aa; --dim: #71717a; --faint: #3f3f46; --line: rgba(255, 255, 255, .08);
+    --accent: #d8a9cc; --teal: #4fc3c8; --ok: #4ade80; --no: #f87171; --clay: #d97757;
+    --grad: linear-gradient(100deg, #4fc3c8, #a9b4f0 50%, #d8a9cc);
+    --sans: -apple-system, 'SF Pro Display', system-ui, sans-serif; --mono: 'SF Mono', ui-monospace, Menlo, monospace; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: transparent; color: var(--fg); font-family: var(--sans); -webkit-font-smoothing: antialiased; font-variant-emoji: text; }
+  #bg { position: absolute; inset: 0; overflow: hidden; background: var(--bg); }
+  #film, #hud { position: absolute; inset: 0; overflow: hidden; }
+  body[data-pass="hud"] #bg, body[data-pass="hud"] #film, body[data-pass="hud"] #vignette, body[data-pass="hud"] #fade { visibility: hidden; }
+  body:not([data-pass="hud"]) #hud { visibility: hidden; }
+  .shot { position: absolute; inset: 0; overflow: hidden; }
+  .set { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; }
+  .abs { position: absolute; }
+  .center { left: 0; right: 0; text-align: center; white-space: nowrap; }
+  .w { display: inline-block; }
+  .g { background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .mono { font-family: var(--mono); }
+  .eyebrow { font: 600 17px var(--mono); letter-spacing: .24em; text-transform: uppercase; color: var(--teal); }
+  .lab { font: 600 13px var(--mono); letter-spacing: .2em; text-transform: uppercase; color: var(--dim); }
+  #vignette { position: absolute; inset: 0; pointer-events: none; background: radial-gradient(ellipse 75% 70% at 50% 50%, transparent 55%, rgba(0, 0, 0, .5)); }
+  #fade { position: absolute; inset: 0; background: #000; opacity: 0; pointer-events: none; }
+
+  /* windows and cards */
+  .win { position: absolute; border-radius: 16px; background: rgba(13, 13, 16, .97); border: 1px solid rgba(255, 255, 255, .1); overflow: hidden;
+    box-shadow: 0 60px 140px -30px rgba(0, 0, 0, .85), 0 0 0 1px rgba(0, 0, 0, .6), inset 0 1px 0 rgba(255, 255, 255, .06); }
+  .chrome { position: relative; height: 46px; display: flex; align-items: center; gap: 9px; padding: 0 18px; border-bottom: 1px solid rgba(255, 255, 255, .06); background: rgba(255, 255, 255, .025); }
+  .chrome i { width: 13px; height: 13px; border-radius: 50%; background: #3a3a41; }
+  .chrome span { position: absolute; left: 0; right: 0; text-align: center; font: 500 15px var(--sans); color: var(--dim); }
+  .card { position: absolute; border-radius: 18px; background: linear-gradient(180deg, rgba(25, 25, 30, .94), rgba(15, 15, 18, .96)); border: 1px solid rgba(255, 255, 255, .08);
+    box-shadow: 0 40px 100px -30px rgba(0, 0, 0, .8), inset 0 1px 0 rgba(255, 255, 255, .05); }
+  .chip { display: inline-flex; align-items: center; gap: 8px; padding: 5px 12px; border-radius: 8px; font: 500 18px var(--mono); white-space: nowrap;
+    border: 1px solid var(--line); background: rgba(255, 255, 255, .04); color: var(--fg2); }
+  .chip.s { border-color: rgba(216, 169, 204, .38); background: rgba(216, 169, 204, .09); color: #efd5e8; }
+  .chip.a { border-color: rgba(79, 195, 200, .38); background: rgba(79, 195, 200, .09); color: #bdeaec; }
+  .chip.c { border-color: rgba(217, 119, 87, .4); background: rgba(217, 119, 87, .1); color: #f3c3b0; }
+  .chip.k { border-color: rgba(74, 222, 128, .4); background: rgba(74, 222, 128, .09); color: #bbf7d0; }
+
+  /* the terminal */
+  .term { font: 400 21px/33px var(--mono); color: var(--fg2); white-space: pre; }
+  .row { position: relative; }
+  .row > .hl { position: absolute; left: -16px; right: -16px; top: 0; bottom: 0; border-radius: 7px; background: rgba(216, 169, 204, .07); border-left: 2px solid var(--accent); opacity: 0; }
+  .bul { display: inline-block; width: 1.5em; }
+  .tn { font-weight: 700; color: var(--fg); }
+  .res { color: var(--mut); }
+  .path { color: #c7d2fe; }
+  .ok { color: var(--ok); } .no { color: var(--no); } .clay { color: var(--clay); } .dimc { color: var(--dim); }
+  .mark-ok { color: #bbf7d0; text-decoration: underline 2px rgba(74, 222, 128, var(--u, 0)); text-underline-offset: 6px; }
+  .caret { display: inline-block; width: .58em; height: 1.08em; vertical-align: -.2em; background: var(--fg2); }
+  .tbl { display: inline-grid; grid-template-columns: 140px 360px 520px 44px; border: 1px solid var(--faint); border-radius: 8px; overflow: hidden; font-size: 19px; }
+  .tbl > span { height: 33px; padding: 0 14px; border-bottom: 1px solid rgba(255, 255, 255, .06); }
+  .diff { display: inline-block; border-left: 2px solid rgba(74, 222, 128, .5); font-size: 19px; line-height: 30px; }
+  .diff > div { padding: 0 20px 0 12px; background: rgba(74, 222, 128, .07); }
+
+  /* the rail: dots are opaque and never move, so the track only shows between them */
+  .step { position: absolute; left: 30px; right: 30px; height: 70px; }
+  .dot { position: absolute; left: 0; top: 2px; width: 30px; height: 30px; border-radius: 50%; border: 2px solid #3f3f46; display: grid; place-items: center; font: 700 14px/1 var(--sans); color: var(--dim); background: #141417; }
+  .ring { position: absolute; inset: -2px; border-radius: 50%; border: 2px solid transparent; border-top-color: var(--accent); border-right-color: var(--accent); opacity: 0; }
+  .ripple { position: absolute; inset: -2px; border-radius: 50%; border: 2px solid var(--ok); opacity: 0; }
+  .sname { position: absolute; left: 48px; top: 0; font: 600 22px/32px var(--sans); color: var(--dim); }
+  .sdet { position: absolute; left: 48px; top: 34px; font: 400 16px/22px var(--mono); color: var(--dim); white-space: nowrap; }
+
+  /* the chapter captions, laid over the camera */
+  .cap { position: absolute; left: 96px; top: 56px; }
+  .cap .k { font: 600 16px var(--mono); letter-spacing: .24em; color: var(--teal); }
+  .cap .l { margin-top: 12px; font: 650 50px/1.12 var(--sans); letter-spacing: -.03em; white-space: nowrap; }
+</style>
+</head>
+<body>
+<div id="bg"></div>
+<div id="film"></div>
+<div id="vignette"></div>
+<div id="fade"></div>
+<div id="hud"></div>
+
+<script type="module">
+const $ = (s) => document.querySelector(s);
+const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+const lerp = (a, b, k) => a + (b - a) * k;
+const expo = (k) => (k = clamp(k), k === 1 ? 1 : 1 - 2 ** (-10 * k));
+const io = (k) => (k = clamp(k), k < .5 ? 4 * k ** 3 : 1 - (-2 * k + 2) ** 3 / 2);
+const rnd = (i) => { const x = Math.sin(i * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
+
+// ---------- sound cues: every one is a sound of score.mjs ----------
+const SFX = [];
+const cue = (t, k, g = 1, p = 0) => SFX.push({ t: +t.toFixed(4), k, g, p });
+
+function h(tag, a = {}, ...kids) {
+  const n = document.createElement(tag);
+  for (const [k, v] of Object.entries(a)) {
+    if (k === 'class') n.className = v; else if (k === 'style') n.style.cssText = v; else if (k === 'text') n.textContent = v;
+    else if (k === 'html') n.innerHTML = v; else n.setAttribute(k, v);
+  }
+  n.append(...kids.flat().filter((x) => x != null));
+  return n;
+}
+const NS = 'http://www.w3.org/2000/svg';
+const svg = (tag, a = {}) => { const n = document.createElementNS(NS, tag); for (const [k, v] of Object.entries(a)) n.setAttribute(k, v); return n; };
+const chip = (text, cls = '', style = '') => h('span', { class: `chip ${cls}`, style, text });
+const MARK = (size, id, fill = true) => `<svg viewBox="0 0 128 128" width="${size}" height="${size}" fill="none" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"><defs><linearGradient id="${id}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4fc3c8"/><stop offset=".55" stop-color="#a9b4f0"/><stop offset="1" stop-color="#d8a9cc"/></linearGradient></defs><g stroke="url(#${id})"><path pathLength="1" d="M64 22 L106 45 L64 68 L22 45 Z"/><path pathLength="1" d="M24 66 L64 88 L104 66"/><path pathLength="1" d="M24 86 L64 108 L104 86"/></g><path class="fill" d="M64 22 L106 45 L64 68 L22 45 Z" fill="url(#${id})" stroke="none" opacity="${fill ? 1 : 0}"/></svg>`;
+
+/** n fades up from a (s): a short rise, a blur clearing; given z, it drifts up and away from z. Text never scales. */
+function F(n, t, a, o = {}) {
+  const d = o.d ?? 1, k = expo((t - a) / d), q = o.z == null ? 0 : io((t - o.z) / (o.zd ?? .7));
+  const op = clamp((t - a) / (d * .45)) * (1 - q);
+  n.style.opacity = op;
+  if (op <= 0) return;
+  n.style.transform = `translate(${(o.x ?? 0) * (1 - k)}px, ${(o.y ?? 26) * (1 - k) - (o.up ?? 18) * q}px)`;
+  const bl = (o.b ?? 10) * (1 - k) + (o.zb ?? 10) * q;
+  n.style.filter = bl > .2 ? `blur(${bl}px)` : 'none';
+}
+/** Key-press times for text typed by a person from a to z: uneven, a little slower after a space. */
+function keys(text, a, z, seed = 1) {
+  const gaps = [...text].map((c, i) => (.55 + .9 * rnd(i * 3.1 + seed)) * (text[i - 1] === ' ' ? 1.5 : 1));
+  const sum = gaps.reduce((x, y) => x + y, 0);
+  let acc = 0;
+  return gaps.map((g) => (acc += g, a + (z - a) * (acc - g) / sum));
+}
+const typedAt = (times, t) => times.filter((x) => x <= t).length;
+const typeCues = (text, times, g = .7) => times.forEach((x, i) => text[i] !== ' ' && cue(x, 'key', g * (.7 + .3 * rnd(i)), i));
+
+// ---------- the stage: a deep background, two soft lights drifting, a faint grid ----------
+const glowA = h('div', { class: 'abs', style: 'width: 1500px; height: 1500px; margin: -750px; border-radius: 50%; background: radial-gradient(closest-side, rgba(79, 195, 200, .11), transparent)' });
+const glowB = h('div', { class: 'abs', style: 'width: 1600px; height: 1600px; margin: -800px; border-radius: 50%; background: radial-gradient(closest-side, rgba(216, 169, 204, .11), transparent)' });
+const grid = h('div', { class: 'abs', style: 'inset: 0; background-image: linear-gradient(rgba(255, 255, 255, .035) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, .035) 1px, transparent 1px); background-size: 80px 80px; -webkit-mask-image: radial-gradient(ellipse 70% 65% at 50% 50%, #000 20%, transparent 80%)' });
+$('#bg').append(glowA, glowB, grid);
+
+// ---------- shots: each is shown over [t0, t1] and handles its own way in and out ----------
+const shots = [];
+function shot(t0, t1, build) {
+  const root = h('div', { class: 'shot' }), set = h('div', { class: 'set' });
+  root.append(set);
+  $('#film').append(root);
+  const s = { t0, t1, root, set };
+  s.render = build(set, s);
+  shots.push(s);
+  return s;
+}
+const SESSION = {}; // what the camera needs from the session: where its rows are
+const NOW = { cam: [960, 540, 1] }; // the camera of the frame being drawn, for the focus pulls
+
+// =====================================================================================================================
+// 0–7.5: "AI writes Odoo code from memory." Behind it, the code an AI typed; the symbol it invented is struck out
+shot(0, 7.8, (set) => {
+  const CODE = ['class SaleOrder(models.Model):', "    _inherit = 'sale.order'", '', '    def action_confirm(self):', '        res = super().action_confirm()',
+    '        self.delivery_date = fields.Datetime.now()', '        return res'];
+  const codeLines = CODE.map(() => h('div', { style: 'height: 46px' }));
+  const ghost = h('div', { class: 'abs mono', style: 'left: 430px; top: 330px; font-size: 30px; line-height: 46px; white-space: pre; color: #8b8b96; filter: blur(1.5px); -webkit-mask-image: radial-gradient(ellipse 60% 70% at 50% 50%, #000 30%, transparent 90%)' }, ...codeLines);
+  const BIG = 'font: 650 104px/1.2 var(--sans); letter-spacing: -.045em';
+  const words = 'AI writes Odoo code'.split(' ').map((w) => h('span', { class: 'w', text: w }));
+  const l1 = h('div', { class: 'abs center', style: `top: 352px; ${BIG}` });
+  words.forEach((w, i) => l1.append(w, i < words.length - 1 ? ' ' : ''));
+  const mem = h('div', { class: 'abs center', style: `top: 482px; ${BIG}; color: var(--dim)`, text: 'from memory.' });
+  const src = h('div', { class: 'abs center', style: `top: 482px; ${BIG}` }, 'from ', h('span', { class: 'g', text: 'your source.' }));
+  const line = h('i', { class: 'abs', style: 'left: -6px; right: -6px; top: 52%; height: 3px; border-radius: 2px; background: var(--no); transform-origin: 0 50%' });
+  const symName = h('span', { style: 'position: relative; color: var(--mut)' }, 'sale.order.delivery_date', line);
+  const sym = h('div', { class: 'abs center mono', style: 'top: 668px; font-size: 30px' }, symName, h('span', { style: 'color: var(--dim)', text: '   not in the Odoo 18 source' }));
+  set.append(ghost, l1, mem, src, sym);
+  const codeKeys = keys(CODE.join('\n'), .2, 4.2, 9);
+  cue(3.4, 'strike', .8); cue(5, 'shimmer', .9); cue(6.9, 'whoosh', .6);
+  return (t) => {
+    let n = typedAt(codeKeys, t);
+    CODE.forEach((l, i) => { codeLines[i].textContent = l.slice(0, Math.max(0, n)); n -= l.length + 1; });
+    ghost.style.opacity = .2 * clamp(t / 1.5) * (1 - io((t - 6.6) / .9));
+    words.forEach((w, i) => F(w, t, .5 + i * .14, { y: 34, b: 14, z: 6.7, zd: .9, up: 30 }));
+    F(mem, t, 1.6, { y: 30, b: 14, z: 4.6, zd: .6, up: 30 });
+    F(sym, t, 2.6, { y: 16, z: 4.6, zd: .6 });
+    line.style.transform = `scaleX(${expo((t - 3.4) / .9)})`;
+    symName.style.color = t > 3.4 ? '#fca5a5' : '';
+    F(src, t, 5, { y: 34, b: 14, z: 6.8, zd: .9, up: 30 });
+  };
+});
+
+// 7.5–12.5: the brand. The mark draws itself; Agent Skills; a Claude Code plugin for Odoo 16 · 17 · 18 · 19
+shot(7.2, 13.4, (set) => {
+  const glow = h('div', { class: 'abs', style: 'left: 960px; top: 330px; width: 900px; height: 900px; margin: -450px; border-radius: 50%; background: radial-gradient(closest-side, rgba(169, 180, 240, .16), transparent)' });
+  const mark = h('div', { class: 'abs', style: 'left: 885px; top: 222px; width: 150px; height: 150px', html: MARK(150, 'gm1', false) });
+  const name = h('div', { class: 'abs center', style: 'top: 418px; font: 650 128px/1.1 var(--sans); background: linear-gradient(100deg, #fafafa 42%, #ffffff 48%, #d7f3f4 50%, #fafafa 56%) 0 0 / 260% 100%; -webkit-background-clip: text; background-clip: text; color: transparent', text: 'Agent Skills' });
+  const sub = h('div', { class: 'abs center', style: 'top: 590px; font: 500 36px var(--sans); color: var(--mut); letter-spacing: -.01em' }, 'A ', h('span', { style: 'color: var(--fg)', text: 'Claude Code' }), ' plugin for Odoo development');
+  const vers = ['16.0', '17.0', '18.0', '19.0'].map((v) => chip(`odoo-${v}`, 's', 'font-size: 22px; padding: 8px 18px'));
+  const row = h('div', { class: 'abs', style: 'left: 0; right: 0; top: 684px; display: flex; justify-content: center; gap: 16px' }, ...vers);
+  const group = h('div', { class: 'abs', style: 'inset: 0' }, glow, mark, name, sub, row);
+  set.append(group);
+  const paths = [...mark.querySelectorAll('g path')], fill = mark.querySelector('.fill');
+  paths.forEach((p) => { p.style.strokeDasharray = '1'; });
+  cue(7.5, 'bloom'); vers.forEach((_, i) => cue(9.8 + i * .14, 'glass', .5, i));
+  return (t) => {
+    glow.style.opacity = .6 * clamp((t - 7.3) / 1.2) + .15 * Math.sin(t * 1.3);
+    F(mark, t, 7.4, { y: 0, b: 6, d: 1.4 });
+    paths.forEach((p, i) => { p.style.strokeDashoffset = `${1 - io((t - 7.5 - i * .18) / 1.1)}`; });
+    fill.setAttribute('opacity', `${.95 * io((t - 8.6) / .8)}`);
+    F(name, t, 8.3, { y: 20, b: 16, d: 1.4 });
+    name.style.letterSpacing = `${lerp(.03, -.045, expo((t - 8.3) / 1.8))}em`;
+    name.style.backgroundPosition = `${lerp(100, 0, io((t - 9.2) / 1.4))}% 0`;
+    F(sub, t, 9.0);
+    vers.forEach((v, i) => F(v, t, 9.8 + i * .14, { y: 18, b: 6 }));
+    const q = io((t - 11.6) / 1.2);
+    group.style.transform = `translateY(${-90 * q}px)`;
+    group.style.opacity = 1 - q;
+    group.style.filter = q > .01 ? `blur(${14 * q}px)` : 'none';
+  };
+});
+
+// 12.5–49: the session. Claude Code on the left, the plugin's rail on the right
+const SESSION_IN = 12.5, SESSION_OUT = 48.2, DONE = 45;
+shot(SESSION_IN, 49.8, (set) => {
+  const TX = 96, TY = 100, TW = 1190, TH = 880, LH = 33, VP = 60, VPH = TH - VP - 168;
+  const RX = 1350, RY = 100, RW = 474, RH = 880;
+  const rig = h('div', { class: 'abs', style: 'inset: 0; transform-origin: 50% 100%' });
+  const stage = h('div', { class: 'abs', style: 'inset: 0; perspective: 2000px; perspective-origin: 50% 20%' }, rig);
+  const halo = h('div', { class: 'abs', style: 'left: 690px; top: 540px; width: 1800px; height: 1300px; margin: -650px -900px; border-radius: 50%; background: radial-gradient(closest-side, rgba(169, 180, 240, .09), transparent)' });
+  set.append(halo, stage);
+
+  // ---- the window ----
+  const win = h('div', { class: 'win', style: `left: ${TX}px; top: ${TY}px; width: ${TW}px; height: ${TH}px` },
+    h('div', { class: 'chrome' }, h('i'), h('i'), h('i'), h('span', { text: 'x_sale — claude' })));
+  const tx = h('div', { style: 'position: relative' });
+  const vp = h('div', { class: 'abs term', style: `left: 30px; right: 30px; top: ${VP}px; height: ${VPH}px; overflow: hidden; -webkit-mask-image: linear-gradient(transparent, #000 56px)` }, tx);
+  const glyph = h('span'), verb = h('span', { style: 'background: linear-gradient(90deg, var(--clay) 40%, #ffd6c6 50%, var(--clay) 60%) 0 0 / 300% 100%; -webkit-background-clip: text; background-clip: text; color: transparent' });
+  const meta = h('span', { class: 'dimc' });
+  const spin = h('div', { class: 'abs term', style: `left: 30px; top: ${TH - 160}px; color: var(--clay)` }, glyph, ' ', verb, ' ', meta);
+  const typedEl = h('span', { style: 'color: var(--fg)' }), caret = h('i', { class: 'caret' });
+  const input = h('div', { class: 'abs term', style: `left: 22px; right: 22px; top: ${TH - 116}px; height: 60px; padding: 13px 18px; border: 1px solid var(--faint); border-radius: 10px` }, h('span', { class: 'dimc', text: '> ' }), typedEl, caret);
+  const hint = h('div', { class: 'abs term', style: `left: 42px; top: ${TH - 50}px; font-size: 17px; color: var(--dim)`, text: '? for shortcuts' });
+  win.append(vp, spin, input, hint);
+
+  // ---- the transcript: rows that grow in, the newest kept in view ----
+  const R = [];
+  const row = (t, kids, o = {}) => {
+    const hl = h('i', { class: 'hl' });
+    const el = h('div', { class: 'row', style: `height: ${o.h ?? LH}px` }, hl, ...kids);
+    tx.append(el);
+    const r = { t, el, hl, h: o.h ?? LH, ...o };
+    R.push(r);
+    return r;
+  };
+  const gap = (t) => row(t, [], { h: LH * .55 });
+  const tool = (t, name, arg, dur, step, o = {}) => {
+    const b = h('span', { class: 'bul', text: '●' });
+    const r = row(t, [b, h('span', { class: 'tn', text: name }), h('span', { text: `(${arg}${o.more ? '' : ')'}` })], { b, run: [t, t + dur], step, fail: o.fail });
+    if (o.more) row(t, [h('span', { text: `     ${o.more})` })]);
+    cue(t, 'tool', .6);
+    cue(t + dur, o.fail ? 'fail' : 'done', 1, R.length);
+    return r;
+  };
+  const res = (t, html, first = true) => row(t, [h('span', { class: 'res', html: (first ? '  ⎿  ' : '     ') + html })]);
+  const say = (t, lines, cps = 85) => {
+    let at = t;
+    return lines.map((text, i) => {
+      const s = h('span', { style: 'color: var(--fg)' });
+      const r = row(at, [i ? h('span', { class: 'bul' }) : h('span', { class: 'bul', style: 'color: var(--fg)', text: '●' }), s], { stream: { s, text, cps } });
+      at += text.length / cps;
+      return r;
+    });
+  };
+
+  const welcome = h('div', { style: 'display: inline-block; margin-top: 4px; padding: 8px 26px 10px; border: 1px solid var(--clay); border-radius: 9px; line-height: 33px' },
+    h('div', {}, h('span', { class: 'clay', text: '✻ ' }), 'Welcome to ', h('b', { style: 'color: var(--fg)', text: 'Claude Code' }), '!'),
+    h('div', { class: 'dimc', text: '  /help for help, /status for your current setup' }),
+    h('div', { class: 'dimc', text: '  cwd: ~/work/x_sale' }));
+  row(-9, [welcome], { h: LH * 4.2 });
+  gap(-9);
+  const PROMPT = 'Show the delivery date on the Sales Orders list.';
+  const P0 = 15.0, P1 = 17.0, SUBMIT = 17.5;
+  const keyT = keys(PROMPT, P0, P1, 3);
+  typeCues(PROMPT, keyT); cue(SUBMIT, 'enter');
+  row(SUBMIT, [h('span', { class: 'dimc', text: `> ${PROMPT}` })]);
+  gap(SUBMIT);
+  tool(18.0, 'Skill', 'odoo-workflow', .6, -1);
+  res(18.6, 'Loaded <span style="color: var(--fg2)">odoo-workflow</span> · trace first, then code');
+  gap(18.6);
+  tool(20.0, 'Bash', 'odoo_trace env', 1, 0);
+  res(21.0, '<span class="ok">VERDICT:</span> Odoo 18.0, 2 roots, 650 modules');
+  gap(21.0);
+  tool(21.4, 'Skill', 'odoo-18.0', .5, 1);
+  res(21.9, 'Loaded <span style="color: var(--fg2)">odoo-18.0</span> · Odoo 18 reference pack');
+  gap(21.9);
+  say(22.5, ['You said “delivery date”. Checking that the field exists before using it.']);
+  gap(22.5);
+  tool(23.75, 'Bash', 'odoo_trace field sale.order delivery_date', 1.25, 2, { fail: true });
+  const nfRows = [res(25.0, '<span class="no">Error: Exit code 1</span>'),
+    res(25.08, 'VERDICT: <span class="no">NOT FOUND</span>: sale.order.delivery_date; closest fields: <span class="mark-ok">commitment_date</span>', false),
+    res(25.16, "(label 'Delivery Date'), delivery_set, delivery_status, delivery_count", false)];
+  gap(25.16);
+  tool(26.9, 'Bash', 'odoo_trace field sale.order commitment_date', .6, 2);
+  const cfRows = [res(27.5, '<span class="path">sale/models/sale_order.py:103</span> sale SaleOrder via=self Datetime'),
+    res(27.58, '<span class="ok">VERDICT: FOUND</span> on sale.order', false)];
+  gap(27.58);
+  tool(28.2, 'Bash', 'odoo_trace xmlid sale.view_order_tree', .6, 2);
+  res(28.8, '<span class="ok">VERDICT: FOUND</span> sale.view_order_tree (<span class="path">sale/views/sale_order_views.xml:178</span>)');
+  gap(28.8);
+  tool(29.4, 'Bash', 'grep -n commitment_date sale/views/sale_order_views.xml', .6, 2);
+  const grepRow = res(30.0, '131:  &lt;field name="commitment_date" <span class="mark-ok">optional="hide"</span>/&gt;');
+  res(30.08, '802:  &lt;label for="commitment_date" string="Delivery Date"/&gt;', false);
+  res(30.16, '<span class="dimc">… +2 lines (ctrl+o to expand)</span>', false);
+  gap(30.16);
+  say(30.7, ['It exists, and the base list already has it, hidden. Context Brief:']);
+  const BRIEF = [['Layer', 'Symbol', 'Source · file:line', ''], ['field', 'sale.order.commitment_date', 'sale/models/sale_order.py:103', '✓'],
+    ['view', 'sale.view_order_tree', 'sale/views/sale_order_views.xml:178', '✓'], ['anchor', 'commitment_date · hidden', 'sale/views/sale_order_views.xml:131', '✓']];
+  const cells = BRIEF.map((r, i) => r.map((c, j) => h('span', { style: i === 0 ? 'color: var(--fg); font-weight: 600; background: rgba(255, 255, 255, .04)' : j === 3 ? 'color: var(--ok); font-weight: 700' : j === 2 ? 'color: #c7d2fe' : j === 0 ? 'color: var(--dim)' : 'color: var(--fg)', text: c })));
+  const tbl = h('div', { class: 'tbl' }, ...cells.flat());
+  const brief = row(31.6, [h('span', { class: 'bul' }), tbl], { h: LH * 4.3 });
+  row(32.6, [h('span', { class: 'bul' }), h('span', { class: 'dimc', html: '<span style="color: var(--fg2)">Change:</span> inherit sale.view_order_tree, set optional="show". No new field.' })]);
+  BRIEF.slice(1).forEach((_, i) => cue(32.5 + i * .3, 'glass', .5, i + 2));
+  gap(32.6);
+  tool(35.0, 'Write', 'x_sale/views/sale_order_views.xml', .6, 4);
+  res(35.6, 'Wrote 12 lines to <span class="path">x_sale/views/sale_order_views.xml</span>');
+  const DIFF = ['<field name="inherit_id" ref="sale.view_order_tree"/>', '<field name="arch" type="xml">', '  <field name="commitment_date" position="attributes">', '    <attribute name="optional">show</attribute>', '  </field>'];
+  const diffRows = DIFF.map((l, i) => h('div', {}, h('span', { class: 'dimc', text: `${String(i + 5).padStart(2)} ` }), h('span', { class: 'ok', text: '+ ' }), h('span', { style: 'color: var(--fg)', text: l })));
+  const diff = row(35.8, [h('span', { class: 'bul' }), h('span', { class: 'bul' }), h('div', { class: 'diff' }, ...diffRows)], { h: 30 * 5 + 10 });
+  gap(35.8);
+  tool(37.5, 'Bash', 'odoo-bin -c odoo.conf -d scratch_x_sale -i x_sale --test-tags /x_sale', 1.9, 5, { more: '--stop-after-init' });
+  res(39.4, `0 failed, 0 error(s) of <span class="ok">2 tests</span> when loading database 'scratch_x_sale'`);
+  tool(39.75, 'Bash', 'odoo_trace unlisted x_sale', .5, 5);
+  res(40.25, '<span class="ok">VERDICT:</span> x_sale: all files load');
+  tool(40.6, 'Bash', 'odoo-bin db -c odoo.conf drop scratch_x_sale', .4, 5);
+  res(41.0, '<span class="dimc">(No content)</span>');
+  gap(41.0);
+  tool(41.25, 'odoo-code-review', 'Review x_sale for Odoo 18.0', 1.85, 6);
+  res(43.1, 'Done · <span class="ok">0 blocking</span> · views, security and i18n checked');
+  gap(43.1);
+  tool(43.75, 'Skill', 'odoo-commit', .55, 7);
+  res(44.3, '<span style="color: var(--fg)">[IMP] x_sale: show the delivery date on the order list</span>');
+  gap(44.3);
+  const fin = say(DONE, ['Done. Sales Orders now show Delivery Date: commitment_date was in the list', 'already, hidden. One attribute changed, no new field, 2 tests passing.'], 95);
+
+  // ---- the rail: the plugin, its workflow, and who owns each step ----
+  const rail = h('div', { class: 'card', style: `left: ${RX}px; top: ${RY}px; width: ${RW}px; height: ${RH}px` });
+  const ver = h('span', { text: 'Odoo version · resolving' });
+  rail.append(
+    h('div', { class: 'abs', style: 'left: 30px; top: 26px; display: flex; align-items: center; gap: 14px' }, h('span', { style: 'width: 34px; height: 34px', html: MARK(34, 'gm2') }),
+      h('span', { style: 'font: 650 25px var(--sans); letter-spacing: -.01em', text: 'agent-skills' }), chip('plugin', '', 'font-size: 14px; padding: 2px 9px')),
+    h('div', { class: 'abs mono', style: 'left: 30px; top: 76px; font-size: 16px; color: var(--dim)' }, ver));
+  const wfNote = h('span', { class: 'mono', style: 'font-size: 15px; color: var(--mut)', text: 'runs every step below' });
+  const wfCard = h('div', { class: 'abs', style: 'left: 22px; right: 22px; top: 118px; height: 64px; border-radius: 12px; border: 1px solid rgba(216, 169, 204, .25); background: rgba(216, 169, 204, .05); display: flex; align-items: center; gap: 14px; padding: 0 16px' },
+    chip('odoo-workflow', 's', 'font-size: 17px'), wfNote);
+  rail.append(wfCard);
+  const STEPS = [
+    ['Runtime', 'version, roots, conf', 'Odoo 18.0 · 2 roots', ['odoo_trace', ''], 20.0, 21.0],
+    ['Pack', 'load the matching pack', 'Odoo 18 reference', ['odoo-18.0', 's'], 21.4, 21.9],
+    ['Trace', 'every symbol, in source', 'delivery_date ✕ → commitment_date', ['odoo_trace', ''], 23.75, 30.0],
+    ['Brief', 'no file:line, no code', '3 rows, each cited', ['odoo-workflow', 's'], 30.7, 33.6],
+    ['Build', 'the smallest change', '1 inherited view', ['Claude Code', 'c'], 35.0, 36.4],
+    ['Prove', 'on a throwaway database', '2 tests > 0 · all files load', ['odoo-workflow', 's'], 37.5, 41.0],
+    ['Review', 'version-aware review', '0 blocking', ['odoo-code-review', 'a'], 41.25, 43.1],
+    ['Commit', '[TAG] module: message', '[IMP] x_sale', ['odoo-commit', 's'], 43.75, 44.3],
+  ];
+  const S0 = 214, SG = 70, CELEBRATE = 47.4;
+  const track = h('i', { class: 'abs', style: `left: 44px; top: ${S0 + 34}px; width: 2px; height: ${SG * 7 - 34}px; background: rgba(255, 255, 255, .07)` });
+  const trackFill = h('i', { class: 'abs', style: `left: 44px; top: ${S0 + 34}px; width: 2px; height: ${SG * 7 - 34}px; background: linear-gradient(#4fc3c8, #d8a9cc); transform-origin: 50% 0` });
+  rail.append(track, trackFill);
+  const steps = STEPS.map(([name, what, got, [own, cls], a, z], i) => {
+    const ring = h('i', { class: 'ring' }), ripple = h('i', { class: 'ripple' }), num = h('span', { text: String(i + 1) });
+    const dot = h('div', { class: 'dot' }, ring, ripple, num);
+    const sname = h('div', { class: 'sname', text: name });
+    const d1 = h('span', { text: what }), d2 = h('span', { class: 'abs', style: 'left: 0; top: 0; color: var(--fg2)', text: got });
+    const sdet = h('div', { class: 'sdet' }, d1, d2);
+    const sown = chip(own, cls, 'position: absolute; right: 0; top: 1px; font-size: 15px; padding: 3px 10px');
+    const el = h('div', { class: 'step', style: `top: ${S0 + i * SG}px` }, dot, sname, sdet, sown);
+    rail.append(el);
+    cue(z + .05, 'step', .9, i);
+    return { el, dot, ring, ripple, num, sname, d1, d2, sown, a, z, y: RY + S0 + i * SG + 17 };
+  });
+  const allDone = chip('8 of 8 · every line cited', 'k', 'position: absolute; left: 30px; bottom: 64px; font-size: 16px');
+  const legend = h('div', { class: 'abs mono', style: 'left: 30px; bottom: 24px; display: flex; gap: 18px; font-size: 14px; color: var(--dim)' },
+    ...[['skill', '#d8a9cc'], ['helper', '#a1a1aa'], ['agent', '#4fc3c8'], ['Claude Code', '#d97757']].map(([t, c]) => h('span', {}, h('span', { style: `color: ${c}`, text: '■ ' }), t)));
+  rail.append(allDone, legend);
+  cue(CELEBRATE, 'resolve');
+
+  // the link between the running line and its step
+  const link = svg('svg', { width: 1920, height: 1080, style: 'position: absolute; left: 0; top: 0; overflow: visible; pointer-events: none' });
+  const linkPath = svg('path', { fill: 'none', stroke: '#d8a9cc', 'stroke-width': 2, 'stroke-linecap': 'round' });
+  const linkDot = svg('circle', { r: 4, fill: '#f5d0ea' });
+  link.append(linkPath, linkDot);
+  rig.append(win, rail, link);
+
+  // ---- layout over time: each row grows in over 0.4 s; the viewport keeps the newest in view ----
+  const grown = (r, t) => r.h * expo((t - r.t) / .4);
+  const rowTop = (r, t) => { let y = 0; for (const x of R) { if (x === r) return y; y += grown(x, t); } return y; };
+  const scrollAt = (t) => Math.max(0, R.reduce((y, x) => y + grown(x, t), 0) - VPH + 10);
+  const rowY = (r, t) => TY + VP + rowTop(r, t) - scrollAt(t);
+  const lastY = (t) => { const r = R.findLast((x) => t >= x.t) ?? R[0]; return rowY(r, t) + grown(r, t); };
+  Object.assign(SESSION, { rowY, lastY, nf: nfRows[1], grepRow, brief, diff, fin: fin[0], inputY: TY + TH - 86, TX, TW });
+  const VERBS = [[SUBMIT, 'Thinking…'], [18.0, 'Loading odoo-workflow…'], [20.0, 'Resolving the runtime…'], [21.4, 'Loading the Odoo 18 pack…'], [22.5, 'Tracing sale.order…'],
+    [30.7, 'Writing the Context Brief…'], [35.0, 'Editing x_sale…'], [37.5, 'Proving on scratch_x_sale…'], [41.25, 'Reviewing…'], [43.75, 'Committing…']];
+  cue(SESSION_IN + .1, 'whoosh', .7);
+
+  return (t) => {
+    // the rig rises into place, and leaves by sinking back
+    const k = expo((t - SESSION_IN) / 2.2), q = io((t - SESSION_OUT) / 1.4);
+    rig.style.transform = `translateY(${320 * (1 - k)}px) rotateX(${24 * (1 - k)}deg) scale(${lerp(.9, 1, k) * (1 - .1 * q)})`;
+    rig.style.opacity = clamp((t - SESSION_IN) / .8) * (1 - q);
+    rig.style.filter = q > .01 ? `blur(${14 * q}px)` : 'none';
+    halo.style.opacity = clamp((t - SESSION_IN) / 1.5) * (1 - q) * (.85 + .15 * Math.sin(t * .9));
+
+    // the transcript
+    for (const r of R) {
+      const on = t >= r.t;
+      r.el.style.opacity = on ? clamp((t - r.t) / .3) : 0;
+      r.el.style.transform = on ? `translateY(${8 * (1 - expo((t - r.t) / .4))}px)` : '';
+      if (r.stream) r.stream.s.textContent = r.stream.text.slice(0, clamp(Math.floor((t - r.t) * r.stream.cps), 0, r.stream.text.length));
+      if (r.run) {
+        const running = t < r.run[1];
+        r.b.style.color = running ? (Math.floor(t * 3) % 2 ? 'var(--faint)' : 'var(--fg2)') : r.fail ? 'var(--no)' : 'var(--ok)';
+        r.hl.style.opacity = r.step >= 0 ? clamp((t - r.t) / .3) * (1 - clamp((t - r.run[1] - .5) / .5)) : 0;
+      }
+    }
+    tx.style.transform = `translateY(${-scrollAt(t)}px)`;
+    // NOT FOUND glows red while the music holds its breath; FOUND answers in green
+    const red = clamp((t - 25) / .3) * (1 - clamp((t - 27.3) / .5)), green = clamp((t - 27.5) / .3) * (1 - clamp((t - 29.4) / .6));
+    for (const r of nfRows) { r.hl.style.opacity = red; r.hl.style.background = 'rgba(248, 113, 113, .1)'; r.hl.style.borderLeftColor = 'var(--no)'; }
+    for (const r of cfRows) { r.hl.style.opacity = green; r.hl.style.background = 'rgba(74, 222, 128, .08)'; r.hl.style.borderLeftColor = 'var(--ok)'; }
+    tx.querySelectorAll('.mark-ok').forEach((m, i) => m.style.setProperty('--u', clamp((t - (i ? 30.3 : 25.6)) / .4)));
+    // the brief lifts off the page while the camera is on it
+    const lift = io((t - 32.4) / .6) * (1 - io((t - 34.7) / .6));
+    tbl.style.boxShadow = `0 ${24 * lift}px ${60 * lift}px rgba(0, 0, 0, ${.6 * lift}), 0 0 ${40 * lift}px rgba(169, 180, 240, ${.22 * lift})`;
+    tbl.style.borderColor = lift > .01 ? `rgba(169, 180, 240, ${.25 + .35 * lift})` : '';
+    tbl.style.background = `rgba(30, 30, 38, ${.9 * lift})`;
+    [...tbl.children].forEach((c, i) => { const ri = Math.floor(i / 4); c.style.opacity = clamp((t - 31.6 - ri * .3) / .3) * (i % 4 === 3 ? clamp((t - 32.5 - (ri - 1) * .3) / .2) : 1); });
+    diffRows.forEach((d, i) => { d.style.opacity = clamp((t - 35.8 - i * .12) / .25); });
+
+    // the spinner and the input
+    const v = VERBS.findLast(([a]) => t >= a);
+    spin.style.opacity = v && t < DONE ? 1 : 0;
+    if (v) {
+      glyph.textContent = '·✢✳✶✻✽'[Math.floor(t * 8) % 6];
+      verb.textContent = v[1];
+      verb.style.backgroundPosition = `${100 - ((t * 45) % 100)}% 0`;
+      meta.textContent = `(${Math.floor(t - SUBMIT)}s · ↓ ${((t - SUBMIT) * .34).toFixed(1)}k tokens · esc to interrupt)`;
+    }
+    typedEl.textContent = t < SUBMIT ? PROMPT.slice(0, typedAt(keyT, t)) : '';
+    caret.style.opacity = t < P0 || t > P1 + .2 ? (Math.floor(t * 2) % 2 ? .15 : .9) : .9;
+
+    // the focus follows the camera: close on the rail, the terminal goes soft; close on the terminal, the rail does
+    const [cx, , cs] = NOW.cam, zk = clamp((cs - 1.1) / .3), toRail = zk * clamp((cx - 1000) / 250), toTerm = zk * clamp((1000 - cx) / 250);
+    win.style.filter = toRail > .02 ? `blur(${7 * toRail}px) brightness(${1 - .3 * toRail})` : 'none';
+
+    // the rail
+    F(rail, t, SESSION_IN + .5, { y: 0, x: 40, b: 8, d: 1.4 });
+    if (t > SESSION_IN + 2) rail.style.filter = toTerm > .02 ? `blur(${5 * toTerm}px) brightness(${1 - .3 * toTerm})` : 'none';
+    ver.textContent = t < 21 ? 'Odoo version · resolving' : 'Odoo 18.0 · 2 roots · 650 modules';
+    ver.style.color = t >= 21 ? 'var(--fg2)' : '';
+    const wfOn = t >= 18.6 && t < CELEBRATE, wfDone = t >= CELEBRATE;
+    wfCard.style.boxShadow = wfOn ? `0 0 ${24 + 10 * Math.sin(t * 3)}px rgba(216, 169, 204, .22)` : wfDone ? '0 0 30px rgba(74, 222, 128, .2)' : 'none';
+    wfCard.style.borderColor = wfOn ? 'rgba(216, 169, 204, .6)' : wfDone ? 'rgba(74, 222, 128, .55)' : '';
+    wfNote.textContent = wfDone ? 'done · 8 steps' : 'runs every step below';
+    let fillK = 0;
+    steps.forEach((s, i) => {
+      const active = t >= s.a && t < s.z, done = t >= s.z;
+      s.ring.style.opacity = active ? 1 : 0;
+      s.ring.style.transform = `rotate(${(t * 400) % 360}deg)`;
+      const pulse = Math.max(clamp((t - s.z) / .7), clamp((t - CELEBRATE - i * .08) / .7));
+      s.ripple.style.opacity = pulse > 0 && pulse < 1 ? .8 * (1 - pulse) : 0;
+      s.ripple.style.transform = `scale(${1 + .9 * expo(pulse)})`;
+      s.dot.style.borderColor = done ? 'var(--ok)' : active ? 'rgba(216, 169, 204, .35)' : '';
+      s.dot.style.background = done ? '#13281b' : '';
+      s.num.textContent = done ? '✓' : String(i + 1);
+      s.num.style.color = done ? 'var(--ok)' : active ? 'var(--fg)' : '';
+      s.sname.style.color = done || active ? 'var(--fg)' : '';
+      const sw = clamp((t - s.z) / .4);
+      s.d1.style.opacity = 1 - sw; s.d2.style.opacity = sw;
+      s.d2.style.transform = `translateY(${6 * (1 - sw)}px)`;
+      s.sown.style.opacity = done || active ? 1 : .45;
+      if (i < 7) fillK += clamp((t - s.z) / (steps[i + 1].a - s.z + .001));
+    });
+    trackFill.style.transform = `scaleY(${fillK / 7})`;
+    F(allDone, t, CELEBRATE + .5, { y: 10, b: 4, d: .8 });
+
+    // the link from the running line to its step
+    const act = R.find((r) => r.step >= 0 && r.run && t >= r.t && t < r.run[1] + .5);
+    if (act) {
+      const s = steps[act.step], y1 = rowY(act, t) + LH / 2, y2 = s.y, x1 = TX + TW, x2 = RX;
+      const p = expo((t - act.t) / .5), fade = 1 - clamp((t - act.run[1]) / .5);
+      linkPath.setAttribute('d', `M${x1} ${y1} C ${x1 + 40} ${y1}, ${x2 - 40} ${y2}, ${x2} ${y2}`);
+      const len = linkPath.getTotalLength();
+      linkPath.style.strokeDasharray = `${len}`;
+      linkPath.style.strokeDashoffset = `${len * (1 - p)}`;
+      link.style.opacity = fade;
+      const dp = linkPath.getPointAtLength(len * ((t * .9) % 1));
+      linkDot.setAttribute('cx', dp.x); linkDot.setAttribute('cy', dp.y);
+      linkDot.style.opacity = p > .9 ? 1 : 0;
+    } else link.style.opacity = 0;
+  };
+});
+
+// 49–59.5: under the hood. The plugin first, then your agent and your source either side; what travels between them
+shot(48.6, 60.2, (set) => {
+  const eb = h('div', { class: 'abs center eyebrow', style: 'top: 128px', text: 'Under the hood' });
+  const hd = h('div', { class: 'abs center', style: 'top: 166px; font: 650 66px/1.15 var(--sans); letter-spacing: -.035em' }, 'One plugin. ', h('span', { class: 'g', text: 'Every step has an owner.' }));
+  const head = (t) => h('div', { class: 'lab', style: 'position: absolute; left: 28px; top: 26px', text: t });
+  const line = (txt, style = '') => h('div', { style: `display: flex; align-items: center; gap: 12px; height: 50px; font: 500 23px var(--mono); color: var(--fg2); ${style}` }, txt);
+  const A = h('div', { class: 'card', style: 'left: 100px; top: 330px; width: 380px; height: 420px' }, head('your coding agent'),
+    h('div', { class: 'abs', style: 'left: 28px; top: 70px' }, line(h('span', {}, h('span', { class: 'clay', text: '✻ ' }), 'Claude Code'), 'color: var(--fg)'), line('Cursor', 'color: var(--mut)'), line('Codex', 'color: var(--mut)'), line('any skills agent', 'color: var(--dim)')),
+    h('div', { class: 'abs mono', style: 'left: 22px; right: 22px; bottom: 22px; padding: 12px 16px; border: 1px solid var(--faint); border-radius: 10px; font-size: 16px; color: var(--mut); white-space: nowrap; overflow: hidden', text: '> Show the delivery date on…' }));
+  const grp = (lab, ...kids) => h('div', { style: 'display: grid; grid-template-columns: 104px 1fr; align-items: center; min-height: 62px' }, h('span', { class: 'lab', text: lab }), h('div', { style: 'display: flex; flex-wrap: wrap; gap: 10px; align-items: center' }, ...kids));
+  const note = (t) => h('span', { class: 'mono', style: 'font-size: 15px; color: var(--dim)', text: t });
+  const B = h('div', { class: 'card', style: 'left: 640px; top: 330px; width: 640px; height: 420px; border-color: rgba(216, 169, 204, .3); box-shadow: 0 40px 100px -30px rgba(0, 0, 0, .8), 0 0 80px rgba(216, 169, 204, .08)' }, head('agent-skills plugin'),
+    h('div', { class: 'abs', style: 'left: 28px; right: 28px; top: 66px' },
+      grp('workflow', chip('odoo-workflow', 's'), note('trace · brief · done')),
+      grp('packs', ...['16.0', '17.0', '18.0', '19.0'].map((v) => chip(`odoo-${v}`, 's', 'font-size: 15px; padding: 4px 9px'))),
+      grp('helper', chip('odoo_trace'), note('stdlib · read-only')),
+      grp('agents', chip('odoo-code-tracer', 'a', 'font-size: 16px'), chip('odoo-code-review', 'a', 'font-size: 16px')),
+      grp('commits', chip('odoo-commit', 's'), note('[TAG] module: message'))));
+  const tree = (txt, d, extra) => h('div', { style: `display: flex; align-items: center; gap: 12px; height: 46px; padding-left: ${d * 28}px; font: 400 22px var(--mono); color: var(--fg2)` }, txt, extra);
+  const C = h('div', { class: 'card', style: 'left: 1440px; top: 330px; width: 380px; height: 420px' }, head('your odoo source'),
+    h('div', { class: 'abs', style: 'left: 28px; top: 70px' }, tree('odoo/', 0, chip('core', '', 'font-size: 13px; padding: 1px 7px')), tree('addons/', 0), tree('sale/', 1), tree('portal/', 1), tree('custom/', 0, chip('yours', 'k', 'font-size: 13px; padding: 1px 7px')), tree('x_sale/', 1)),
+    h('div', { class: 'abs', style: 'left: 28px; bottom: 24px' }, chip('read-only', '', 'font-size: 15px')));
+  const wires = svg('svg', { width: 1920, height: 1080, style: 'position: absolute; left: 0; top: 0; overflow: visible' });
+  wires.innerHTML = '<defs><linearGradient id="gw" x1="0" x2="1"><stop offset="0" stop-color="#4fc3c8"/><stop offset="1" stop-color="#d8a9cc"/></linearGradient></defs>';
+  const WIRES = [['M480 540 C 560 540, 560 540, 640 540', 'loads skills', -48], ['M1280 540 C 1360 540, 1360 540, 1440 540', 'reads only', -48], ['M1630 750 C 1630 930, 290 930, 290 750', 'file:line evidence', -2]];
+  const ws = WIRES.map(([d, lab, dy]) => {
+    const p = svg('path', { d, fill: 'none', stroke: 'url(#gw)', 'stroke-width': 2, pathLength: 1, opacity: .75 });
+    p.style.strokeDasharray = '1';
+    wires.append(p);
+    const len = p.getTotalLength(), mid = p.getPointAtLength(len / 2);
+    const label = h('div', { class: 'abs mono', style: `left: ${mid.x}px; top: ${mid.y + dy}px; translate: -50% 0; font-size: 16px; color: var(--mut); padding: 4px 12px; border-radius: 8px; background: rgba(9, 9, 11, .92); border: 1px solid var(--line); white-space: nowrap`, text: lab });
+    const dots = [0, 1].map(() => h('i', { class: 'abs', style: 'width: 8px; height: 8px; margin: -4px; border-radius: 50%; background: #f1e3ee; box-shadow: 0 0 12px 3px rgba(216, 169, 204, .55)' }));
+    return { p, len, label, dots };
+  });
+  set.append(wires, A, B, C, eb, hd, ...ws.flatMap((w) => [w.label, ...w.dots]));
+  const chips = [...B.querySelectorAll('.chip')];
+  cue(49.6, 'shimmer', .6); [49.4, 51.6, 51.9].forEach((x, i) => cue(x, 'glass', .45, i));
+  return (t) => {
+    const OUT = 58.9;
+    F(B, t, 49.3, { y: 30, d: 1.2, z: OUT + .1, zd: .8 });
+    chips.forEach((c, i) => F(c, t, 49.8 + i * .07, { y: 10, b: 4, d: .7 }));
+    [A, C].forEach((n, i) => F(n, t, 51.4 + i * .3, { x: i ? 40 : -40, y: 0, d: 1.2, z: OUT + .1, zd: .8 }));
+    F(eb, t, 52.2, { z: OUT, zd: .8 }); F(hd, t, 52.5, { y: 30, b: 12, z: OUT, zd: .8 });
+    ws.forEach((w, i) => {
+      w.p.style.strokeDashoffset = `${1 - io((t - 53 - i * .45) / 1.2)}`;
+      w.p.style.opacity = .75 * (1 - io((t - OUT) / .8));
+      F(w.label, t, 53.6 + i * .45, { y: 10, b: 4, z: OUT, zd: .8 });
+      w.dots.forEach((d, j) => {
+        const k = ((t - 54.2 - i * .45) / 2.6 + j / 2) % 1, pt = w.p.getPointAtLength(k * w.len);
+        Object.assign(d.style, { left: `${pt.x}px`, top: `${pt.y}px`, opacity: t > 54.2 + i * .45 ? Math.sin(Math.PI * k) * (1 - io((t - OUT) / .6)) : 0 });
+      });
+    });
+  };
+});
+
+// 59.5–67.5: benchmarks, one at a time, then side by side
+shot(59.2, 68.2, (set) => {
+  const eb = h('div', { class: 'abs center eyebrow', style: 'top: 190px', text: 'Measured on real Odoo 18 and 19 source' });
+  const counters = [];
+  const stat = (x, a, b, sep, label, rows, foot) => {
+    const n1 = h('span', { text: '0' }), n2 = h('span', { text: String(b) });
+    counters.push({ n1, a });
+    const big = h('div', { style: 'font: 650 148px/1.1 var(--sans); letter-spacing: -.045em; font-variant-numeric: tabular-nums', class: 'g' }, n1, h('span', { style: 'color: #52525b; -webkit-text-fill-color: #52525b', text: sep }), n2);
+    const bars = rows.map(([lab, v, max, hi]) => {
+      const fill = h('div', { style: `height: 6px; border-radius: 3px; width: ${100 * v / max}%; background: ${hi ? 'var(--grad)' : 'rgba(255, 255, 255, .22)'}; transform-origin: 0 50%` });
+      const r = h('div', { style: 'margin-top: 14px' }, h('div', { style: `display: flex; justify-content: space-between; font: 400 17px var(--mono); color: ${hi ? 'var(--fg2)' : 'var(--dim)'}` }, h('span', { text: lab }), h('span', { text: String(v) })),
+        h('div', { style: 'margin-top: 8px; height: 6px; border-radius: 3px; background: rgba(255, 255, 255, .05)' }, fill));
+      return { r, fill };
+    });
+    const col = h('div', { class: 'abs', style: `left: ${x - 210}px; top: 300px; width: 420px; text-align: center` }, big,
+      h('div', { style: 'margin-top: 8px; font: 500 27px var(--sans); color: var(--fg)', text: label }),
+      h('div', { style: 'margin-top: 26px; text-align: left' }, ...bars.map((b) => b.r)),
+      h('div', { style: 'margin-top: 16px; font: 400 15px var(--mono); color: var(--dim); text-align: left', text: foot }));
+    set.append(col);
+    return { col, bars };
+  };
+  const cols = [
+    stat(400, 34, 34, '/', 'trace questions answered', [['odoo_trace helper', 34, 34, 1], ['grep recipe, bash', 20, 34]], 'the same recipe under zsh: 12/34'),
+    stat(960, 23, 23, '/', 'expectations passed', [['with odoo-workflow', 23, 23, 1], ['without the skill', 21, 23]], 'realistic setup · 8 evals'),
+    stat(1520, 16, 6, ' : ', 'blind grader prefers', [['the skill', 16, 16, 1], ['no skill', 6, 16]], '32 pairs · 10 ties'),
+  ];
+  const note = h('div', { class: 'abs center mono', style: 'top: 880px; font-size: 19px; color: var(--dim)', text: 'The cost: about 2× output tokens. A fast path skips trivial edits.' });
+  set.append(eb, note);
+  const AT = [60, 61.9, 63.75];
+  AT.forEach((a, i) => cue(a, 'glass', .6, i + 1));
+  return (t) => {
+    const OUT = 66.9;
+    F(eb, t, 59.6, { z: OUT, zd: .8 });
+    cols.forEach((c, i) => {
+      const a = AT[i];
+      F(c.col, t, a - .4, { y: 36, b: 12, d: 1.2, z: OUT + i * .08, zd: .8 });
+      counters[i].n1.textContent = String(Math.round(counters[i].a * expo((t - a) / 1.4)));
+      c.bars.forEach((b, j) => { b.fill.style.transform = `scaleX(${expo((t - a - .4 - j * .2) / 1.2)})`; });
+    });
+    F(note, t, 65.4, { y: 12, z: OUT, zd: .8 });
+  };
+});
+
+// 67.5–80: install
+shot(67.2, 80, (set) => {
+  const lock = h('div', { class: 'abs', style: 'left: 0; right: 0; top: 214px; display: flex; justify-content: center; align-items: center; gap: 30px' },
+    h('span', { style: 'width: 112px; height: 112px', html: MARK(112, 'gm3') }), h('span', { style: 'font: 650 112px/1.1 var(--sans); letter-spacing: -.045em', text: 'Agent Skills' }));
+  const tag = h('div', { class: 'abs center', style: 'top: 372px; font: 500 46px/1.3 var(--sans); color: var(--mut); letter-spacing: -.015em' }, 'Odoo code from ', h('span', { class: 'g', style: 'font-weight: 650', text: 'the real source.' }));
+  const C1 = 'claude plugin marketplace add unclecatvn/agent-skills', C2 = 'claude plugin install agent-skills@unclecat-agent-skills';
+  const l1 = h('span'), l2 = h('span'), caret = h('i', { class: 'caret' });
+  const term = h('div', { class: 'win', style: 'left: 380px; top: 500px; width: 1160px; height: 196px' }, h('div', { class: 'chrome' }, h('i'), h('i'), h('i'), h('span', { text: 'Terminal' })),
+    h('div', { class: 'term', style: 'padding: 22px 34px; font-size: 25px; line-height: 44px' }, h('div', {}, h('span', { class: 'clay', text: '$ ' }), l1), h('div', {}, h('span', { class: 'clay', text: '$ ' }), l2, caret)));
+  const foot = h('div', { class: 'abs', style: 'left: 0; right: 0; top: 760px; display: flex; justify-content: center; gap: 14px' },
+    chip('github.com/unclecatvn/agent-skills', 's', 'font-size: 21px; padding: 8px 16px'), chip('MIT', '', 'font-size: 21px; padding: 8px 16px'), chip('Odoo 16 · 17 · 18 · 19', 'a', 'font-size: 21px; padding: 8px 16px'));
+  set.append(lock, tag, term, foot);
+  const k1 = keys(C1, 69.6, 71.4, 5), k2 = keys(C2, 71.9, 73.7, 7);
+  typeCues(C1, k1, .5); typeCues(C2, k2, .5); cue(67.4, 'whoosh', .5);
+  return (t) => {
+    F(lock, t, 67.6, { y: 24, b: 14, d: 1.4 });
+    F(tag, t, 68.3, { y: 20 });
+    F(term, t, 69.0, { y: 40, d: 1.2 });
+    l1.textContent = C1.slice(0, typedAt(k1, t)); l2.textContent = C2.slice(0, typedAt(k2, t));
+    l2.after(caret);
+    if (t < 71.9) l1.after(caret);
+    caret.style.opacity = Math.floor(t * 2) % 2 ? .15 : .9;
+    [...foot.children].forEach((c, i) => F(c, t, 74.6 + i * .18, { y: 14, b: 6 }));
+    set.style.opacity = clamp((t - 67.2) / .6);
+  };
+});
+
+// ---------- the chapter captions, over the camera (render.py draws them in a second pass) ----------
+const CAPS = [[19.8, 22.4, '01 · RUNTIME', 'Reads your Odoo version.', 'Then loads its pack.'], [23.6, 29.9, '02 · TRACE', 'Checks every symbol', 'in the source first.'],
+  [30.6, 34.7, '03 · BRIEF', 'No file:line,', 'no code.'], [37.3, 39.6, '04 · PROVE', 'Proven on a', 'throwaway database.'], [42.6, 44.6, '05 · REVIEW', 'Reviewed and committed', 'by its own agents.']];
+const scrim = h('div', { class: 'abs', style: 'left: 0; top: 0; width: 1920px; height: 300px; background: linear-gradient(rgba(9, 9, 11, .95), rgba(9, 9, 11, .86) 55%, transparent)' });
+$('#hud').append(scrim);
+const caps = CAPS.map(([a, z, k, l1, l2]) => {
+  const n = h('div', { class: 'cap' }, h('div', { class: 'k', text: k }), h('div', { class: 'l' }, l1, h('br'), h('span', { style: 'color: var(--mut)', text: l2 })));
+  $('#hud').append(n);
+  return { n, a, z };
+});
+
+// ---------- the camera: moves and holds, its moves on the bar lines; [cx, cy, scale] in page pixels ----------
+const wide = () => [960, 540, 1];
+const TERM = () => SESSION.TX + SESSION.TW / 2;
+const follow = (s) => (t) => [TERM(), SESSION.lastY(t) - 150 / s, s];
+const on = (key, s, dy = 0) => (t) => [TERM(), SESSION.rowY(SESSION[key], t) + SESSION[key].h / 2 + dy, s];
+const rail = (cy, s) => () => [1920, cy, s];
+const CAM = [
+  [0, 0, (t) => [960, 540, 1 + .06 * clamp(t / 12)]],
+  [11.8, 1.6, wide],
+  [14.5, 1.1, () => [560, SESSION.inputY - 40, 1.65]],
+  [17.3, 1.1, rail(400, 1.6)],
+  [19.7, 1.0, follow(1.4)],
+  [24.6, .9, on('nf', 1.85)],
+  [27.2, .9, follow(1.4)],
+  [29.6, .8, on('grepRow', 1.75)],
+  [31.3, 1.0, on('brief', 1.3, 20)],
+  [34.7, .9, on('diff', 1.6)],
+  [37.0, 1.2, () => [960, 540, 1.03]],
+  [40.0, 1.0, rail(640, 1.6)],
+  [42.6, 1.0, follow(1.4)],
+  [44.6, .9, on('fin', 1.55, 16)],
+  [46.8, 1.3, wide],
+  [48.4, 1.3, () => [960, 545, 1.5]],
+  [50.4, 2.2, wide],
+  [53.0, 6, (t) => [960, 545, 1 + .04 * clamp((t - 53) / 6)]],
+  [58.6, 1.4, () => [400, 520, 1.7]],
+  [61.2, 1.0, () => [960, 520, 1.7]],
+  [63.1, 1.0, () => [1520, 520, 1.7]],
+  [64.9, 1.5, wide],
+  [67.0, 1.0, () => [960, 520, 1.02]],
+  [69.0, 1.5, () => [960, 600, 1.22]],
+  [73.6, 1.6, wide],
+];
+CAM.forEach(([t, d], i) => { if (i > 1 && d >= .9) cue(t + .1, 'air', .35); });
+/** Keep the frame inside the page. */
+const fit = ([x, y, s]) => { s = Math.max(1, s); return [clamp(x, 960 / s, 1920 - 960 / s), clamp(y, 540 / s, 1080 - 540 / s), s]; };
+/** The camera at t: the move into the current key, from wherever the previous key's target is now. */
+function camAt(t) {
+  const i = CAM.findLastIndex(([a]) => a <= t);
+  const [a, d, to] = CAM[i], b = fit(to(t));
+  if (i === 0 || d === 0) return b;
+  const prev = fit(CAM[i - 1][2](t)), k = io((t - a) / d);
+  return [lerp(prev[0], b[0], k), lerp(prev[1], b[1], k), lerp(prev[2], b[2], k)];
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+const DURATION = 80;
+window.renderAt = async (t) => {
+  const cam = camAt(t);
+  NOW.cam = cam;
+  for (const s of shots) {
+    const live = t >= s.t0 && t < s.t1;
+    s.root.style.display = live ? '' : 'none';
+    if (live) s.render(t);
+  }
+  glowA.style.left = `${520 + 300 * Math.sin(t * .11)}px`; glowA.style.top = `${330 + 140 * Math.cos(t * .09)}px`;
+  glowB.style.left = `${1420 + 260 * Math.cos(t * .1)}px`; glowB.style.top = `${760 + 140 * Math.sin(t * .12)}px`;
+  grid.style.opacity = .5 + .5 * clamp((t - 49) / 1.5) * (1 - clamp((t - 67) / 1.5));
+  $('#fade').style.opacity = Math.max(1 - clamp(t / .8), io((t - 78.2) / 1.8));
+  let hud = false;
+  for (const c of caps) {
+    const vis = t >= c.a && t < c.z + .8;
+    c.n.style.display = vis ? '' : 'none';
+    if (vis) { F(c.n, t, c.a, { y: 20, b: 10, d: .9, z: c.z, zd: .6, up: 12 }); hud = true; }
+  }
+  scrim.style.opacity = Math.max(0, ...caps.map((c) => clamp((t - c.a) / .5) * (1 - clamp((t - c.z) / .7))));
+  return [...cam, hud];
+};
+window.DURATION = DURATION;
+window.POSTER_AT = 47.9;
+window.MUSIC = { duration: DURATION, bpm: 96, sfx: SFX.sort((a, b) => a.t - b.t),
+  marks: { brand: 7.5, session: SESSION_IN, groove: 17.5, tension: 25, release: 27.5, build: 37.5, climax: DONE, outro: 67.5, last: 77.5 } };
+await window.renderAt(0);
+window.ready = true;
+</script>
+</body>
+</html>
