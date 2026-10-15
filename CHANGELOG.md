@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ### Added
+- `website/`: a landing page (English and Vietnamese, light and dark): a terminal replaying real `odoo_trace` output on Odoo 18 source, the intro film (`intro.mp4`), the six failures it targets, the workflow, the trace helper, the `x_age_days` comparison, the benchmarks, the toolkit and the three install routes with copy buttons. `.github/workflows/pages.yml` publishes it to GitHub Pages when it changes on `main` (Settings → Pages → Source: GitHub Actions).
 - `lib/video/`: the 64-second intro film, as code. `intro.html` draws every frame as a function of time (the HUD, the architecture diagram, the `sale.order` trace graph, the pipeline, the benchmark charts); `score.mjs` synthesizes a 120 BPM score and a sound for every motion on the picture's cues; `render.py` renders both to a 1080p60 MP4 with Playwright and ffmpeg. Every `odoo_trace` line in it is the helper's output on Odoo 18.0 source, every number is from the benchmark. The rendered MP4 is ignored here.
 
 ### Changed
