@@ -113,7 +113,7 @@ claude plugin install agent-skills@unclecat-agent-skills
 
 Thêm `--scope project` để ghi việc cài đặt vào dự án hiện tại thay vì vào cài đặt người dùng. Mọi thứ
 đều có namespace của plugin: skill như `agent-skills:odoo-workflow` và `agent-skills:odoo-18-0`, agent
-như `agent-skills:odoo-code-tracer`, `agent-skills:odoo-code-review` và `agent-skills:planner`.
+như `agent-skills:odoo-code-tracer` và `agent-skills:odoo-code-review`.
 
 Để cập nhật về sau, làm mới marketplace rồi cài lại plugin:
 
@@ -292,10 +292,7 @@ Hãy đòi bằng chứng: Brief, dòng tổng kết test, và những bước k
 | [Odoo 19.0](skills/odoo-19.0/) | Tài liệu tham chiếu phát triển và API highlights theo phiên bản. |
 | [Odoo Workflow](skills/odoo-workflow/) | Quy trình trace trước cho mọi thay đổi Odoo: phát hiện runtime, trace helper, Context Brief có trích dẫn, và definition of done chạy trên database dùng xong bỏ. |
 | [Odoo Commit](skills/odoo-commit/) | Commit message theo chuẩn Odoo, stage file tường minh và chuẩn bị commit. |
-| [Code Review](skills/code-review/) | Yêu cầu review, xử lý phản hồi và kiểm chứng dựa trên bằng chứng. |
 | [DTG Base](skills/dtg-base/) | Tham chiếu cho các tiện ích DTGBase: ngày tháng, múi giờ, batch, barcode, văn bản và file. |
-| [Flow Diagram](skills/flow-diagram/) | Sơ đồ kiến trúc và luồng dạng HTML/SVG tương tác. |
-| [Slide](skills/slide/) | Bộ slide trình chiếu HTML/React độc lập. |
 
 Mỗi gói Odoo bắt đầu từ file chỉ mục `SKILL.md` và `references/api-highlights.md`, sau đó là một
 hướng dẫn cho mỗi chủ đề: model, field, decorator, view, OWL, security, controller, action, data,
@@ -307,7 +304,6 @@ report, testing, hiệu năng, transaction, migration, bản dịch, mixin, mani
 | --- | --- |
 | [Odoo Code Tracer](agents/odoo-code-tracer.md) | Lần theo entry point, override, kế thừa và side effect xuyên suốt source dự án. |
 | [Odoo Code Review](agents/odoo-code-review.md) | Review thay đổi Odoo về tính đúng đắn, bảo mật, đa công ty, hiệu năng và chuẩn theo phiên bản, kèm báo cáo chấm điểm. |
-| [Planner](agents/planner.md) | Chia nhỏ một tính năng thành các bước triển khai. |
 
 ### Rules
 

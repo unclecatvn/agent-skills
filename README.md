@@ -113,8 +113,8 @@ claude plugin install agent-skills@unclecat-agent-skills
 
 Add `--scope project` to record the installation in the current project instead of your user
 settings. Everything appears namespaced by the plugin: skills such as `agent-skills:odoo-workflow`
-and `agent-skills:odoo-18-0`, agents such as `agent-skills:odoo-code-tracer`,
-`agent-skills:odoo-code-review` and `agent-skills:planner`.
+and `agent-skills:odoo-18-0`, agents such as `agent-skills:odoo-code-tracer` and
+`agent-skills:odoo-code-review`.
 
 To update later, refresh the marketplace, then install the plugin again:
 
@@ -292,10 +292,7 @@ Ask for the evidence: the Brief, the test summary line, and which checks were sk
 | [Odoo 19.0](skills/odoo-19.0/) | Version-specific development references and API highlights. |
 | [Odoo Workflow](skills/odoo-workflow/) | Trace-first procedure for every Odoo change: runtime detection, the trace helper, a cited Context Brief, and a definition of done run on a throwaway database. |
 | [Odoo Commit](skills/odoo-commit/) | Odoo-style commit messages, explicit staging, and commit preparation. |
-| [Code Review](skills/code-review/) | Requesting reviews, handling feedback, and evidence-based verification. |
 | [DTG Base](skills/dtg-base/) | References for DTGBase utilities: dates, timezones, batches, barcodes, text, and files. |
-| [Flow Diagram](skills/flow-diagram/) | Interactive HTML/SVG architecture and flow diagrams. |
-| [Slide](skills/slide/) | Self-contained HTML/React presentation decks. |
 
 Each Odoo pack starts from its `SKILL.md` index and `references/api-highlights.md`, then one guide
 per topic: models, fields, decorators, views, OWL, security, controllers, actions, data, reports,
@@ -307,7 +304,6 @@ testing, performance, transactions, migrations, translations, mixins, manifests,
 | --- | --- |
 | [Odoo Code Tracer](agents/odoo-code-tracer.md) | Follows entry points, overrides, inheritance and side effects through the project source. |
 | [Odoo Code Review](agents/odoo-code-review.md) | Reviews Odoo changes for correctness, security, multi-company, performance and version-specific standards, with a scored report. |
-| [Planner](agents/planner.md) | Breaks a feature into implementation steps. |
 
 ### Rules
 

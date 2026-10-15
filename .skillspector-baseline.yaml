@@ -64,14 +64,6 @@ fingerprints:
   rule_id: E1
   file: dtg-base/odoo-18-dtg-base-guide.md
   reason: Accepted finding (auto-generated baseline)
-- hash: sha256:2310224f426f2ecffa1e2efc1e1091a5be1b7a7568a6ddae88eeae1c61938247
-  rule_id: EA2
-  file: code-review/SKILL.md
-  reason: Accepted finding (auto-generated baseline)
-- hash: sha256:8bc44fafcd9831082e90c291399173d41727f7c0c2776d0113a1eaac4c6f4339
-  rule_id: EA2
-  file: flow-diagram/SKILL.md
-  reason: Accepted finding (auto-generated baseline)
 - hash: sha256:55410b4cc8cedcea3d707d5dceb981cd68230caecd85be5d9ff996c4300e4474
   rule_id: MP3
   file: odoo-18.0/references/odoo-18-data-guide.md
@@ -120,42 +112,6 @@ fingerprints:
   rule_id: PE3
   file: odoo-workflow/SKILL.md
   reason: Odoo portal access tokens (access_token on portal.mixin) as an access check before sudo(); no credential files.
-- hash: sha256:4d91ed09e57090f976bc768ddb587fe41f69a37f4def338f132db33c8f3ee75a
-  rule_id: P2
-  file: flow-diagram/assets/template.html
-  reason: Accepted finding (auto-generated baseline)
-- hash: sha256:c1997a48eee3e8394f1a1f40b55bc83ed295d25a68462043f4c1a8aec2206797
-  rule_id: P2
-  file: flow-diagram/assets/template.html
-  reason: Accepted finding (auto-generated baseline)
-- hash: sha256:6bdf30f076f852def2372d2de6ce6104380ae555c4dde88c16b2ce3fd641ea34
-  rule_id: P2
-  file: flow-diagram/assets/template.html
-  reason: Accepted finding (auto-generated baseline)
-- hash: sha256:41ed9bbd147f8f8ead1d9a01a7bdbcbc288f40f1c7e0aba1490718e715d69628
-  rule_id: P2
-  file: flow-diagram/references/flow-diagram-example.html
-  reason: Accepted finding (auto-generated baseline)
-- hash: sha256:f4c12caedb6c75660d2fb3135078ae0fa3d181826cff0e301246c03d6ca44c6e
-  rule_id: P2
-  file: flow-diagram/references/flow-diagram-example.html
-  reason: Accepted finding (auto-generated baseline)
-- hash: sha256:985006ff808856978a87253e4c40c53404cc028e701534ba3b41204b7a3442f8
-  rule_id: P2
-  file: flow-diagram/references/layout-patterns-guide.html
-  reason: Accepted finding (auto-generated baseline)
-- hash: sha256:c4a3ecaae54e161c64baa54305ad18d5ed536427210d1e2324905b73b7d77cb6
-  rule_id: P2
-  file: flow-diagram/references/layout-patterns-guide.html
-  reason: Accepted finding (auto-generated baseline)
-- hash: sha256:b9ebb39a2ff35a47003fa8f914766b0c9f7c9bcde088dfabc8a008ac06291877
-  rule_id: P2
-  file: flow-diagram/references/layout-patterns-guide.html
-  reason: Accepted finding (auto-generated baseline)
-- hash: sha256:2aebad9c693e1a8163f73bb29cbf12cfa546da9c5a8697130e131841cd211936
-  rule_id: P2
-  file: flow-diagram/references/layout-patterns-guide.html
-  reason: Accepted finding (auto-generated baseline)
 - hash: sha256:b30511bbdec6023a619a85fd52350224308edbaf513e7c19d69b0301432dba60
   rule_id: P2
   file: odoo-16.0/references/odoo-16-data-guide.md

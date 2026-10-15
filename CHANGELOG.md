@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+
+### Changed
+- Removed the `slide`, `flow-diagram` and generic `code-review` skill packs and the `planner` agent: the toolkit is now Odoo-only. Odoo review stays with the `odoo-code-review` agent.
+
 ## [1.0.20]
 
 ### Release Description
