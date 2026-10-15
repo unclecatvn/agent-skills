@@ -3,479 +3,865 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Agent Skills · Odoo code from the real source</title>
+<title>Agent Skills for Odoo: Claude Code plugin for Odoo 16–19</title>
 <meta name="author" content="UncleCat">
-<meta name="description" content="Agent Skills makes AI coding assistants trace your real Odoo 16–19 source before they write code: version-aware reference packs, a trace-first workflow, a read-only trace helper and two specialist agents. A Claude Code plugin, also for Cursor and Codex.">
-<meta name="theme-color" content="#05060b">
+<meta name="description" content="A free Claude Code plugin, also for Cursor and Codex, that makes AI read your real Odoo 16–19 source before it writes code: version-specific references, a trace-first workflow and review agents.">
+<link rel="canonical" href="https://unclecatvn.github.io/agent-skills/">
+<!-- the FAQ section's English questions and answers, for search results; generated from the same text -->
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "What is Agent Skills for Odoo?", "acceptedAnswer": {"@type": "Answer", "text": "A free, open-source toolkit that makes AI coding assistants such as Claude Code, Cursor and Codex work from your real Odoo source instead of from memory: reference packs for Odoo 16 to 19, the odoo-workflow skill with a read-only trace helper, and two agents, odoo-code-tracer and odoo-code-review. It is not an Odoo module: nothing is installed in your database."}}, {"@type": "Question", "name": "How do I use Claude Code with Odoo?", "acceptedAnswer": {"@type": "Answer", "text": "Install the plugin, then open Claude Code in your Odoo project and ask as usual: the skill starts on Odoo work, and on the first task it finds your Odoo version, core and addons from your odoo.conf.\nclaude plugin marketplace add unclecatvn/agent-skills\nclaude plugin install agent-skills@unclecat-agent-skills"}}, {"@type": "Question", "name": "Does it work with Cursor, Codex and other AI assistants?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. The skills installer puts the skills in any assistant it supports; pick yours when it asks. The two agents come with the Claude Code plugin only.\nnpx skills add unclecatvn/agent-skills"}}, {"@type": "Question", "name": "Which Odoo versions are supported?", "acceptedAnswer": {"@type": "Answer", "text": "Odoo 16.0, 17.0, 18.0 and 19.0, Community and Enterprise. The version is read from your core's odoo/release.py, never assumed, and the matching pack is loaded. The workflow and its helper are checked against the Odoo 18 and 19 source."}}, {"@type": "Question", "name": "What do I need on my machine?", "acceptedAnswer": {"@type": "Answer", "text": "A local checkout of the Odoo source your project runs, plus enterprise if you use it; Python 3.8 or later for the helper, with only the standard library, so your Odoo virtualenv works; PostgreSQL with the right to create scratch_* databases for the tests; Node.js 18 or later only for the npx routes."}}, {"@type": "Question", "name": "Will it touch my database or send my code anywhere?", "acceptedAnswer": {"@type": "Answer", "text": "The trace helper only reads files and makes no network calls. Tests run on a throwaway scratch_<module> database that is dropped afterwards, and the assistant is told never to install or upgrade on a named database unless you ask. What your assistant sends to its model is up to the assistant."}}, {"@type": "Question", "name": "How is it better than asking the AI directly?", "acceptedAnswer": {"@type": "Answer", "text": "Without it, the assistant answers from memory: fields that don't exist, such as sale.order.delivery_date, xpaths that stop the install, \"tests pass\" when no test ran. With it, every symbol gets a file:line or NOT FOUND before any code is written, and the change is proven on a scratch database. A blind grader preferred it 16 times to 6 over 32 pairs."}}, {"@type": "Question", "name": "How do I update it?", "acceptedAnswer": {"@type": "Answer", "text": "Refresh the marketplace, then install the plugin again.\nclaude plugin marketplace update unclecat-agent-skills\nclaude plugin install agent-skills@unclecat-agent-skills"}}, {"@type": "Question", "name": "Is it free?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. It is MIT licensed and open source on GitHub, where issues and pull requests are welcome."}}]}</script>
+<meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0a0a0a" media="(prefers-color-scheme: dark)">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Agent Skills">
-<meta property="og:title" content="Agent Skills: Odoo code from the real source">
-<meta property="og:description" content="Version-aware Odoo skills and agents for AI coding assistants. Every claim cites a file:line; every change is proven on a scratch database. Odoo 16–19.">
+<meta property="og:title" content="Agent Skills: make your AI read the Odoo source before it writes code">
+<meta property="og:description" content="Version-specific Odoo references, a trace-first workflow and two specialist agents for AI coding assistants. Every claim cites a file and line. Odoo 16–19.">
 <meta property="og:url" content="https://unclecatvn.github.io/agent-skills/">
 <meta property="og:image" content="https://unclecatvn.github.io/agent-skills/og.png">
 <meta name="twitter:card" content="summary_large_image">
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 128 128'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%232dd4bf'/%3E%3Cstop offset='.6' stop-color='%23a78bfa'/%3E%3Cstop offset='1' stop-color='%23e879f9'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='128' height='128' rx='30' fill='%2305060b'/%3E%3Cg fill='none' stroke='url(%23g)' stroke-width='9' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M64 24 L102 45 L64 66 L26 45 Z' fill='url(%23g)'/%3E%3Cpath d='M28 66 L64 86 L100 66'/%3E%3Cpath d='M28 84 L64 104 L100 84'/%3E%3C/g%3E%3C/svg%3E">
-<script>/* the saved language and theme, before the first paint */ try { const l = localStorage.getItem('lang'); if (l) document.documentElement.lang = l; const t = localStorage.getItem('theme'); if (t) document.documentElement.dataset.theme = t; } catch {}</script>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 128 128'%3E%3Crect width='128' height='128' rx='28' fill='%23714b67'/%3E%3Cg fill='none' stroke='%23fff' stroke-width='9' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M64 24 L102 45 L64 66 L26 45 Z' fill='%23fff'/%3E%3Cpath d='M28 66 L64 86 L100 66'/%3E%3Cpath d='M28 84 L64 104 L100 84'/%3E%3C/g%3E%3C/svg%3E">
+<script>/* the saved language and theme (light or dark; none = the system's), before the first paint */ try { const l = localStorage.getItem('lang'); if (l) document.documentElement.lang = l; const t = localStorage.getItem('theme'); if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t; } catch {}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
+  /* Simple and modern: neutral surfaces in alternating bands, a soft grid and Odoo's plum and teal washed into the
+     hero, thin borders. One left edge for every section; lists read top to bottom. */
   :root {
-    --bg: #05060b; --surface: #0d0f17; --surface-2: #131623; --line: rgba(255, 255, 255, .08); --line-strong: rgba(255, 255, 255, .15);
-    --text: #eef0f6; --muted: #9298ab; --faint: #5d6377;
-    --teal: #2dd4bf; --violet: #a78bfa; --pink: #e879f9; --red: #fb7185; --green: #4ade80;
-    --teal-ink: #99f6e4; --red-ink: #fecdd3; --green-ink: #bbf7d0;
-    --grad: linear-gradient(100deg, #2dd4bf, #a78bfa 55%, #e879f9);
-    --header: rgba(5, 6, 11, .72); --dot: rgba(255, 255, 255, .07); --glow-a: rgba(45, 212, 191, .14); --glow-b: rgba(167, 139, 250, .16);
-    --btn-bg: #eef0f6; --btn-text: #05060b; --term: #080910; --shadow: 0 40px 100px -30px rgba(0, 0, 0, .8);
-    --sans: Geist, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    --bg: #ffffff; --bg-2: #f8f8fa; --bg-3: #f1f1f4; --border: #e4e4e7; --border-2: #d4d4d8;
+    --fg: #09090b; --fg-2: #3f3f46; --muted: #6b6b76;
+    --accent: #714b67; --accent-bg: #f6eff4; --accent-fg: #5e3c55; --teal: #017e84;
+    --ok: #15803d; --ok-bg: #effaf3; --no: #b91c1c; --no-bg: #fef2f2;
+    --btn: #09090b; --btn-fg: #ffffff;
+    --term: #0b0b0e; --term-fg: #e4e4e7; --term-mut: #71717a; --term-border: #27272a;
+    --you-bg: #eef3ff; --you-fg: #1d4ed8;
+    --wash-a: rgba(113, 75, 103, .16); --wash-b: rgba(1, 126, 132, .13); --gridline: rgba(9, 9, 11, .055);
+    --shadow: 0 1px 2px rgba(0, 0, 0, .04), 0 12px 32px -16px rgba(0, 0, 0, .18);
+    --sans: Geist, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
     --mono: "Geist Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+    --bg: #09090b; --bg-2: #111114; --bg-3: #1a1a1f; --border: #26262b; --border-2: #3a3a42;
+    --fg: #fafafa; --fg-2: #d4d4d8; --muted: #a1a1aa;
+    --accent: #d8a9cc; --accent-bg: #2a1d27; --accent-fg: #e8c6de; --teal: #4fc3c8;
+    --ok: #4ade80; --ok-bg: #0f1f15; --no: #f87171; --no-bg: #261313;
+    --btn: #fafafa; --btn-fg: #09090b; --term: #000000; --term-border: #27272a;
+    --you-bg: #172036; --you-fg: #7eaaff;
+    --wash-a: rgba(216, 169, 204, .14); --wash-b: rgba(79, 195, 200, .1); --gridline: rgba(255, 255, 255, .05);
+    --shadow: 0 1px 2px rgba(0, 0, 0, .4), 0 12px 32px -16px rgba(0, 0, 0, .7);
+    color-scheme: dark;
+  } }
+  :root[data-theme="dark"] {
+    --bg: #09090b; --bg-2: #111114; --bg-3: #1a1a1f; --border: #26262b; --border-2: #3a3a42;
+    --fg: #fafafa; --fg-2: #d4d4d8; --muted: #a1a1aa;
+    --accent: #d8a9cc; --accent-bg: #2a1d27; --accent-fg: #e8c6de; --teal: #4fc3c8;
+    --ok: #4ade80; --ok-bg: #0f1f15; --no: #f87171; --no-bg: #261313;
+    --btn: #fafafa; --btn-fg: #09090b; --term: #000000; --term-border: #27272a;
+    --you-bg: #172036; --you-fg: #7eaaff;
+    --wash-a: rgba(216, 169, 204, .14); --wash-b: rgba(79, 195, 200, .1); --gridline: rgba(255, 255, 255, .05);
+    --shadow: 0 1px 2px rgba(0, 0, 0, .4), 0 12px 32px -16px rgba(0, 0, 0, .7);
     color-scheme: dark;
   }
-  /* Light: the visitor's system setting, unless they picked one with the ☀ / ☾ button (html[data-theme]) */
-  @media (prefers-color-scheme: light) { :root:not([data-theme="dark"]) {
-    --bg: #fafbfd; --surface: #ffffff; --surface-2: #f2f4f8; --line: rgba(15, 20, 40, .09); --line-strong: rgba(15, 20, 40, .16);
-    --text: #10131c; --muted: #5a6072; --faint: #8a90a2; --teal: #0d9488; --violet: #7c3aed; --pink: #c026d3; --red: #e11d48; --green: #16a34a;
-    --teal-ink: #0f766e; --red-ink: #be123c; --green-ink: #15803d; --grad: linear-gradient(100deg, #0d9488, #7c3aed 55%, #c026d3);
-    --header: rgba(250, 251, 253, .8); --dot: rgba(15, 20, 40, .08); --glow-a: rgba(13, 148, 136, .1); --glow-b: rgba(124, 58, 237, .1);
-    --btn-bg: #10131c; --btn-text: #fff; --shadow: 0 30px 80px -30px rgba(15, 20, 40, .35);
-    color-scheme: light;
-  } }
-  :root[data-theme="light"] {
-    --bg: #fafbfd; --surface: #ffffff; --surface-2: #f2f4f8; --line: rgba(15, 20, 40, .09); --line-strong: rgba(15, 20, 40, .16);
-    --text: #10131c; --muted: #5a6072; --faint: #8a90a2; --teal: #0d9488; --violet: #7c3aed; --pink: #c026d3; --red: #e11d48; --green: #16a34a;
-    --teal-ink: #0f766e; --red-ink: #be123c; --green-ink: #15803d; --grad: linear-gradient(100deg, #0d9488, #7c3aed 55%, #c026d3);
-    --header: rgba(250, 251, 253, .8); --dot: rgba(15, 20, 40, .08); --glow-a: rgba(13, 148, 136, .1); --glow-b: rgba(124, 58, 237, .1);
-    --btn-bg: #10131c; --btn-text: #fff; --shadow: 0 30px 80px -30px rgba(15, 20, 40, .35);
-    color-scheme: light;
-  }
   * { box-sizing: border-box; }
-  html { scroll-behavior: smooth; }
-  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } *, *::before, *::after { animation: none !important; transition: none !important; } }
-  body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.6 var(--sans); -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+  html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } *, *::before, *::after { animation-duration: .01ms !important; animation-delay: 0s !important; transition: none !important; } }
+  body { margin: 0; background: var(--bg); color: var(--fg); font: 16px/1.6 var(--sans); -webkit-font-smoothing: antialiased; }
   html:not([lang="vi"]) [data-l="vi"], html[lang="vi"] [data-l="en"] { display: none; }
+  /* line breaks: headings balanced, short blocks even, no lone last word, code never split */
+  h1, h2, h3, summary { text-wrap: balance; }
+  p, li, dd { text-wrap: pretty; }
+  .sub, .lead, .fine, .side-note, .card p, .stats span, .cmp-row span, .facts span, details p, .quote, .ask, .dnotes li, .you, .step-b, .ftrack .nm { text-wrap: balance; }
   a { color: inherit; }
-  img, video { max-width: 100%; display: block; }
-  code { font: .88em var(--mono); background: var(--surface-2); border: 1px solid var(--line); padding: .1em .4em; border-radius: 6px; white-space: nowrap; }
-  ::selection { background: rgba(167, 139, 250, .4); }
-  .g { background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
-  .wrap { max-width: 1180px; margin: 0 auto; padding: 0 32px; }
-  @media (max-width: 760px) { .wrap { padding: 0 16px; } }
-
-  /* the stage: a dot grid and two glows behind everything */
-  .stage { position: fixed; inset: 0; z-index: -1; pointer-events: none;
-    background: radial-gradient(900px 600px at 15% 0%, var(--glow-a), transparent 70%), radial-gradient(900px 700px at 90% 30%, var(--glow-b), transparent 70%); }
-  .stage::after { content: ""; position: absolute; inset: 0; background-image: radial-gradient(var(--dot) 1.2px, transparent 1.4px); background-size: 28px 28px;
-    -webkit-mask-image: linear-gradient(#000, transparent 85%); mask-image: linear-gradient(#000, transparent 85%); }
+  code { font: .875em var(--mono); background: var(--bg-3); border: 1px solid var(--border); padding: .05em .35em; border-radius: 5px; white-space: nowrap; }
+  ::selection { background: var(--accent-bg); }
+  svg.i { width: 18px; height: 18px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+  .wrap { max-width: 1120px; margin: 0 auto; padding: 0 24px; }
 
   /* nav */
-  header { position: sticky; top: 0; z-index: 20; background: var(--header); backdrop-filter: saturate(180%) blur(14px); -webkit-backdrop-filter: saturate(180%) blur(14px); border-bottom: 1px solid var(--line); }
-  .nav { display: flex; align-items: center; gap: 28px; height: 62px; }
-  .logo { display: flex; align-items: center; gap: 10px; font-weight: 650; letter-spacing: -.02em; text-decoration: none; font-size: 17px; }
-  .logo svg { width: 26px; height: 26px; }
-  .nav nav { display: flex; gap: 22px; }
-  .nav nav a { color: var(--muted); text-decoration: none; font-size: 14px; }
-  .nav nav a:hover { color: var(--text); }
-  .nav .end { margin-left: auto; display: flex; gap: 8px; align-items: center; }
-  .icon-btn { display: grid; place-items: center; min-width: 34px; height: 34px; padding: 0 10px; border: 1px solid var(--line-strong); background: transparent; color: var(--muted);
-    border-radius: 9px; cursor: pointer; font: 500 12px var(--mono); }
-  .icon-btn:hover { color: var(--text); border-color: var(--text); }
-  .gh { display: inline-flex; align-items: center; gap: 8px; height: 34px; padding: 0 12px; border-radius: 9px; background: var(--btn-bg); color: var(--btn-text); text-decoration: none; font: 600 13px var(--sans); }
-  .gh svg { width: 16px; height: 16px; }
-  .gh .stars { font: 500 12px var(--mono); opacity: .75; }
-  @media (max-width: 900px) { .nav nav { display: none; } }
+  header { position: sticky; top: 0; z-index: 10; background: color-mix(in srgb, var(--bg) 80%, transparent); backdrop-filter: saturate(160%) blur(12px); -webkit-backdrop-filter: saturate(160%) blur(12px); border-bottom: 1px solid var(--border); }
+  .nav { display: flex; align-items: center; gap: 32px; height: 64px; }
+  .logo { display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: 16px; text-decoration: none; letter-spacing: -.01em; white-space: nowrap; }
+  .logo span.m { display: grid; place-items: center; width: 28px; height: 28px; border-radius: 8px; background: var(--accent); color: var(--bg); }
+  .logo span.m svg { width: 16px; height: 16px; }
+  .nav nav { display: flex; gap: 24px; font-size: 14px; }
+  .nav nav a { color: var(--muted); text-decoration: none; white-space: nowrap; }
+  .nav nav a:hover { color: var(--fg); }
+  .nav .end { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+  .ghost { display: inline-grid; place-items: center; height: 32px; min-width: 32px; padding: 0 8px; border-radius: 8px; border: 0; background: transparent; color: var(--muted); font: 500 13px var(--sans); cursor: pointer; text-decoration: none; white-space: nowrap; }
+  .ghost:hover { color: var(--fg); background: var(--bg-3); }
+  /* the theme: system, light or dark */
+  .themes { display: inline-flex; padding: 3px; gap: 2px; border: 1px solid var(--border); border-radius: 9px; background: var(--bg); }
+  .themes button { display: grid; place-items: center; width: 28px; height: 26px; border-radius: 6px; border: 0; background: transparent; color: var(--muted); cursor: pointer; }
+  .themes button:hover { color: var(--fg); }
+  .themes button[aria-pressed="true"] { background: var(--bg-3); color: var(--fg); }
+  .themes svg { width: 15px; height: 15px; }
+  .btn { display: inline-flex; align-items: center; gap: 8px; height: 40px; padding: 0 16px; border-radius: 8px; font: 500 14px var(--sans); text-decoration: none; border: 1px solid var(--border-2); background: var(--bg); color: var(--fg); cursor: pointer; white-space: nowrap; }
+  .btn:hover { background: var(--bg-3); }
+  .btn.pri { background: var(--btn); color: var(--btn-fg); border-color: var(--btn); }
+  .btn.pri:hover { opacity: .88; }
+  .btn.sm { height: 34px; padding: 0 12px; font-size: 13px; }
+  .btn .n { color: var(--muted); font: 500 12px var(--mono); }
+  @media (max-width: 960px) { .nav nav { display: none; } }
+  @media (max-width: 520px) { .nav { gap: 10px; } .btn .n, .gh-label { display: none; } .nav .end { gap: 4px; } }
 
-  /* buttons and the command box */
-  .btn { display: inline-flex; align-items: center; gap: 10px; height: 46px; padding: 0 20px; border-radius: 12px; font: 600 15px var(--sans); text-decoration: none; border: 1px solid var(--line-strong); cursor: pointer; }
-  .btn.pri { background: var(--btn-bg); color: var(--btn-text); border-color: transparent; }
-  .btn:not(.pri) { background: transparent; color: var(--text); }
-  .btn:hover { transform: translateY(-1px); }
-  .cmd { display: flex; align-items: center; gap: 12px; padding: 12px 12px 12px 18px; border-radius: 12px; background: var(--term); border: 1px solid var(--line-strong); font: 14px var(--mono); color: #d6dae6; overflow: hidden; }
-  .cmd .pr { color: var(--pink); flex: none; }
-  .cmd .t { flex: 1; overflow-x: auto; white-space: nowrap; scrollbar-width: none; }
-  .copy { flex: none; height: 30px; padding: 0 12px; border-radius: 8px; border: 1px solid rgba(255, 255, 255, .15); background: rgba(255, 255, 255, .06); color: #d6dae6; font: 500 12px var(--mono); cursor: pointer; }
-  .copy:hover { background: rgba(255, 255, 255, .12); }
-  .copy.done { color: #4ade80; border-color: rgba(74, 222, 128, .5); }
+  /* bands: full-width rows that alternate, so the page has rhythm without decoration */
+  .band { padding: 104px 0; }
+  .band.alt { background: var(--bg-2); border-block: 1px solid var(--border); }
+  .band.tint { background: radial-gradient(900px 420px at 0% 0%, var(--wash-a), transparent 70%), radial-gradient(800px 420px at 100% 100%, var(--wash-b), transparent 70%), var(--bg-2); border-block: 1px solid var(--border); }
+  @media (max-width: 760px) { .band { padding: 72px 0; } }
 
-  /* the hero */
-  .hero { display: grid; grid-template-columns: 1.05fr 1fr; gap: 56px; align-items: center; padding: 96px 0 72px; }
-  @media (max-width: 980px) { .hero { grid-template-columns: 1fr; padding: 64px 0 48px; gap: 40px; } }
-  .hero > *, .split > *, .fails > *, .kit > *, .bench > *, .steps > * { min-width: 0; } /* a long command scrolls in its box instead of widening the page */
-  @media (max-width: 560px) { .eyebrow { font-size: 11px; letter-spacing: 0; } .gh .stars { display: none; } }
-  .eyebrow { display: inline-flex; align-items: center; gap: 10px; padding: 6px 12px; border-radius: 999px; border: 1px solid var(--line-strong); font: 500 12px var(--mono); color: var(--muted); letter-spacing: .04em; }
-  .eyebrow i { width: 7px; height: 7px; border-radius: 50%; background: var(--teal); box-shadow: 0 0 10px var(--teal); }
-  h1 { font-size: clamp(38px, 5.6vw, 66px); line-height: 1.04; letter-spacing: -.045em; font-weight: 750; margin: 22px 0 20px; }
-  .lead { font-size: clamp(17px, 1.6vw, 19px); color: var(--muted); max-width: 34em; margin: 0 0 30px; }
-  .ctas { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 16px; }
-  .hero .cmd { max-width: 600px; font-size: 13px; }
+  /* hero: a soft grid and two washes of Odoo's colours behind it */
+  .hero { position: relative; isolation: isolate; text-align: center; padding: 96px 0 88px; overflow: hidden; }
+  .hero::before { content: ""; position: absolute; inset: 0; z-index: -2; background: radial-gradient(640px 340px at 18% 8%, var(--wash-a), transparent 70%), radial-gradient(720px 380px at 86% 22%, var(--wash-b), transparent 70%); }
+  .hero::after { content: ""; position: absolute; inset: 0; z-index: -1; background-image: linear-gradient(var(--gridline) 1px, transparent 1px), linear-gradient(90deg, var(--gridline) 1px, transparent 1px); background-size: 56px 56px; background-position: center top;
+    -webkit-mask-image: radial-gradient(ellipse 75% 65% at 50% 20%, #000 35%, transparent 80%); mask-image: radial-gradient(ellipse 75% 65% at 50% 20%, #000 35%, transparent 80%); }
+  .badge { display: inline-flex; align-items: center; gap: 6px; flex-wrap: wrap; justify-content: center; min-height: 30px; padding: 4px 12px; border-radius: 999px; border: 1px solid var(--border); background: color-mix(in srgb, var(--bg) 70%, transparent); font-size: 13px; color: var(--fg-2); }
+  .badge b { font-weight: 500; color: var(--accent-fg); }
+  h1 { font-size: clamp(34px, 6vw, 60px); line-height: 1.08; letter-spacing: -.04em; font-weight: 700; margin: 24px auto 20px; max-width: 22ch; }
+  .sub { font-size: clamp(16px, 2vw, 18.5px); color: var(--muted); max-width: 600px; margin: 0 auto; }
+  .ctas { display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; margin-top: 32px; }
+  .install { display: flex; align-items: center; gap: 10px; max-width: 540px; margin: 20px auto 0; min-height: 44px; padding: 4px 6px 4px 14px; border: 1px solid var(--border); border-radius: 10px; background: var(--bg); font: 13.5px var(--mono); color: var(--fg-2); text-align: left; }
+  .install .t, .code .t { flex: 1; min-width: 0; }
+  .install .t::before, .code .t::before { content: "$ "; color: var(--muted); }
+  @media (max-width: 600px) { .hero { padding: 56px 0 64px; } .install { font-size: 12.5px; } }
+  .copy { flex: none; display: inline-grid; place-items: center; width: 32px; height: 32px; border-radius: 7px; border: 0; background: transparent; color: var(--muted); cursor: pointer; }
+  .copy:hover { background: var(--bg-3); color: var(--fg); }
+  .copy.done { color: var(--ok); }
 
-  /* the terminal */
-  .term { border-radius: 16px; background: var(--term); border: 1px solid var(--line-strong); box-shadow: var(--shadow); overflow: hidden; color: #d6dae6; }
-  .term-head { display: flex; align-items: center; gap: 8px; height: 44px; padding: 0 16px; border-bottom: 1px solid rgba(255, 255, 255, .07); font: 500 12px var(--mono); color: #7d8396; }
-  .term-head i { width: 11px; height: 11px; border-radius: 50%; background: #2a2e3d; }
-  .term-head span { margin-left: 8px; }
-  .term-body { padding: 18px 20px 22px; font: 13.5px/1.75 var(--mono); min-height: 248px; white-space: pre-wrap; word-break: break-word; }
-  .term-body .pr { color: #e879f9; } .term-body .ok { color: #4ade80; } .term-body .bad { color: #fb7185; } .term-body .mut { color: #7d8396; } .term-body .hl { color: #99f6e4; }
-  .caret { display: inline-block; width: .6em; height: 1.1em; vertical-align: -.2em; background: #2dd4bf; animation: blink 1s steps(1) infinite; }
+  /* the hero's session, drawn like a desktop coding assistant: the same prompt, sent without the plugin and with it */
+  .shot { max-width: 1072px; margin: 56px auto 0; text-align: left; }
+  .app { display: grid; grid-template-columns: 252px minmax(0, 1fr); height: 640px; border: 1px solid var(--border); border-radius: 18px; background: var(--bg); box-shadow: var(--shadow); overflow: hidden; }
+  .app svg { width: 16px; height: 16px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+  .app-side { display: flex; flex-direction: column; min-height: 0; padding: 14px 10px 10px; background: var(--bg-2); border-right: 1px solid var(--border); font-size: 14px; color: var(--fg-2); }
+  .app-top { display: flex; align-items: center; gap: 8px; padding: 2px 6px 16px; color: var(--muted); }
+  .dots { display: inline-flex; gap: 7px; margin-right: 6px; } .dots i { width: 11px; height: 11px; border-radius: 50%; background: var(--border-2); }
+  .app-top .sp, .app-user .sp, .app-bot .sp { flex: 1; }
+  .views { display: inline-flex; gap: 2px; padding: 2px; border-radius: 8px; background: var(--bg-3); }
+  .views span { display: grid; place-items: center; width: 30px; height: 26px; border-radius: 6px; }
+  .views span.on { background: var(--bg); color: var(--fg); box-shadow: 0 1px 2px rgba(0, 0, 0, .1); }
+  .si { display: flex; align-items: center; gap: 10px; width: 100%; min-height: 32px; padding: 0 8px; border: 0; border-radius: 8px; background: none; color: inherit; font: inherit; text-align: left; white-space: nowrap; }
+  .si svg { color: var(--muted); }
+  .si .tx { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+  .si em { font: normal 500 11px/1.6 var(--sans); padding: 0 6px; border-radius: 5px; background: var(--you-bg); color: var(--you-fg); }
+  .si.dim { color: var(--muted); }
+  .side-h { margin: 14px 8px 2px; font-size: 12.5px; color: var(--muted); }
+  .sess { cursor: pointer; }
+  .sess i { flex: none; width: 7px; height: 7px; margin: 0 4px; border-radius: 50%; border: 1.5px solid var(--border-2); }
+  .sess.no i { border: 0; background: var(--no); } .sess.ok i { border: 0; background: var(--ok); }
+  .sess:hover { background: var(--bg-3); }
+  .sess[aria-selected="true"] { background: var(--bg-3); color: var(--fg); }
+  .app-user { margin-top: auto; display: flex; align-items: center; gap: 8px; padding: 12px 8px 2px; border-top: 1px solid var(--border); }
+  .app-user b { display: grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; background: var(--accent); color: var(--bg); font: 600 12px var(--sans); }
+  .app-main { display: flex; flex-direction: column; min-width: 0; min-height: 0; }
+  .app-title { display: flex; align-items: center; gap: 8px; padding: 24px 36px 12px; font-size: 15.5px; color: var(--muted); white-space: nowrap; }
+  .app-title .dots { display: none; }
+  .app-title b { color: var(--fg); font-weight: 600; }
+  .app-title .tx { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+  .log { flex: 1; min-height: 0; overflow-y: auto; scrollbar-width: thin; padding: 8px 36px 16px; display: flex; flex-direction: column; gap: 16px; font-size: 15px; line-height: 1.6; color: var(--fg); }
+  .log > * { flex: none; animation: rise .4s cubic-bezier(.2, .8, .2, 1) both; }
+  .log code { font-size: .86em; }
+  .you { align-self: flex-start; max-width: 88%; padding: 12px 18px; border-radius: 12px; background: var(--you-bg); color: var(--you-fg); }
+  .say { margin: 0; }
+  .step { color: var(--muted); }
+  .step > summary { display: inline-flex; align-items: center; gap: 6px; cursor: pointer; list-style: none; }
+  .step > summary::-webkit-details-marker { display: none; }
+  .step > summary::after { content: ""; width: 6px; height: 6px; margin-left: 4px; border-right: 1.5px solid; border-bottom: 1.5px solid; transform: rotate(-45deg); transition: transform .2s; }
+  .step[open] > summary::after { transform: translateY(-2px) rotate(45deg); }
+  .step > summary:hover { color: var(--fg-2); }
+  .step b { color: var(--fg); font-weight: 500; }
+  .step .plus { color: var(--ok); }
+  .step-b { margin: 8px 0 2px 2px; padding-left: 14px; border-left: 2px solid var(--border); }
+  .step-b.th { font-size: 14px; font-style: italic; }
+  .tr { font: 12.5px/1.6 var(--mono); overflow-wrap: anywhere; white-space: pre-wrap; }
+  .tr + .tr { margin-top: 10px; }
+  .tr .c { color: var(--fg); }
+  .tr .ok, .brief .ok { color: var(--ok); } .tr .no, .brief .no { color: var(--no); } .tr .hi { color: var(--accent-fg); font-weight: 500; }
+  .card-code { margin-top: 10px; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; background: var(--bg-2); color: var(--fg-2); }
+  .card-code .path { padding: 9px 16px; border-bottom: 1px solid var(--border); font: 12.5px var(--mono); color: var(--muted); }
+  .card-code pre { margin: 0; padding: 8px 0; overflow-x: auto; font: 12.5px/1.8 var(--mono); }
+  .card-code .ln { display: block; padding-right: 16px; white-space: pre; }
+  .card-code .ln b { display: inline-block; width: 64px; padding-right: 14px; text-align: right; color: var(--muted); font-weight: 400; user-select: none; }
+  .card-code .ln b::after { content: " +"; color: var(--ok); }
+  .card-code .ln.add { background: color-mix(in srgb, var(--ok) 11%, transparent); }
+  .card-code .s { color: var(--teal); }
+  .card-code .err { text-decoration: underline wavy var(--no); text-decoration-thickness: 1.5px; text-underline-offset: 4px; }
+  .brief { border: 1px solid var(--border); border-radius: 10px; overflow: hidden; font: 12.5px/1.5 var(--mono); color: var(--fg-2); }
+  .brief > div { display: grid; grid-template-columns: 130px minmax(0, 1fr) auto; gap: 12px; padding: 7px 14px; border-top: 1px solid var(--border); }
+  .brief > div:first-child { border-top: 0; background: var(--bg-2); font: 600 12.5px var(--sans); color: var(--fg); }
+  .brief > div > span:last-child { color: var(--muted); text-align: right; }
+  .fail { border: 1px solid color-mix(in srgb, var(--no) 40%, var(--border)); background: var(--no-bg); border-radius: 10px; padding: 10px 14px; font: 12.5px/1.6 var(--mono); color: var(--no); overflow-wrap: anywhere; }
+  .fail small { display: block; margin-bottom: 2px; font: 500 12px var(--sans); color: var(--muted); }
+  .busy { display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--muted); }
+  .busy i { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); animation: pulse 1s ease-in-out infinite; }
+  @keyframes pulse { 50% { opacity: .25; transform: scale(.7); } }
+  .busy[hidden] { display: none; }
+  .app-in { display: flex; align-items: center; gap: 10px; margin: 4px 36px 0; min-height: 54px; padding: 6px 10px 6px 18px; border: 1px solid var(--border-2); border-radius: 14px; background: var(--bg); }
+  .app-in .t { flex: 1; min-width: 0; font-size: 15px; color: var(--fg); }
+  .app-in .t .ph { color: var(--muted); }
+  .go { flex: none; display: grid; place-items: center; width: 34px; height: 34px; border-radius: 9px; color: var(--muted); transition: background .2s, color .2s; }
+  .go.on { background: var(--btn); color: var(--btn-fg); }
+  .app-bot { display: flex; align-items: center; gap: 14px; padding: 10px 46px 16px; font-size: 13.5px; color: var(--fg-2); white-space: nowrap; }
+  .app-bot > svg { color: var(--muted); }
+  .skill { display: inline-flex; align-items: center; gap: 6px; padding: 1px 8px; border-radius: 6px; border: 1px solid var(--border); font: 12.5px var(--mono); color: var(--muted); }
+  .skill i { width: 7px; height: 7px; border-radius: 50%; background: var(--no); }
+  .skill.on { color: var(--ok); border-color: color-mix(in srgb, var(--ok) 40%, var(--border)); } .skill.on i { background: var(--ok); }
+  .spin { width: 14px; height: 14px; border-radius: 50%; border: 2px solid var(--border-2); }
+  .spin.on { border-top-color: #3b82f6; animation: spin .8s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .caret { display: inline-block; width: 2px; height: 1.15em; margin-left: 1px; vertical-align: -.2em; background: var(--fg); animation: blink 1.1s steps(1) infinite; }
   @keyframes blink { 50% { opacity: 0; } }
-  .queries { display: flex; flex-wrap: wrap; gap: 8px; padding: 0 20px 18px; }
-  .q { padding: 5px 10px; border-radius: 8px; border: 1px solid rgba(255, 255, 255, .12); background: transparent; color: #9298ab; font: 12px var(--mono); cursor: pointer; }
-  .q:hover, .q.on { color: #99f6e4; border-color: rgba(45, 212, 191, .5); background: rgba(45, 212, 191, .08); }
+  @media (max-width: 900px) {
+    .app { grid-template-columns: minmax(0, 1fr); height: 640px; } .app-side { display: none; }
+    .app-title { padding: 16px 18px 10px; font-size: 14.5px; } .app-title .dots { display: inline-flex; }
+    .log { padding: 6px 18px 14px; font-size: 14.5px; } .app-in { margin: 4px 14px 0; } .app-bot { padding: 10px 22px 14px; gap: 12px; }
+  }
+  @media (max-width: 600px) {
+    .app-title .dots, .app-bot .md { display: none; }
+    .log { padding: 4px 14px 12px; } .you { max-width: 100%; }
+    .card-code pre { font-size: 11.5px; } .card-code .ln b { width: 44px; padding-right: 8px; }
+    .brief > div { grid-template-columns: minmax(0, 1fr) auto; } .brief > div > span:last-child { grid-column: 1 / -1; text-align: left; margin-top: -4px; }
+  }
 
-  /* the stats strip */
-  .stats { display: grid; grid-template-columns: repeat(4, 1fr); border: 1px solid var(--line); border-radius: 18px; background: var(--surface); overflow: hidden; }
-  .stats > div { padding: 26px 26px; border-left: 1px solid var(--line); }
-  .stats > div:first-child { border-left: 0; }
-  .stats b { display: block; font: 750 40px/1 var(--sans); letter-spacing: -.04em; }
-  .stats span { display: block; margin-top: 8px; color: var(--muted); font-size: 14px; }
-  @media (max-width: 760px) { .stats { grid-template-columns: 1fr 1fr; } .stats > div:nth-child(3) { border-left: 0; } .stats > div:nth-child(n+3) { border-top: 1px solid var(--line); } }
+  /* stats */
+  .stats { display: grid; grid-template-columns: repeat(3, 1fr); border: 1px solid var(--border); border-radius: 14px; margin: 72px auto 0; max-width: 1072px; overflow: hidden; background: var(--bg); text-align: left; }
+  .stats > div { padding: 24px 28px; }
+  .stats > div + div { border-left: 1px solid var(--border); }
+  .stats b { display: block; font-size: 36px; line-height: 1.1; font-weight: 700; letter-spacing: -.03em; }
+  .stats b small { font-size: 20px; color: var(--muted); font-weight: 500; }
+  .stats span { display: block; margin-top: 6px; font-size: 14.5px; color: var(--muted); }
+  @media (max-width: 760px) { .stats { grid-template-columns: 1fr; } .stats > div + div { border-left: 0; border-top: 1px solid var(--border); } }
 
-  /* sections */
-  .sec { padding: 104px 0 0; }
-  @media (max-width: 760px) { .sec { padding: 72px 0 0; } }
-  .label { display: block; font: 500 12px/1 var(--mono); letter-spacing: .16em; text-transform: uppercase; color: var(--teal); margin-bottom: 16px; }
-  h2 { font-size: clamp(30px, 4.2vw, 48px); line-height: 1.08; letter-spacing: -.04em; font-weight: 700; margin: 0 0 14px; }
-  .sub { color: var(--muted); font-size: 18px; max-width: 40em; margin: 0 0 40px; }
-  .card { border: 1px solid var(--line); border-radius: 16px; background: var(--surface); padding: 24px; }
-  h3 { font-size: 18px; letter-spacing: -.02em; margin: 0 0 8px; font-weight: 650; }
+  /* section headers */
+  .eyebrow { font-size: 14px; font-weight: 500; color: var(--accent-fg); margin: 0 0 10px; }
+  h2 { font-size: clamp(28px, 4vw, 40px); line-height: 1.12; letter-spacing: -.035em; font-weight: 700; margin: 0 0 14px; }
+  .lead { font-size: 17px; color: var(--muted); max-width: 640px; margin: 0 0 40px; }
+  .side { display: grid; grid-template-columns: 340px 1fr; gap: 64px; align-items: start; }
+  .side > * { min-width: 0; }
+  .side .lead { margin-bottom: 0; }
+  @media (max-width: 900px) { .side { grid-template-columns: 1fr; gap: 32px; } }
+  h3 { font-size: 16px; font-weight: 600; letter-spacing: -.01em; margin: 0 0 6px; }
+  .card { border: 1px solid var(--border); border-radius: 14px; background: var(--bg); padding: 24px; }
   .card p { margin: 0; color: var(--muted); font-size: 15px; }
+  .ico { display: inline-grid; place-items: center; width: 36px; height: 36px; border-radius: 9px; background: var(--bg-3); color: var(--fg-2); margin-bottom: 16px; }
+  .ico.no { background: var(--no-bg); color: var(--no); }
+  .grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .grid3 > * { min-width: 0; }
+  @media (max-width: 900px) { .grid3 { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 600px) { .grid3 { grid-template-columns: 1fr; } }
 
-  /* why: the failures */
-  .fails { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
-  @media (max-width: 900px) { .fails { grid-template-columns: 1fr 1fr; } }
-  @media (max-width: 600px) { .fails { grid-template-columns: 1fr; } }
-  .fails .x { display: inline-grid; place-items: center; width: 28px; height: 28px; border-radius: 8px; background: rgba(251, 113, 133, .12); color: var(--red); font-weight: 800; margin-bottom: 14px; }
+  /* the video */
+  .film { position: relative; border: 1px solid var(--border); border-radius: 14px; overflow: hidden; background: #000; aspect-ratio: 16 / 9; box-shadow: var(--shadow); }
+  .film video { width: 100%; height: 100%; display: block; }
+  .sound { position: absolute; right: 12px; top: 12px; display: inline-flex; align-items: center; gap: 6px; height: 32px; padding: 0 12px; border-radius: 8px; border: 0; background: rgba(255, 255, 255, .92); color: #09090b; font: 500 13px var(--sans); cursor: pointer; }
 
-  /* the film */
-  .film { position: relative; border-radius: 18px; overflow: hidden; border: 1px solid var(--line-strong); box-shadow: var(--shadow); background: #000; aspect-ratio: 16 / 9; }
-  .film video { width: 100%; height: 100%; object-fit: cover; }
-  .sound { position: absolute; right: 16px; top: 16px; height: 36px; padding: 0 14px; border-radius: 10px; border: 1px solid rgba(255, 255, 255, .25); background: rgba(5, 6, 11, .7); color: #eef0f6; font: 500 13px var(--sans); cursor: pointer; backdrop-filter: blur(8px); }
+  /* the workflow, as it runs: a track of seven steps with a packet moving along it, the current step's output below */
+  .ftrack { position: relative; display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); margin: 8px 0 24px; --p: 0; }
+  .ftrack::before, .ftrack::after { content: ""; position: absolute; left: calc(100% / 14); top: 21px; height: 2px; border-radius: 2px; }
+  .ftrack::before { right: calc(100% / 14); background: var(--border-2); }
+  .ftrack::after { width: calc((100% - 100% / 7) * var(--p)); background: var(--accent); transition: width .7s cubic-bezier(.4, 0, .2, 1); }
+  .pkt { position: absolute; z-index: 0; top: 17px; left: calc(100% / 14 + (100% - 100% / 7) * var(--p) - 5px); width: 10px; height: 10px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 5px color-mix(in srgb, var(--accent) 22%, transparent), 0 0 18px var(--accent); transition: left .7s cubic-bezier(.4, 0, .2, 1); pointer-events: none; }
+  .ftrack button { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; gap: 10px; min-width: 0; padding: 0 4px; border: 0; background: none; color: var(--muted); font: 500 13.5px/1.3 var(--sans); text-align: center; cursor: pointer; }
+  .ftrack .dot { display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; border: 1.5px solid var(--border-2); background: var(--bg); color: var(--fg-2); font: 500 14px var(--mono); transition: background .3s, border-color .3s, color .3s, box-shadow .3s; }
+  .ftrack .gate .dot { border-radius: 12px; border-style: dashed; border-color: var(--accent); color: var(--accent-fg); }
+  .ftrack .dot svg { width: 19px; height: 19px; }
+  .ftrack .past .dot { background: var(--accent); border-color: var(--accent); border-style: solid; color: var(--bg); }
+  .ftrack [aria-selected="true"] { color: var(--fg); }
+  .ftrack [aria-selected="true"] .dot { border-color: var(--accent); border-style: solid; color: var(--accent-fg); box-shadow: 0 0 0 6px color-mix(in srgb, var(--accent) 16%, transparent); }
+  .ftrack .pill { margin: 0; }
+  .fstage { border: 1px solid var(--border); border-radius: 16px; background: var(--bg); box-shadow: var(--shadow); overflow: hidden; }
+  .fpanel { display: none; grid-template-columns: minmax(0, 1fr) minmax(0, 1.35fr); }
+  .fpanel.on { display: grid; }
+  .ftext { padding: 28px 28px 24px; }
+  .ftext .k { margin: 0 0 8px; font: 500 12.5px var(--mono); color: var(--muted); }
+  .ftext h3 { font-size: 20px; letter-spacing: -.02em; margin-bottom: 8px; }
+  .ftext > p { margin: 0; color: var(--muted); font-size: 15px; text-wrap: pretty; }
+  .rule { list-style: none; margin: 18px 0 0; padding: 0; display: grid; gap: 8px; font-size: 14px; color: var(--fg-2); }
+  .rule li { display: flex; gap: 8px; }
+  .rule svg { margin-top: 3px; width: 16px; height: 16px; }
+  .rule .y svg { color: var(--ok); } .rule .n svg { color: var(--no); }
+  .fpanel .dcode { min-height: 260px; border-radius: 0; padding: 22px 22px; font-size: 12.5px; }
+  .fpanel.play .dcode .ln { animation: rise .45s cubic-bezier(.2, .8, .2, 1) both; animation-delay: calc(var(--i, 0) * 110ms + 100ms); }
+  .fpanel.play .rule li { animation: rise .4s cubic-bezier(.2, .8, .2, 1) both; animation-delay: calc(var(--i, 0) * 160ms + 500ms); }
+  .stamp { display: inline-flex; align-items: center; gap: 6px; margin-top: 18px; padding: 4px 10px; border-radius: 8px; background: var(--ok-bg); color: var(--ok); font: 600 13px var(--sans); opacity: 0; }
+  .stamp svg { width: 15px; height: 15px; }
+  .fpanel.play .stamp { animation: stamp .45s cubic-bezier(.2, 1.4, .4, 1) both; animation-delay: 1.5s; }
+  @keyframes stamp { from { opacity: 0; transform: scale(.85); } to { opacity: 1; transform: none; } }
+  @media (max-width: 860px) {
+    .fpanel { grid-template-columns: 1fr; } .fpanel .dcode { min-height: 0; }
+    .ftrack .nm, .ftrack .pill { display: none; } .ftrack .dot { width: 36px; height: 36px; font-size: 13px; }
+    .ftrack::before, .ftrack::after { top: 17px; } .pkt { top: 13px; }
+    .ftext { padding: 22px 20px 20px; } .fpanel .dcode { padding: 18px 16px; font-size: 11.5px; }
+  }
+  .pill { display: inline-block; margin-left: 6px; padding: 0 7px; border-radius: 999px; background: var(--accent-bg); color: var(--accent-fg); font: 500 11.5px/1.8 var(--sans); vertical-align: 2px; white-space: nowrap; }
+  .side-note { margin: 18px 0 0; color: var(--muted); font-size: 14.5px; }
 
-  /* the workflow */
-  .steps { display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; counter-reset: s; }
-  @media (max-width: 1000px) { .steps { grid-template-columns: 1fr 1fr; } }
-  @media (max-width: 560px) { .steps { grid-template-columns: 1fr; } }
-  .step { position: relative; padding: 20px 16px; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); }
-  .step .n { font: 500 12px var(--mono); color: var(--teal); }
-  .step h3 { font-size: 16px; margin: 8px 0 6px; }
-  .step p { margin: 0; color: var(--muted); font-size: 13.5px; line-height: 1.5; }
-  .step.gate { border-color: rgba(45, 212, 191, .45); box-shadow: 0 0 0 1px rgba(45, 212, 191, .15), 0 0 40px -10px rgba(45, 212, 191, .4); }
+  /* the difference, per component: what an assistant writes without the plugin and with it */
+  .dtabs { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; margin-bottom: 20px; padding-bottom: 2px; }
+  .dtabs button { flex: none; display: inline-flex; align-items: center; gap: 8px; height: 38px; padding: 0 14px; border-radius: 9px; border: 1px solid var(--border); background: var(--bg); color: var(--fg-2); font: 500 14px var(--sans); cursor: pointer; white-space: nowrap; }
+  .dtabs button:hover { border-color: var(--border-2); }
+  .dtabs button[aria-selected="true"] { background: var(--fg); color: var(--bg); border-color: var(--fg); }
+  .dtabs button span.mono { font: 500 13px var(--mono); }
+  .dpanel { display: none; }
+  .dpanel.on { display: block; }
+  .ask { display: flex; gap: 10px; align-items: baseline; margin: 0 0 16px; font-size: 15.5px; color: var(--fg-2); }
+  .ask b { flex: none; font: 500 12px var(--mono); color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
+  .dgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .dgrid > * { min-width: 0; }
+  @media (max-width: 860px) { .dgrid { grid-template-columns: 1fr; } }
+  .dside { border: 1px solid var(--border); border-radius: 14px; background: var(--bg); overflow: hidden; display: flex; flex-direction: column; }
+  .dside.good { border-color: color-mix(in srgb, var(--ok) 45%, var(--border)); box-shadow: 0 0 0 4px color-mix(in srgb, var(--ok) 8%, transparent); }
+  .dhead { display: flex; align-items: center; gap: 8px; height: 44px; padding: 0 16px; border-bottom: 1px solid var(--border); font-size: 13.5px; font-weight: 600; }
+  .dhead i { width: 8px; height: 8px; border-radius: 50%; }
+  .bad .dhead { color: var(--no); background: var(--no-bg); } .bad .dhead i { background: var(--no); }
+  .good .dhead { color: var(--ok); background: var(--ok-bg); } .good .dhead i { background: var(--ok); }
+  .dhead small { margin-left: auto; font: 500 12px var(--mono); color: var(--muted); }
+  .dcode { margin: 0; flex: 1; background: var(--term); color: var(--term-fg); padding: 16px 18px; font: 12.75px/1.7 var(--mono); white-space: pre; overflow-x: auto; min-height: 200px; }
+  .dcode .ln { display: block; }
+  .dcode .ln:empty::before { content: " "; }
+  .dcode .c { color: #71717a; } .dcode .k { color: #c4b5fd; } .dcode .s { color: #5eead4; } .dcode .y { color: #fde68a; } .dcode .g { color: #4ade80; } .dcode .r { color: #f87171; }
+  .dcode .err { text-decoration: underline wavy #f87171; text-decoration-thickness: 1.5px; text-underline-offset: 4px; }
+  .dnotes { list-style: none; margin: 0; padding: 14px 16px 16px; display: grid; gap: 8px; font-size: 14px; color: var(--fg-2); border-top: 1px solid var(--border); }
+  .dnotes li { display: flex; gap: 8px; }
+  .bad .dnotes svg { color: var(--no); margin-top: 3px; } .good .dnotes svg { color: var(--ok); margin-top: 3px; }
+  .dsource { margin: 12px 0 0; font-size: 13px; color: var(--muted); }
+  /* in motion: the right side's lines arrive one by one; the left side's mistakes get underlined */
+  .dpanel.play .good .ln { animation: rise .45s cubic-bezier(.2, .8, .2, 1) both; animation-delay: calc(var(--i, 0) * 70ms + 150ms); }
+  .dpanel.play .dnotes li { animation: rise .4s cubic-bezier(.2, .8, .2, 1) both; animation-delay: calc(var(--i, 0) * 120ms + 700ms); }
+  .dpanel.play .bad .err { animation: mark .5s ease-out both; animation-delay: .5s; }
+  @keyframes rise { from { opacity: 0; transform: translateY(8px); } }
+  @keyframes mark { from { text-decoration-color: transparent; } }
 
   /* the trace helper */
-  .split { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; align-items: start; }
-  @media (max-width: 980px) { .split { grid-template-columns: 1fr; } }
-  table { width: 100%; border-collapse: collapse; font-size: 14.5px; }
-  th, td { text-align: left; padding: 12px 14px; border-bottom: 1px solid var(--line); vertical-align: top; }
-  th { font: 500 11.5px var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--faint); }
-  td code { white-space: normal; }
-  .tbl { border: 1px solid var(--line); border-radius: 16px; background: var(--surface); overflow-x: auto; }
-  .tbl table { min-width: 560px; }
-  .ok-c { color: var(--green-ink); } .bad-c { color: var(--red-ink); }
-  .checks { list-style: none; padding: 0; margin: 20px 0 0; display: grid; gap: 10px; }
-  .checks li { display: flex; gap: 12px; color: var(--muted); }
-  .checks li::before { content: "✓"; color: var(--teal); font-weight: 700; }
+  .cmds { list-style: none; padding: 0; margin: 0; border: 1px solid var(--border); border-radius: 14px; overflow: hidden; background: var(--bg); }
+  .cmds li { padding: 14px 18px; border-top: 1px solid var(--border); }
+  .cmds li:first-child { border-top: 0; }
+  .cmds li > span { display: block; font-size: 14px; color: var(--muted); margin-bottom: 4px; }
+  .cmds li code { background: none; border: 0; padding: 0; font-size: 13.5px; color: var(--fg); white-space: normal; overflow-wrap: anywhere; }
+  .facts { list-style: none; padding: 0; margin: 24px 0 0; display: grid; gap: 10px; font-size: 15px; color: var(--fg-2); }
+  .facts li { display: flex; gap: 10px; }
+  .facts svg { color: var(--ok); margin-top: 3px; }
 
-  /* benchmarks */
-  .bench { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
-  @media (max-width: 900px) { .bench { grid-template-columns: 1fr; } }
-  .big { font: 800 64px/1 var(--sans); letter-spacing: -.05em; margin: 6px 0 12px; }
-  .big small { font-size: 28px; color: var(--faint); letter-spacing: -.02em; }
-  .bars { display: grid; gap: 12px; margin-top: 18px; }
-  .bar-row { font: 12.5px var(--mono); color: var(--muted); }
-  .bar-row div { display: flex; justify-content: space-between; margin-bottom: 6px; }
-  .track { height: 10px; border-radius: 6px; background: var(--surface-2); overflow: hidden; }
-  .fill { height: 100%; border-radius: 6px; background: var(--faint); width: 0; transition: width 1.2s cubic-bezier(.2, .8, .2, 1); }
-  .fill.g2 { background: var(--grad); }
-  .in .fill { width: var(--w); }
-  .note { margin-top: 24px; color: var(--muted); font-size: 15px; }
+  /* the comparison */
+  .quote { border-left: 2px solid var(--accent); padding: 2px 0 2px 16px; color: var(--fg-2); font-size: 15.5px; margin: 0 0 28px; max-width: 760px; }
+  .quote code { white-space: normal; }
+  .cmp { border: 1px solid var(--border); border-radius: 14px; overflow: hidden; background: var(--bg); }
+  .cmp-row { display: grid; grid-template-columns: 180px 1fr 1fr; border-top: 1px solid var(--border); }
+  .cmp-row:first-child { border-top: 0; background: var(--bg-3); font-size: 13px; font-weight: 500; color: var(--muted); }
+  .cmp-row > div { padding: 14px 18px; font-size: 14.5px; display: flex; gap: 10px; align-items: flex-start; }
+  .cmp-row > div:first-child { color: var(--fg-2); font-weight: 500; }
+  .cmp-row > div + div { border-left: 1px solid var(--border); }
+  .cmp .x { color: var(--no); margin-top: 3px; } .cmp .v { color: var(--ok); margin-top: 3px; }
+  @media (max-width: 760px) { .cmp-row { grid-template-columns: 1fr; } .cmp-row > div + div { border-left: 0; padding-top: 0; } .cmp-row:first-child { display: none; } .cmp-row > div:first-child { padding-bottom: 6px; } }
 
-  /* the toolkit */
-  .kit { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
-  @media (max-width: 900px) { .kit { grid-template-columns: 1fr; } }
-  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
-  .chip { padding: 4px 10px; border-radius: 8px; font: 12.5px var(--mono); border: 1px solid rgba(167, 139, 250, .35); background: rgba(167, 139, 250, .08); color: var(--violet); }
-  .chip.t { border-color: rgba(45, 212, 191, .4); background: rgba(45, 212, 191, .08); color: var(--teal-ink); }
+  /* the numbers */
+  .num { font-size: 40px; font-weight: 700; letter-spacing: -.035em; line-height: 1; margin: 2px 0 18px; }
+  .num small { font-size: 20px; color: var(--muted); font-weight: 500; }
+  .bars { display: grid; gap: 12px; }
+  .b { font-size: 13px; color: var(--muted); }
+  .b div { display: flex; justify-content: space-between; gap: 12px; margin-bottom: 6px; }
+  .b div span:last-child { font-family: var(--mono); color: var(--fg-2); }
+  .track { height: 8px; border-radius: 99px; background: var(--bg-3); overflow: hidden; }
+  .track i { display: block; height: 100%; border-radius: 99px; background: var(--border-2); }
+  .b.me div { color: var(--fg); font-weight: 500; }
+  .b.me .track i { background: var(--accent); }
+  .fine { font-size: 14.5px; color: var(--muted); margin: 24px 0 0; max-width: 720px; }
 
   /* install */
-  .tabs { display: inline-flex; gap: 4px; padding: 4px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); margin-bottom: 18px; flex-wrap: wrap; }
-  .tab { height: 36px; padding: 0 16px; border-radius: 9px; border: 0; background: transparent; color: var(--muted); font: 500 14px var(--sans); cursor: pointer; }
-  .tab.on { background: var(--surface-2); color: var(--text); box-shadow: 0 0 0 1px var(--line-strong); }
-  .panel { display: none; }
-  .panel.on { display: block; }
-  .panel .cmd + .cmd { margin-top: 10px; }
-  .panel p { color: var(--muted); max-width: 46em; }
+  .seg { display: inline-flex; padding: 4px; gap: 4px; border-radius: 10px; background: var(--bg-3); margin-bottom: 18px; flex-wrap: wrap; }
+  .seg button { height: 32px; padding: 0 14px; border-radius: 7px; border: 0; background: transparent; color: var(--muted); font: 500 14px var(--sans); cursor: pointer; white-space: nowrap; }
+  .seg button.on { background: var(--bg); color: var(--fg); box-shadow: 0 1px 2px rgba(0, 0, 0, .08); }
+  .panel { display: none; } .panel.on { display: block; }
+  .code { border: 1px solid var(--border); border-radius: 12px; background: var(--bg); padding: 6px 6px 6px 16px; }
+  .code .ln { display: flex; align-items: center; gap: 10px; min-height: 40px; font: 13.5px var(--mono); color: var(--fg-2); }
+  .panel p { color: var(--muted); font-size: 15px; margin: 14px 0 0; }
 
   /* faq */
-  details { border-bottom: 1px solid var(--line); padding: 18px 0; }
-  summary { cursor: pointer; font-weight: 600; font-size: 17px; list-style: none; display: flex; justify-content: space-between; gap: 20px; }
-  summary::after { content: "+"; color: var(--muted); font-weight: 400; }
-  details[open] summary::after { content: "–"; }
-  details p { color: var(--muted); margin: 12px 0 0; max-width: 52em; }
+  #faq details { border-bottom: 1px solid var(--border); }
+  #faq details:first-of-type { border-top: 1px solid var(--border); }
+  #faq summary { cursor: pointer; list-style: none; display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 18px 0; font-weight: 500; }
+  #faq summary::-webkit-details-marker { display: none; }
+  #faq summary svg { color: var(--muted); transition: transform .2s; }
+  #faq details[open] summary svg { transform: rotate(45deg); }
+  #faq .ans { margin: -4px 0 18px; color: var(--muted); font-size: 15px; text-wrap: pretty; }
+  #faq .ans .cmd { display: block; margin-top: 8px; padding: 8px 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg-2); color: var(--fg-2); font: 13px/1.5 var(--mono); overflow-wrap: anywhere; }
+  #faq .ans .cmd::before { content: "$ "; color: var(--muted); }
+  #faq .ans .cmd + .cmd { margin-top: 6px; }
 
-  /* closing and footer */
-  .closing { text-align: center; padding: 120px 0 110px; }
-  .closing h2 { font-size: clamp(34px, 5vw, 60px); }
-  .closing .cmd { max-width: 640px; margin: 28px auto 0; text-align: left; }
-  footer { border-top: 1px solid var(--line); padding: 32px 0 48px; color: var(--muted); font-size: 14px; }
-  footer .wrap { display: flex; flex-wrap: wrap; gap: 16px 28px; align-items: center; }
-  footer a { color: var(--muted); text-decoration: none; }
-  footer a:hover { color: var(--text); }
+  /* Odoo Debug, the sister project: who it is and how to get it, the panel, then what each of its tabs answers */
+  .od-head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 24px 48px; margin-bottom: 36px; }
+  .od-id { display: flex; align-items: flex-start; gap: 20px; max-width: 640px; }
+  .od-id h2 { margin-bottom: 10px; }
+  .od-id .lead { margin: 0; }
+  .od-head .ctas { margin: 0; }
+  .od-logo { flex: none; display: grid; place-items: center; width: 52px; height: 52px; border-radius: 14px; background: #714b67; color: #fff; }
+  .od-logo svg { width: 28px; height: 28px; }
+  .od-shot { margin: 0; border: 1px solid var(--border); border-radius: 14px; overflow: hidden; background: var(--bg); box-shadow: var(--shadow); }
+  .od-shot .bar { display: flex; align-items: center; height: 36px; padding: 0 14px; border-bottom: 1px solid var(--border); background: var(--bg-2); }
+  .od-shot img { display: block; width: 100%; height: auto; }
+  .od-feats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1px; margin-top: 24px; border: 1px solid var(--border); border-radius: 14px; overflow: hidden; background: var(--border); }
+  .od-feats > div { padding: 20px 22px; background: var(--bg); }
+  .od-feats b { display: block; margin-bottom: 8px; font: 500 12px var(--mono); letter-spacing: .04em; text-transform: uppercase; color: var(--accent-fg); }
+  .od-feats h3 { font-size: 15.5px; margin-bottom: 4px; }
+  .od-feats p { margin: 0; font-size: 14px; color: var(--muted); text-wrap: pretty; }
+  .od-meta { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 24px; margin: 20px 0 0; font-size: 13.5px; color: var(--muted); }
+  @media (max-width: 900px) { .od-feats { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (max-width: 600px) { .od-feats { grid-template-columns: minmax(0, 1fr); } .od-id { gap: 14px; } .od-logo { width: 44px; height: 44px; border-radius: 12px; } .od-logo svg { width: 24px; height: 24px; } }
+
+  /* end */
+  .cta { border: 1px solid var(--border); border-radius: 18px; background: var(--bg); padding: 56px 24px; text-align: center; position: relative; overflow: hidden; isolation: isolate; }
+  .cta::before { content: ""; position: absolute; inset: 0; z-index: -1; background: radial-gradient(520px 220px at 50% 0%, var(--wash-a), transparent 70%); }
+  .cta h2 { margin-bottom: 10px; }
+  footer { border-top: 1px solid var(--border); padding: 28px 0 40px; font-size: 14px; color: var(--muted); }
+  footer .wrap { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 24px; }
+  footer a { text-decoration: none; }
+  footer a:hover { color: var(--fg); }
   footer .sp { flex: 1; }
-
-  /* reveal on scroll */
-  .rv { opacity: 0; transform: translateY(18px); transition: opacity .7s ease, transform .7s cubic-bezier(.2, .8, .2, 1); }
-  .rv.in { opacity: 1; transform: none; }
-  @media (prefers-reduced-motion: reduce) { .rv { opacity: 1; transform: none; } }
 </style>
 </head>
 <body>
-<div class="stage"></div>
+<svg width="0" height="0" style="position: absolute" aria-hidden="true">
+  <symbol id="i-copy" viewBox="0 0 24 24"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></symbol>
+  <symbol id="i-moon" viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></symbol>
+  <symbol id="i-monitor" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></symbol>
+  <symbol id="i-gh" viewBox="0 0 24 24"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.9a3.4 3.4 0 0 0-.9-2.6c3.1-.4 6.4-1.5 6.4-6.9a5.4 5.4 0 0 0-1.5-3.7 5 5 0 0 0-.1-3.7s-1.2-.4-3.9 1.5a13.4 13.4 0 0 0-7 0C6.3 1.6 5.1 2 5.1 2a5 5 0 0 0-.1 3.7 5.4 5.4 0 0 0-1.5 3.7c0 5.4 3.3 6.5 6.4 6.9a3.4 3.4 0 0 0-.9 2.6V22"/></symbol>
+  <symbol id="i-play" viewBox="0 0 24 24"><path d="m7 4 13 8-13 8z"/></symbol>
+  <symbol id="i-vol" viewBox="0 0 24 24"><path d="M11 5 6 9H2v6h4l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M19 5a10 10 0 0 1 0 14"/></symbol>
+  <symbol id="i-mute" viewBox="0 0 24 24"><path d="M11 5 6 9H2v6h4l5 4z"/><path d="m22 9-6 6M16 9l6 6"/></symbol>
+  <symbol id="i-layers" viewBox="0 0 24 24"><path d="m12 2 10 5-10 5L2 7z" fill="currentColor"/><path d="m2 12 10 5 10-5M2 17l10 5 10-5"/></symbol>
+  <symbol id="i-book" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V3H6.5A2.5 2.5 0 0 0 4 5.5z"/><path d="M4 19.5A2.5 2.5 0 0 0 6.5 22H20v-5"/></symbol>
+  <symbol id="i-route" viewBox="0 0 24 24"><circle cx="6" cy="19" r="3"/><circle cx="18" cy="5" r="3"/><path d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15"/></symbol>
+  <symbol id="i-commit" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M3 12h6M15 12h6"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></symbol>
+  <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></symbol>
+  <symbol id="i-bug" viewBox="0 0 24 24"><path d="M8 8V6a4 4 0 0 1 8 0v2"/><rect x="6" y="8" width="12" height="13" rx="6"/><path d="M12 12v9M3 13h3M18 13h3M4 19l2.5-1.5M20 19l-2.5-1.5M4 7l2.5 1.5M20 7l-2.5 1.5"/></symbol>
+  <symbol id="i-ext" viewBox="0 0 24 24"><path d="M15 3h6v6M10 14 21 3M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></symbol>
+  <symbol id="i-panel" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M9 4v16"/></symbol>
+  <symbol id="i-left" viewBox="0 0 24 24"><path d="M19 12H5M11 18l-6-6 6-6"/></symbol>
+  <symbol id="i-right" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
+  <symbol id="i-chat" viewBox="0 0 24 24"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/></symbol>
+  <symbol id="i-code" viewBox="0 0 24 24"><path d="m16 18 6-6-6-6M8 6l-6 6 6 6M14 4l-4 16"/></symbol>
+  <symbol id="i-folder" viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></symbol>
+  <symbol id="i-shapes" viewBox="0 0 24 24"><circle cx="7" cy="7" r="4"/><rect x="13" y="13" width="8" height="8" rx="1"/><path d="m17 3 4 7h-8z"/></symbol>
+  <symbol id="i-sliders" viewBox="0 0 24 24"><path d="M4 6h10M18 6h2M4 18h4M12 18h8M14 4v4M8 16v4"/></symbol>
+  <symbol id="i-down" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
+  <symbol id="i-branch" viewBox="0 0 24 24"><circle cx="6" cy="6" r="2.5"/><circle cx="6" cy="18" r="2.5"/><circle cx="18" cy="8" r="2.5"/><path d="M6 8.5v7M18 10.5c0 4-6 3-11 5.5"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+  <symbol id="i-gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></symbol>
+  <symbol id="i-mic" viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></symbol>
+  <symbol id="i-enter" viewBox="0 0 24 24"><path d="M20 5v6a4 4 0 0 1-4 4H5M9 11l-4 4 4 4"/></symbol>
+  <symbol id="i-chrome" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/><path d="M21.2 8H12M3.9 6.1 8.5 14M10.9 21.9 15.5 14"/></symbol>
+</svg>
 
 <header>
   <div class="wrap nav">
-    <a class="logo" href="#top">
-      <svg viewBox="0 0 128 128" aria-hidden="true"><defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2dd4bf"/><stop offset=".6" stop-color="#a78bfa"/><stop offset="1" stop-color="#e879f9"/></linearGradient></defs><g fill="none" stroke="url(#lg)" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"><path d="M64 22 L106 45 L64 68 L22 45 Z" fill="url(#lg)"/><path d="M24 66 L64 88 L104 66"/><path d="M24 86 L64 108 L104 86"/></g></svg>
-      Agent Skills
-    </a>
+    <a class="logo" href="#top"><span class="m"><svg class="i"><use href="#i-layers"/></svg></span>Agent Skills</a>
     <nav>
-      <a href="#workflow"><span data-l="en">How it works</span><span data-l="vi">Cách hoạt động</span></a>
-      <a href="#trace">Trace helper</a>
-      <a href="#bench"><span data-l="en">Benchmarks</span><span data-l="vi">Đo lường</span></a>
+      <a href="#how"><span data-l="en">How it works</span><span data-l="vi">Cách hoạt động</span></a>
+      <a href="#diff"><span data-l="en">The difference</span><span data-l="vi">Khác biệt</span></a>
+      <a href="#numbers"><span data-l="en">Benchmarks</span><span data-l="vi">Đo lường</span></a>
       <a href="#install"><span data-l="en">Install</span><span data-l="vi">Cài đặt</span></a>
       <a href="#faq">FAQ</a>
     </nav>
     <div class="end">
-      <button class="icon-btn" id="lang" aria-label="Language / Ngôn ngữ"><span data-l="en">VI</span><span data-l="vi">EN</span></button>
-      <button class="icon-btn" id="theme" aria-label="Light or dark theme">☾</button>
-      <a class="gh" href="https://github.com/unclecatvn/agent-skills"><svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>GitHub <span class="stars" id="stars"></span></a>
+      <button class="ghost" id="lang" aria-label="Language"><span data-l="en">VI</span><span data-l="vi">EN</span></button>
+      <div class="themes" role="group" aria-label="Theme">
+        <button data-theme-pick="system" aria-label="System theme" title="System"><svg class="i"><use href="#i-monitor"/></svg></button>
+        <button data-theme-pick="light" aria-label="Light theme" title="Light"><svg class="i"><use href="#i-sun"/></svg></button>
+        <button data-theme-pick="dark" aria-label="Dark theme" title="Dark"><svg class="i"><use href="#i-moon"/></svg></button>
+      </div>
+      <a class="btn sm" href="https://github.com/unclecatvn/agent-skills" aria-label="GitHub"><svg class="i" style="width: 16px; height: 16px"><use href="#i-gh"/></svg><span class="gh-label">GitHub</span> <span class="n" id="stars"></span></a>
     </div>
   </div>
 </header>
 
-<main id="top" class="wrap">
-  <!-- the hero -->
+<main id="top">
   <section class="hero">
-    <div>
-      <span class="eyebrow"><i></i><span data-l="en">Claude Code plugin · Cursor · Codex · Odoo 16–19</span><span data-l="vi">Plugin Claude Code · Cursor · Codex · Odoo 16–19</span></span>
-      <h1 data-l="en">Your AI writes Odoo code from memory. <span class="g">Make it read the source.</span></h1>
-      <h1 data-l="vi">AI viết code Odoo theo trí nhớ. <span class="g">Bắt nó đọc source thật.</span></h1>
-      <p class="lead" data-l="en">Version-aware Odoo references, a trace-first workflow and two specialist agents for AI coding assistants. Every claim cites a <code>file:line</code>; every change is proven on a scratch database.</p>
-      <p class="lead" data-l="vi">Bộ tài liệu Odoo đúng phiên bản, một quy trình trace trước khi code và hai agent chuyên trách cho trợ lý code AI. Mọi khẳng định đều có <code>file:line</code>; mọi thay đổi đều được kiểm chứng trên database thử.</p>
-      <div class="cmd"><span class="pr">$</span><span class="t">claude plugin marketplace add unclecatvn/agent-skills</span><button class="copy" data-copy="claude plugin marketplace add unclecatvn/agent-skills && claude plugin install agent-skills@unclecat-agent-skills">copy</button></div>
+    <div class="wrap">
+      <span class="badge"><b>Claude Code plugin</b><span>· Cursor · Codex · Odoo 16–19</span></span>
+      <h1 data-l="en">Make your AI read the Odoo source before it writes code</h1>
+      <h1 data-l="vi">Bắt AI đọc source Odoo trước khi viết code</h1>
+      <p class="sub" data-l="en">Version-specific Odoo references, a trace-first workflow and two specialist agents. Every claim cites a file and a line, and every change is proven on a scratch database.</p>
+      <p class="sub" data-l="vi">Tài liệu Odoo đúng phiên bản, quy trình tra source trước khi code và hai agent chuyên trách. Mọi khẳng định đều có file và dòng, mọi thay đổi đều được kiểm chứng trên database thử.</p>
       <div class="ctas">
-        <a class="btn pri" href="#install"><span data-l="en">Install in a minute</span><span data-l="vi">Cài trong một phút</span> →</a>
-        <a class="btn" href="#film">▶ <span data-l="en">Watch the 64-second film</span><span data-l="vi">Xem phim 64 giây</span></a>
+        <a class="btn pri" href="#install"><span data-l="en">Get started</span><span data-l="vi">Bắt đầu</span></a>
+        <a class="btn" href="#video"><svg class="i" style="width: 14px; height: 14px"><use href="#i-play"/></svg><span data-l="en">Watch the video</span><span data-l="vi">Xem video</span></a>
+      </div>
+      <div class="install"><span class="t">claude plugin marketplace add unclecatvn/agent-skills</span><button class="copy" data-copy="claude plugin marketplace add unclecatvn/agent-skills && claude plugin install agent-skills@unclecat-agent-skills" aria-label="Copy"><svg class="i"><use href="#i-copy"/></svg></button></div>
+      <div class="shot">
+        <div class="app">
+          <div class="app-side">
+            <div class="app-top"><span class="dots"><i></i><i></i><i></i></span><svg><use href="#i-panel"/></svg><svg><use href="#i-left"/></svg><svg><use href="#i-right"/></svg><span class="sp"></span><span class="views"><span><svg><use href="#i-chat"/></svg></span><span class="on"><svg><use href="#i-code"/></svg></span></span></div>
+            <div class="si"><svg><use href="#i-plus"/></svg><span data-l="en">New</span><span data-l="vi">Mới</span></div>
+            <div class="si"><svg><use href="#i-folder"/></svg><span data-l="en">Projects</span><span data-l="vi">Dự án</span></div>
+            <div class="si"><svg><use href="#i-shapes"/></svg>Artifacts</div>
+            <div class="si"><svg><use href="#i-sliders"/></svg><span data-l="en">Customize</span><span data-l="vi">Tuỳ chỉnh</span></div>
+            <div class="side-h"><span data-l="en">Pinned</span><span data-l="vi">Đã ghim</span></div>
+            <div class="si"><svg><use href="#i-branch"/></svg><span class="tx">sale_extra · Odoo 18</span></div>
+            <div class="side-h"><span data-l="en">Scheduled</span><span data-l="vi">Lên lịch</span></div>
+            <div class="si"><svg><use href="#i-clock"/></svg><span class="tx"><span data-l="en">Weekly odoo-code-review</span><span data-l="vi">odoo-code-review hằng tuần</span></span></div>
+            <div class="side-h"><span data-l="en">Recents</span><span data-l="vi">Gần đây</span></div>
+            <button class="si sess no" aria-label="Without the skill"><i></i><span class="tx"><span data-l="en">Delivery date, no skill</span><span data-l="vi">Ngày giao hàng, không skill</span></span></button>
+            <button class="si sess ok" aria-label="With agent-skills"><i></i><span class="tx"><span data-l="en">Delivery date, agent-skills</span><span data-l="vi">Ngày giao hàng, agent-skills</span></span></button>
+            <div class="si sess dim"><i></i><span class="tx"><span data-l="en">Add x_age_days to order lines</span><span data-l="vi">Thêm x_age_days vào dòng đơn</span></span></div>
+            <div class="si sess dim"><i></i><span class="tx"><span data-l="en">Review my diff before merging</span><span data-l="vi">Review diff trước khi merge</span></span></div>
+            <div class="si sess dim"><i></i><span class="tx"><span data-l="en">Commit this change</span><span data-l="vi">Commit thay đổi này</span></span></div>
+            <div class="app-user"><b>U</b><span>UncleCat</span><svg><use href="#i-down"/></svg><span class="sp"></span><svg><use href="#i-gear"/></svg></div>
+          </div>
+          <div class="app-main">
+            <div class="app-title"><span class="dots"><i></i><i></i><i></i></span><b>sale_extra</b><span>/</span><span class="tx"><span data-l="en">Show the delivery date on the quotation list</span><span data-l="vi">Hiện ngày giao hàng trên danh sách báo giá</span></span><svg><use href="#i-down"/></svg></div>
+            <div class="log" id="log" aria-live="polite"><div class="busy" id="busy" hidden><i></i><span data-l="en">Working…</span><span data-l="vi">Đang làm…</span></div></div>
+            <div class="app-in"><span class="t" id="typed"></span><span class="go" id="go" aria-hidden="true"><svg><use href="#i-enter"/></svg></span></div>
+            <div class="app-bot" aria-hidden="true"><svg><use href="#i-plus"/></svg><svg><use href="#i-mic"/></svg><span class="md">Auto</span><span class="skill" id="plug"></span><span class="sp"></span><span class="md">Opus</span><span class="md"><span data-l="en">High</span><span data-l="vi">Cao</span></span><span class="spin" id="spin"></span></div>
+          </div>
+        </div>
+      </div>
+      <div class="stats">
+        <div><b>34<small>/34</small></b><span data-l="en">trace questions right, on real Odoo 18 and 19 source</span><span data-l="vi">câu hỏi trace trả lời đúng, trên source Odoo 18 và 19</span></div>
+        <div><b>23<small>/23</small></b><span data-l="en">expectations met when the agent isn't told where Odoo is</span><span data-l="vi">tiêu chí đạt, khi agent không được chỉ chỗ Odoo</span></div>
+        <div><b>16<small> vs 6</small></b><span data-l="en">times a blind grader preferred it, over 32 pairs</span><span data-l="vi">lần người chấm mù chọn nó, trên 32 cặp</span></div>
       </div>
     </div>
-    <div class="term rv" aria-label="odoo_trace on Odoo 18 source">
-      <div class="term-head"><i></i><i></i><i></i><span>odoo_trace · Odoo 18.0 source</span></div>
-      <div class="term-body" id="out"></div>
-      <div class="queries" id="queries"></div>
-    </div>
   </section>
 
-  <div class="stats rv">
-    <div><b class="g">34/34</b><span data-l="en">trace questions answered on real Odoo 18 and 19 source</span><span data-l="vi">câu hỏi trace trả lời đúng trên source Odoo 18 và 19 thật</span></div>
-    <div><b>23/23</b><span data-l="en">expectations passed in a realistic setup</span><span data-l="vi">tiêu chí đạt trong tình huống thực tế</span></div>
-    <div><b>16 <small style="font-size: 22px; color: var(--faint)">vs 6</small></b><span data-l="en">a blind grader's preference, 32 pairs</span><span data-l="vi">lượt chấm mù ưu tiên, trên 32 cặp</span></div>
-    <div><b>16–19</b><span data-l="en">Odoo versions, one pack each</span><span data-l="vi">phiên bản Odoo, mỗi bản một gói</span></div>
-  </div>
-
-  <!-- why -->
-  <section class="sec" id="why">
-    <span class="label">01 — <span data-l="en">Why</span><span data-l="vi">Vì sao</span></span>
-    <h2 data-l="en">Plausible Odoo code is the expensive kind.</h2>
-    <h2 data-l="vi">Code Odoo "trông có vẻ đúng" là loại tốn kém nhất.</h2>
-    <p class="sub" data-l="en">AI assistants write code that looks right. The failures that cost time are always the same kind:</p>
-    <p class="sub" data-l="vi">Trợ lý AI viết code trông có vẻ đúng. Những lỗi tốn thời gian luôn thuộc cùng một kiểu:</p>
-    <div class="fails">
-      <div class="card rv"><span class="x">✕</span><h3 data-l="en">Symbols that don't exist</h3><h3 data-l="vi">Symbol không hề tồn tại</h3><p data-l="en">A field or xmlid the base addon never had: <code>sale.order.delivery_date</code>, <code>sales_team.group_sale_admin</code>.</p><p data-l="vi">Field hoặc xmlid mà addon gốc chưa từng có: <code>sale.order.delivery_date</code>, <code>sales_team.group_sale_admin</code>.</p></div>
-      <div class="card rv"><span class="x">✕</span><h3 data-l="en">Anchors from another module</h3><h3 data-l="vi">Anchor của module khác</h3><p data-l="en">An xpath on a field only another module adds, so the install fails with "cannot be located in parent view".</p><p data-l="vi">Xpath trỏ vào field mà chỉ module khác thêm vào, nên cài module lỗi "cannot be located in parent view".</p></div>
-      <div class="card rv"><span class="x">✕</span><h3 data-l="en">The wrong hook</h3><h3 data-l="vi">Override sai chỗ</h3><p data-l="en">An override on the public method instead of the hook that does the work.</p><p data-l="vi">Override method public thay vì đúng hook thực sự làm việc.</p></div>
-      <div class="card rv"><span class="x">✕</span><h3 data-l="en">Data dropped silently</h3><h3 data-l="vi">Mất dữ liệu âm thầm</h3><p data-l="en">A stored field renamed without a migration: the column and its data are gone.</p><p data-l="vi">Đổi tên field stored mà không có migration: cột và dữ liệu của nó biến mất.</p></div>
-      <div class="card rv"><span class="x">✕</span><h3 data-l="en"><code>sudo()</code> nobody can audit</h3><h3 data-l="vi"><code>sudo()</code> không ai kiểm soát</h3><p data-l="en">Access checks bypassed with no stated reason and no prior check.</p><p data-l="vi">Bỏ qua phân quyền mà không có lý do rõ ràng, cũng không kiểm tra trước.</p></div>
-      <div class="card rv"><span class="x">✕</span><h3 data-l="en">"Tests pass"</h3><h3 data-l="vi">"Test pass rồi"</h3><p data-l="en">Exit code 0, when the run ran zero tests because the module wasn't installed there.</p><p data-l="vi">Exit code 0, trong khi không chạy test nào vì module chưa được cài trên database đó.</p></div>
-    </div>
-  </section>
-
-  <!-- the film -->
-  <section class="sec" id="film">
-    <span class="label">02 — <span data-l="en">The film</span><span data-l="vi">Phim giới thiệu</span></span>
-    <h2 data-l="en">Sixty-four seconds, start to proof.</h2>
-    <h2 data-l="vi">Sáu mươi tư giây, từ lỗi đến bằng chứng.</h2>
-    <div class="film rv">
-      <video id="video" src="intro.mp4" poster="intro-poster.jpg" muted loop playsinline controls preload="metadata" aria-label="64-second film: an AI invents two Odoo symbols; Agent Skills reads the version, traces sale.order, finds access_url via portal.mixin and does not find delivery_date, cites every row of its Context Brief, proves the change on a scratch database; the benchmarks; the install command."></video>
-      <button class="sound" id="sound">🔇 <span data-l="en">Sound on</span><span data-l="vi">Bật tiếng</span></button>
-    </div>
-  </section>
-
-  <!-- the workflow -->
-  <section class="sec" id="workflow">
-    <span class="label">03 — <span data-l="en">How it works</span><span data-l="vi">Cách hoạt động</span></span>
-    <h2 data-l="en">One procedure for every Odoo change.</h2>
-    <h2 data-l="vi">Một quy trình cho mọi thay đổi Odoo.</h2>
-    <p class="sub" data-l="en"><code>odoo-workflow</code> runs before any code is written, and again before anything is called done. A question like "where is X defined?" stops after step 2; a typo fix takes the fast path.</p>
-    <p class="sub" data-l="vi"><code>odoo-workflow</code> chạy trước khi viết dòng code nào, và chạy lại trước khi coi là xong. Câu hỏi kiểu "X được định nghĩa ở đâu?" dừng ở bước 2; sửa lỗi chính tả thì đi đường tắt.</p>
-    <div class="steps">
-      <div class="step rv"><span class="n">00</span><h3 data-l="en">Runtime</h3><h3 data-l="vi">Runtime</h3><p data-l="en">Finds core, conf and addons; reads the version from <code>release.py</code>.</p><p data-l="vi">Tìm core, conf, addons; đọc phiên bản từ <code>release.py</code>.</p></div>
-      <div class="step rv"><span class="n">01</span><h3>Trace</h3><p data-l="en">Every model, field, method, view and xmlid looked up in the source.</p><p data-l="vi">Tra mọi model, field, method, view, xmlid trong source.</p></div>
-      <div class="step gate rv"><span class="n">02</span><h3>Context Brief</h3><p data-l="en">One row per symbol, each with a <code>file:line</code> or NOT FOUND. No row, no code.</p><p data-l="vi">Mỗi symbol một dòng, có <code>file:line</code> hoặc NOT FOUND. Không có dòng, không code.</p></div>
-      <div class="step rv"><span class="n">03</span><h3 data-l="en">Plan</h3><h3 data-l="vi">Kế hoạch</h3><p data-l="en">Ten bullets at most; one commit per repository.</p><p data-l="vi">Tối đa mười ý; mỗi repo một commit.</p></div>
-      <div class="step rv"><span class="n">04</span><h3 data-l="en">Implement</h3><h3 data-l="vi">Triển khai</h3><p data-l="en">The narrowest hook, <code>super()</code> plus the smallest delta.</p><p data-l="vi">Hook hẹp nhất, <code>super()</code> cộng thay đổi nhỏ nhất.</p></div>
-      <div class="step gate rv"><span class="n">05</span><h3 data-l="en">Definition of done</h3><h3 data-l="vi">Định nghĩa "xong"</h3><p data-l="en">Install and test on a throwaway database; more than 0 tests, or it isn't done.</p><p data-l="vi">Cài và test trên database thử; phải chạy hơn 0 test, không thì chưa xong.</p></div>
-      <div class="step rv"><span class="n">06</span><h3>Review</h3><p data-l="en">The <code>odoo-code-review</code> agent, scored.</p><p data-l="vi">Agent <code>odoo-code-review</code> chấm điểm.</p></div>
-    </div>
-  </section>
-
-  <!-- the trace helper -->
-  <section class="sec" id="trace">
-    <span class="label">04 — Trace helper</span>
-    <h2 data-l="en">It doesn't remember. It checks.</h2>
-    <h2 data-l="vi">Không nhớ. Mà kiểm tra.</h2>
-    <p class="sub" data-l="en"><code>odoo_trace.py</code> parses your Odoo source with Python's <code>ast</code>, follows <code>_inherit</code> mixins, <code>_inherits</code> delegation and the core <code>BaseModel</code>, and prints an absolute <code>file:line</code>. Standard library only. It only reads.</p>
-    <p class="sub" data-l="vi"><code>odoo_trace.py</code> phân tích source Odoo của bạn bằng <code>ast</code> của Python, đi theo mixin <code>_inherit</code>, uỷ quyền <code>_inherits</code> và <code>BaseModel</code> của core, rồi in ra <code>file:line</code> tuyệt đối. Chỉ dùng thư viện chuẩn. Chỉ đọc, không ghi.</p>
-    <div class="split">
-      <div class="tbl rv">
-        <table>
-          <thead><tr><th data-l="en">Question</th><th data-l="vi">Câu hỏi</th><th data-l="en">Command</th><th data-l="vi">Lệnh</th></tr></thead>
-          <tbody>
-            <tr><td data-l="en">Which version, core, conf and roots?</td><td data-l="vi">Phiên bản, core, conf và roots nào?</td><td><code>odoo_trace env</code></td></tr>
-            <tr><td data-l="en">Does a field exist, and where?</td><td data-l="vi">Field có tồn tại không, ở đâu?</td><td><code>odoo_trace field sale.order access_url</code></td></tr>
-            <tr><td data-l="en">Every definition of a method, in <code>super()</code> order</td><td data-l="vi">Mọi định nghĩa của method, theo thứ tự <code>super()</code></td><td><code>odoo_trace method sale.order _action_confirm</code></td></tr>
-            <tr><td data-l="en">Does an xmlid exist: XML, CSV or generated?</td><td data-l="vi">Xmlid có tồn tại: XML, CSV hay sinh ra?</td><td><code>odoo_trace xmlid base.lang_vi_VN</code></td></tr>
-            <tr><td data-l="en">Which files of a module never load?</td><td data-l="vi">File nào của module không bao giờ được load?</td><td><code>odoo_trace unlisted x_eval</code></td></tr>
-          </tbody>
-        </table>
+  <section class="band alt" id="problem">
+    <div class="wrap">
+      <p class="eyebrow" data-l="en">The problem</p><p class="eyebrow" data-l="vi">Vấn đề</p>
+      <h2 data-l="en">AI writes Odoo code that looks right</h2>
+      <h2 data-l="vi">AI viết code Odoo trông có vẻ đúng</h2>
+      <p class="lead" data-l="en">It works from memory, not from your source, and the mistakes are always the same few.</p>
+      <p class="lead" data-l="vi">Nó làm theo trí nhớ chứ không theo source của bạn, nên lỗi lúc nào cũng chỉ là vài kiểu quen thuộc.</p>
+      <div class="grid3">
+        <div class="card"><span class="ico no"><svg class="i"><use href="#i-x"/></svg></span><h3 data-l="en">Symbols that don't exist</h3><h3 data-l="vi">Symbol không tồn tại</h3><p><code>sale.order.delivery_date</code><br><code>sales_team.group_sale_admin</code></p></div>
+        <div class="card"><span class="ico no"><svg class="i"><use href="#i-x"/></svg></span><h3 data-l="en">Anchors from another module</h3><h3 data-l="vi">Xpath bám vào module khác</h3><p data-l="en">The install stops at "cannot be located in parent view".</p><p data-l="vi">Cài module dừng ở lỗi "cannot be located in parent view".</p></div>
+        <div class="card"><span class="ico no"><svg class="i"><use href="#i-x"/></svg></span><h3 data-l="en">The wrong hook</h3><h3 data-l="vi">Override sai chỗ</h3><p data-l="en">It overrides <code>action_confirm</code>; the work is in <code>_action_confirm</code>.</p><p data-l="vi">Override <code>action_confirm</code>, trong khi việc thật nằm ở <code>_action_confirm</code>.</p></div>
+        <div class="card"><span class="ico no"><svg class="i"><use href="#i-x"/></svg></span><h3 data-l="en">Data dropped</h3><h3 data-l="vi">Mất dữ liệu</h3><p data-l="en">A stored field renamed without a migration.</p><p data-l="vi">Đổi tên field stored mà không viết migration.</p></div>
+        <div class="card"><span class="ico no"><svg class="i"><use href="#i-x"/></svg></span><h3 data-l="en">An unchecked <code>sudo()</code></h3><h3 data-l="vi"><code>sudo()</code> không kiểm soát</h3><p data-l="en">No stated reason and no access check first.</p><p data-l="vi">Không nêu lý do, không kiểm tra quyền trước.</p></div>
+        <div class="card"><span class="ico no"><svg class="i"><use href="#i-x"/></svg></span><h3 data-l="en">"Tests pass"</h3><h3 data-l="vi">"Test pass rồi"</h3><p data-l="en">Exit code 0, though not a single test ran.</p><p data-l="vi">Exit code 0, dù chưa có test nào chạy.</p></div>
       </div>
-      <div class="card rv">
-        <h3 data-l="en">Exit codes you can script</h3><h3 data-l="vi">Exit code dùng được trong script</h3>
-        <ul class="checks">
-          <li data-l="en"><span><b>0</b> found, with its file:line</span></li><li data-l="vi"><span><b>0</b> tìm thấy, kèm file:line</span></li>
-          <li data-l="en"><span><b>1</b> NOT FOUND, with the closest real names</span></li><li data-l="vi"><span><b>1</b> NOT FOUND, kèm các tên thật gần nhất</span></li>
-          <li data-l="en"><span><b>2</b> a setup error, never a silent empty answer</span></li><li data-l="vi"><span><b>2</b> lỗi cấu hình, không bao giờ trả về rỗng âm thầm</span></li>
-          <li data-l="en"><span>Finds the Odoo core even when <code>odoo.conf</code> lives outside the project</span></li><li data-l="vi"><span>Tìm được core Odoo kể cả khi <code>odoo.conf</code> nằm ngoài project</span></li>
-          <li data-l="en"><span>Works the same under bash and zsh</span></li><li data-l="vi"><span>Chạy như nhau trên bash và zsh</span></li>
+    </div>
+  </section>
+
+  <section class="band" id="video">
+    <div class="wrap">
+      <p class="eyebrow">Demo</p>
+      <h2 data-l="en">See it work</h2>
+      <h2 data-l="vi">Xem cách nó làm việc</h2>
+      <p class="lead" data-l="en">Every terminal line in the video is real output on Odoo 18.</p>
+      <p class="lead" data-l="vi">Mọi dòng terminal trong video đều là output thật trên Odoo 18.</p>
+      <div class="film">
+        <video id="vid" src="intro.mp4" poster="intro-poster.jpg" muted loop playsinline controls preload="metadata" aria-label="Video: a Claude Code session asked to show the delivery date on the Sales Orders list. The plugin's rail shows who owns each step: odoo-workflow resolves Odoo 18.0, loads the 18.0 pack, traces sale.order (delivery_date not found; commitment_date already in the list, hidden), cites a Context Brief, changes one attribute, proves it on a scratch database, hands off to odoo-code-review and commits through odoo-commit; then the plugin's parts, the benchmarks and the install command."></video>
+        <button class="sound" id="sound"><svg class="i" style="width: 15px; height: 15px"><use href="#i-mute"/></svg><span data-l="en">Sound</span><span data-l="vi">Âm thanh</span></button>
+      </div>
+    </div>
+  </section>
+
+  <section class="band alt" id="how">
+    <div class="wrap">
+      <p class="eyebrow" data-l="en">How it works</p><p class="eyebrow" data-l="vi">Cách hoạt động</p>
+      <h2 data-l="en">One workflow for every Odoo change</h2>
+      <h2 data-l="vi">Một quy trình cho mọi thay đổi Odoo</h2>
+      <p class="lead" data-l="en"><code>odoo-workflow</code> runs before any code is written, and again before anything is called done. The two gates let nothing through on a guess.</p>
+      <p class="lead" data-l="vi"><code>odoo-workflow</code> chạy trước khi viết code, và chạy lại trước khi coi là xong. Hai cổng chặn không cho gì đi qua bằng phỏng đoán.</p>
+      <div class="flow" id="flow">
+        <div class="ftrack" role="tablist" aria-label="Workflow"><button role="tab" aria-selected="false" class=""><span class="dot">0</span><span class="nm"><span data-l="en">Runtime and version</span><span data-l="vi">Runtime và phiên bản</span></span></button><button role="tab" aria-selected="false" class=""><span class="dot">1</span><span class="nm">Trace</span></button><button role="tab" aria-selected="false" class="gate"><span class="dot"><svg class="i"><use href="#i-shield"/></svg></span><span class="nm">Context Brief</span><span class="pill">gate</span></button><button role="tab" aria-selected="false" class=""><span class="dot">3</span><span class="nm"><span data-l="en">Plan</span><span data-l="vi">Kế hoạch</span></span></button><button role="tab" aria-selected="false" class=""><span class="dot">4</span><span class="nm"><span data-l="en">Implement</span><span data-l="vi">Triển khai</span></span></button><button role="tab" aria-selected="false" class="gate"><span class="dot"><svg class="i"><use href="#i-shield"/></svg></span><span class="nm"><span data-l="en">Definition of done</span><span data-l="vi">Định nghĩa "xong"</span></span><span class="pill">gate</span></button><button role="tab" aria-selected="false" class=""><span class="dot">6</span><span class="nm">Review</span></button><span class="pkt" aria-hidden="true"></span></div>
+        <div class="fstage">
+          <div class="fpanel">
+            <div class="ftext"><p class="k"><span data-l="en">Step</span><span data-l="vi">Bước</span> 0 / 6</p><h3><span data-l="en">Runtime and version</span><span data-l="vi">Runtime và phiên bản</span></h3><p><span data-l="en">Finds the core, the conf and the addons, and reads the version from <code>odoo/release.py</code>. Nothing is assumed.</span><span data-l="vi">Tìm core, conf và addons, rồi đọc phiên bản từ <code>odoo/release.py</code>. Không giả định gì.</span></p></div>
+            <pre class="dcode"><span class="ln" style="--i: 0"><span class="c">$</span> odoo_trace env</span><span class="ln" style="--i: 1">version   <span class="y">18.0</span>  <span class="c">[odoo/release.py]</span></span><span class="ln" style="--i: 2">addons    r1 odoo/addons</span><span class="ln" style="--i: 3">          r2 addons</span><span class="ln" style="--i: 4"><span class="g">VERDICT: Odoo 18.0, 2 roots, 650 modules</span></span></pre>
+          </div>
+          <div class="fpanel">
+            <div class="ftext"><p class="k"><span data-l="en">Step</span><span data-l="vi">Bước</span> 1 / 6</p><h3>Trace</h3><p><span data-l="en">Looks up every model, field, method, view and xmlid the change touches, in your source.</span><span data-l="vi">Tra mọi model, field, method, view và xmlid mà thay đổi đụng tới, ngay trong source của bạn.</span></p></div>
+            <pre class="dcode"><span class="ln" style="--i: 0"><span class="c">$</span> odoo_trace field sale.order delivery_date</span><span class="ln" style="--i: 1"><span class="r">VERDICT: NOT FOUND</span>; closest: <span class="y">commitment_date</span> (label 'Delivery Date')</span><span class="ln" style="--i: 2"></span><span class="ln" style="--i: 3"><span class="c">$</span> odoo_trace field sale.order commitment_date</span><span class="ln" style="--i: 4"><span class="s">addons/sale/models/sale_order.py:103</span> via=self Datetime</span><span class="ln" style="--i: 5"></span><span class="ln" style="--i: 6"><span class="c">$</span> odoo_trace xmlid sale.view_quotation_tree</span><span class="ln" style="--i: 7"><span class="g">VERDICT: FOUND</span> <span class="s">addons/sale/views/sale_order_views.xml:205</span></span></pre>
+          </div>
+          <div class="fpanel">
+            <div class="ftext"><p class="k"><span data-l="en">Step</span><span data-l="vi">Bước</span> 2 / 6 · gate</p><h3>Context Brief</h3><p><span data-l="en">One row per symbol, each with a <code>file:line</code> or NOT FOUND.</span><span data-l="vi">Mỗi symbol một dòng, có <code>file:line</code> hoặc NOT FOUND.</span></p><ul class="rule"><li class="y" style="--i: 0"><svg class="i"><use href="#i-check"/></svg><span><span data-l="en">Every row answered: go on</span><span data-l="vi">Mọi dòng đều có câu trả lời: đi tiếp</span></span></li><li class="n" style="--i: 1"><svg class="i"><use href="#i-x"/></svg><span><span data-l="en">A symbol with no row: no code</span><span data-l="vi">Symbol chưa có dòng: không viết code</span></span></li></ul><span class="stamp"><svg class="i"><use href="#i-check"/></svg><span data-l="en">Gate passed</span><span data-l="vi">Qua cổng</span></span></div>
+            <pre class="dcode"><span class="ln" style="--i: 0"><span class="c">symbol            source</span></span><span class="ln" style="--i: 1">version 18.0      <span class="s">odoo/release.py</span></span><span class="ln" style="--i: 2">delivery_date     <span class="r">NOT FOUND</span></span><span class="ln" style="--i: 3">commitment_date   <span class="s">sale/models/sale_order.py:103</span></span><span class="ln" style="--i: 4">quotation list    <span class="s">sale/views/sale_order_views.xml:205</span></span><span class="ln" style="--i: 5"></span><span class="ln" style="--i: 6"><span class="g">4 rows, 4 answered</span></span></pre>
+          </div>
+          <div class="fpanel">
+            <div class="ftext"><p class="k"><span data-l="en">Step</span><span data-l="vi">Bước</span> 3 / 6</p><h3><span data-l="en">Plan</span><span data-l="vi">Kế hoạch</span></h3><p><span data-l="en">Ten bullets at most, one commit per repository.</span><span data-l="vi">Tối đa mười ý, mỗi repo một commit.</span></p></div>
+            <pre class="dcode"><span class="ln" style="--i: 0">1. <span data-l="en">Show commitment_date on the quotation list</span><span data-l="vi">Hiện commitment_date trên danh sách báo giá</span></span><span class="ln" style="--i: 1">   optional="show" <span data-l="en">on</span><span data-l="vi">trên</span> sale.view_quotation_tree</span><span class="ln" style="--i: 2">2. <span data-l="en">No model change, no migration</span><span data-l="vi">Không đổi model, không cần migration</span></span><span class="ln" style="--i: 3"></span><span class="ln" style="--i: 4"><span class="c">commit</span>  <span class="g">[IMP] sale_extra: show the delivery date on quotations</span></span></pre>
+          </div>
+          <div class="fpanel">
+            <div class="ftext"><p class="k"><span data-l="en">Step</span><span data-l="vi">Bước</span> 4 / 6</p><h3><span data-l="en">Implement</span><span data-l="vi">Triển khai</span></h3><p><span data-l="en">The narrowest hook and the smallest change that does the job.</span><span data-l="vi">Hook hẹp nhất và thay đổi nhỏ nhất đủ làm việc.</span></p></div>
+            <pre class="dcode"><span class="ln" style="--i: 0"><span class="k">&lt;record</span> id="view_quotation_tree_delivery" model="ir.ui.view"<span class="k">&gt;</span></span><span class="ln" style="--i: 1">  <span class="k">&lt;field</span> name="model"<span class="k">&gt;</span>sale.order<span class="k">&lt;/field&gt;</span></span><span class="ln" style="--i: 2">  <span class="k">&lt;field</span> name="inherit_id" ref="<span class="s">sale.view_quotation_tree</span>"<span class="k">/&gt;</span></span><span class="ln" style="--i: 3">  <span class="k">&lt;field</span> name="arch" type="xml"<span class="k">&gt;</span></span><span class="ln" style="--i: 4">    <span class="k">&lt;field</span> name="<span class="y">commitment_date</span>" position="attributes"<span class="k">&gt;</span></span><span class="ln" style="--i: 5">      <span class="k">&lt;attribute</span> name="optional"<span class="k">&gt;</span><span class="g">show</span><span class="k">&lt;/attribute&gt;</span></span><span class="ln" style="--i: 6">    <span class="k">&lt;/field&gt;</span></span><span class="ln" style="--i: 7">  <span class="k">&lt;/field&gt;</span></span><span class="ln" style="--i: 8"><span class="k">&lt;/record&gt;</span></span></pre>
+          </div>
+          <div class="fpanel">
+            <div class="ftext"><p class="k"><span data-l="en">Step</span><span data-l="vi">Bước</span> 5 / 6 · gate</p><h3><span data-l="en">Definition of done</span><span data-l="vi">Định nghĩa "xong"</span></h3><p><span data-l="en">Install and test on a throwaway database.</span><span data-l="vi">Cài và test trên database dùng xong bỏ.</span></p><ul class="rule"><li class="y" style="--i: 0"><svg class="i"><use href="#i-check"/></svg><span><span data-l="en">Installed, tests ran, none failed: done</span><span data-l="vi">Cài được, test có chạy, không lỗi: xong</span></span></li><li class="n" style="--i: 1"><svg class="i"><use href="#i-x"/></svg><span><span data-l="en">Zero tests ran: not done, whatever the exit code</span><span data-l="vi">0 test chạy: chưa xong, dù exit code là gì</span></span></li></ul><span class="stamp"><svg class="i"><use href="#i-check"/></svg><span data-l="en">Gate passed</span><span data-l="vi">Qua cổng</span></span></div>
+            <pre class="dcode"><span class="ln" style="--i: 0"><span class="c">$</span> odoo-bin -d scratch_sale_extra -i sale_extra \</span><span class="ln" style="--i: 1">    --test-enable --test-tags /sale_extra \</span><span class="ln" style="--i: 2">    --stop-after-init</span><span class="ln" style="--i: 3"></span><span class="ln" style="--i: 4"><span class="c">#</span> <span data-l="en">installs on a database used once</span><span data-l="vi">cài được trên database chỉ dùng một lần</span></span><span class="ln" style="--i: 5"><span class="c">#</span> <span data-l="en">more than zero tests ran</span><span data-l="vi">có hơn 0 test đã chạy</span></span><span class="ln" style="--i: 6"><span class="c">#</span> <span data-l="en">none failed</span><span data-l="vi">không test nào lỗi</span></span></pre>
+          </div>
+          <div class="fpanel">
+            <div class="ftext"><p class="k"><span data-l="en">Step</span><span data-l="vi">Bước</span> 6 / 6</p><h3>Review</h3><p><span data-l="en">The <code>odoo-code-review</code> agent scores the diff against the rules of your version.</span><span data-l="vi">Agent <code>odoo-code-review</code> chấm diff theo quy tắc của đúng phiên bản bạn dùng.</span></p></div>
+            <pre class="dcode"><span class="ln" style="--i: 0"><span class="c">odoo-code-review · Odoo 18.0</span></span><span class="ln" style="--i: 1"></span><span class="ln" style="--i: 2">ORM &amp; model methods   <span class="y">30%</span></span><span class="ln" style="--i: 3">Views &amp; XML           <span class="y">15%</span></span><span class="ln" style="--i: 4">Fields                <span class="y">15%</span></span><span class="ln" style="--i: 5">Decorators            <span class="y">10%</span></span><span class="ln" style="--i: 6">Performance           <span class="y">10%</span></span><span class="ln" style="--i: 7">Security              <span class="y"> 5%</span>   …</span><span class="ln" style="--i: 8"></span><span class="ln" style="--i: 9"><span data-l="en">blocking issues first, each with file:line</span><span data-l="vi">lỗi chặn merge trước, mỗi lỗi có file:line</span></span></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="band tint" id="diff">
+    <div class="wrap">
+      <p class="eyebrow" data-l="en">What's inside</p><p class="eyebrow" data-l="vi">Bên trong</p>
+      <h2 data-l="en">The difference, part by part</h2>
+      <h2 data-l="vi">Khác biệt khi có plugin, từng phần một</h2>
+      <p class="lead" data-l="en">Same request, same assistant. On the left what it writes from memory, on the right what it writes with agent-skills installed.</p>
+      <p class="lead" data-l="vi">Cùng một yêu cầu, cùng một trợ lý. Bên trái là thứ nó viết theo trí nhớ, bên phải là thứ nó viết khi đã cài agent-skills.</p>
+      <div class="dtabs" role="tablist" id="dtabs">
+        <button role="tab" aria-selected="true" data-d="packs"><svg class="i"><use href="#i-book"/></svg><span data-l="en">Reference packs</span><span data-l="vi">Gói tài liệu</span></button>
+        <button role="tab" aria-selected="false" data-d="workflow"><svg class="i"><use href="#i-route"/></svg><span class="mono">odoo-workflow</span></button>
+        <button role="tab" aria-selected="false" data-d="tracer"><svg class="i"><use href="#i-search"/></svg><span class="mono">odoo-code-tracer</span></button>
+        <button role="tab" aria-selected="false" data-d="review"><svg class="i"><use href="#i-shield"/></svg><span class="mono">odoo-code-review</span></button>
+        <button role="tab" aria-selected="false" data-d="commit"><svg class="i"><use href="#i-commit"/></svg><span class="mono">odoo-commit</span></button>
+      </div>
+
+      <div class="dpanel on" data-d="packs">
+        <p class="ask"><b data-l="en">You ask</b><b data-l="vi">Bạn hỏi</b><span data-l="en">"Show a priority on the quotation list, hidden once the order is confirmed." Odoo 18.</span><span data-l="vi">"Thêm cột priority vào danh sách báo giá, ẩn khi đơn đã xác nhận." Odoo 18.</span></p>
+        <div class="dgrid">
+          <div class="dside bad"><div class="dhead"><i></i><span data-l="en">Without agent-skills</span><span data-l="vi">Không có agent-skills</span></div>
+<pre class="dcode"><span class="ln">&lt;xpath expr="//<span class="err">tree</span>" position="inside"&gt;</span><span class="ln">    &lt;field name="x_priority"</span><span class="ln">           <span class="err">attrs</span>="{'invisible': [('state', '=', 'sale')]}"/&gt;</span><span class="ln">&lt;/xpath&gt;</span></pre>
+            <ul class="dnotes"><li style="--i: 0"><svg class="i"><use href="#i-x"/></svg><span data-l="en"><code>&lt;tree&gt;</code> is deprecated in Odoo 18</span><span data-l="vi"><code>&lt;tree&gt;</code> đã bị thay ở Odoo 18</span></li><li style="--i: 1"><svg class="i"><use href="#i-x"/></svg><span data-l="en"><code>attrs=</code> is rejected since Odoo 17</span><span data-l="vi"><code>attrs=</code> bị từ chối từ Odoo 17</span></li></ul></div>
+          <div class="dside good"><div class="dhead"><i></i><span data-l="en">With agent-skills</span><span data-l="vi">Có agent-skills</span><small>odoo-18.0</small></div>
+<pre class="dcode"><span class="ln" style="--i: 0">&lt;xpath expr="//<span class="g">list</span>" position="inside"&gt;</span><span class="ln" style="--i: 1">    &lt;field name="x_priority"</span><span class="ln" style="--i: 2">           <span class="g">invisible</span>="state == 'sale'"/&gt;</span><span class="ln" style="--i: 3">&lt;/xpath&gt;</span></pre>
+            <ul class="dnotes"><li style="--i: 0"><svg class="i"><use href="#i-check"/></svg><span data-l="en"><code>&lt;list&gt;</code>, as the Odoo 18 pack says</span><span data-l="vi"><code>&lt;list&gt;</code>, đúng như gói Odoo 18 ghi</span></li><li style="--i: 1"><svg class="i"><use href="#i-check"/></svg><span data-l="en">A direct expression instead of <code>attrs</code></span><span data-l="vi">Biểu thức trực tiếp thay cho <code>attrs</code></span></li></ul></div>
+        </div>
+        <p class="dsource" data-l="en">From <code>skills/odoo-18.0/references/api-highlights.md</code>. Each version has its own pack.</p>
+        <p class="dsource" data-l="vi">Lấy từ <code>skills/odoo-18.0/references/api-highlights.md</code>. Mỗi phiên bản có gói riêng.</p>
+      </div>
+
+      <div class="dpanel" data-d="workflow">
+        <p class="ask"><b data-l="en">You ask</b><b data-l="vi">Bạn hỏi</b><span data-l="en">"Add a stored field x_age_days on sale.order.line: days since create_date."</span><span data-l="vi">"Thêm field stored x_age_days trên sale.order.line: số ngày kể từ create_date."</span></p>
+        <div class="dgrid">
+          <div class="dside bad"><div class="dhead"><i></i><span data-l="en">Without agent-skills</span><span data-l="vi">Không có agent-skills</span></div>
+<pre class="dcode"><span class="ln"><span class="err">I assumed Odoo 18 (or 19).</span></span><span class="ln"> </span><span class="ln">x_age_days = fields.Integer(</span><span class="ln">    compute='_compute_x_age_days', store=True)</span><span class="ln"> </span><span class="ln"><span class="c">$</span> odoo-bin -u x_eval --test-tags /x_eval</span><span class="ln"><span class="err">0 failed, 0 error(s) of 0 tests</span>   <span class="c">exit 0</span></span></pre>
+            <ul class="dnotes"><li style="--i: 0"><svg class="i"><use href="#i-x"/></svg><span data-l="en">The version is guessed; nothing is cited</span><span data-l="vi">Phiên bản là đoán; không trích dẫn gì</span></li><li style="--i: 1"><svg class="i"><use href="#i-x"/></svg><span data-l="en">Zero tests ran, and it still reads as green</span><span data-l="vi">Không test nào chạy mà vẫn báo xanh</span></li></ul></div>
+          <div class="dside good"><div class="dhead"><i></i><span data-l="en">With agent-skills</span><span data-l="vi">Có agent-skills</span><small>Context Brief</small></div>
+<pre class="dcode"><span class="ln" style="--i: 0"><span class="c">version  </span> <span class="g">18.0</span>           odoo/release.py</span><span class="ln" style="--i: 1"><span class="c">field    </span> create_date    <span class="s">odoo/models.py:288</span></span><span class="ln" style="--i: 2"><span class="c">field    </span> x_age_days     <span class="y">NOT FOUND, name is free</span></span><span class="ln" style="--i: 3"><span class="c">migration</span> stored compute <span class="s">odoo/models.py:3474</span></span><span class="ln" style="--i: 4">          → version 1.1 + pre-migrate.py</span><span class="ln" style="--i: 5"> </span><span class="ln" style="--i: 6"><span class="c">done     </span> scratch_x_eval: <span class="g">0 failed of N tests, N &gt; 0</span></span></pre>
+            <ul class="dnotes"><li style="--i: 0"><svg class="i"><use href="#i-check"/></svg><span data-l="en">Every row cited before a line of code</span><span data-l="vi">Mọi dòng có nguồn trước khi viết code</span></li><li style="--i: 1"><svg class="i"><use href="#i-check"/></svg><span data-l="en">Proven on a throwaway database</span><span data-l="vi">Kiểm chứng trên database dùng xong bỏ</span></li></ul></div>
+        </div>
+        <p class="dsource" data-l="en">The README's measured task: the grader passed 2 of 3 expectations without the skill and 3 of 3 with it.</p>
+        <p class="dsource" data-l="vi">Task đã đo trong README: người chấm cho đạt 2/3 tiêu chí khi không có skill, 3/3 khi có.</p>
+      </div>
+
+      <div class="dpanel" data-d="tracer">
+        <p class="ask"><b data-l="en">You ask</b><b data-l="vi">Bạn hỏi</b><span data-l="en">"What runs when a sale order is confirmed?"</span><span data-l="vi">"Khi xác nhận đơn bán hàng thì những gì chạy?"</span></p>
+        <div class="dgrid">
+          <div class="dside bad"><div class="dhead"><i></i><span data-l="en">Without agent-skills</span><span data-l="vi">Không có agent-skills</span></div>
+<pre class="dcode"><span class="ln"><span class="err">action_confirm()</span> in sale/models/sale_order.py</span><span class="ln">sets the state to 'sale' and creates</span><span class="ln">the delivery.</span></pre>
+            <ul class="dnotes"><li style="--i: 0"><svg class="i"><use href="#i-x"/></svg><span data-l="en">One module, from memory</span><span data-l="vi">Một module, theo trí nhớ</span></li><li style="--i: 1"><svg class="i"><use href="#i-x"/></svg><span data-l="en">Misses every hook other modules add</span><span data-l="vi">Bỏ sót hook mà các module khác thêm vào</span></li></ul></div>
+          <div class="dside good"><div class="dhead"><i></i><span data-l="en">With agent-skills</span><span data-l="vi">Có agent-skills</span><small>super() order</small></div>
+<pre class="dcode"><span class="ln" style="--i: 0"><span class="c">$</span> odoo_trace method sale.order _action_confirm</span><span class="ln" style="--i: 1"><span class="c">#1</span> website_sale_slides <span class="s">:10</span>  <span class="k">_action_add_members</span></span><span class="ln" style="--i: 2"><span class="c">#2</span> sale_project        <span class="s">:125</span> <span class="k">_timesheet_service_generation</span></span><span class="ln" style="--i: 3"><span class="c">#3</span> repair              <span class="s">:26</span>  <span class="k">_create_repair_order</span></span><span class="ln" style="--i: 4"><span class="c">#4</span> sale_stock          <span class="s">:180</span> <span class="k">_action_launch_stock_rule</span></span><span class="ln" style="--i: 5"><span class="c">#5</span> sale_purchase       <span class="s">:20</span>  <span class="k">_purchase_service_generation</span></span><span class="ln" style="--i: 6"><span class="c">#6</span> delivery            <span class="s">:147</span></span><span class="ln" style="--i: 7"><span class="c">#7</span> sale                <span class="s">:1217</span> <span class="c">the base, no super()</span></span></pre>
+            <ul class="dnotes"><li style="--i: 0"><svg class="i"><use href="#i-check"/></svg><span data-l="en">All 7 definitions, in the order they run</span><span data-l="vi">Đủ 7 định nghĩa, đúng thứ tự chạy</span></li><li style="--i: 1"><svg class="i"><use href="#i-check"/></svg><span data-l="en">The hook each module adds</span><span data-l="vi">Hook mà từng module thêm vào</span></li></ul></div>
+        </div>
+        <p class="dsource" data-l="en">Real output on the Odoo 18.0 source, each line in that module's <code>models/sale_order.py</code>.</p>
+        <p class="dsource" data-l="vi">Output thật trên source Odoo 18.0, mỗi dòng nằm trong <code>models/sale_order.py</code> của module đó.</p>
+      </div>
+
+      <div class="dpanel" data-d="review">
+        <p class="ask"><b data-l="en">You ask</b><b data-l="vi">Bạn hỏi</b><span data-l="en">"Review my diff before I merge it."</span><span data-l="vi">"Review diff của tôi trước khi merge."</span></p>
+        <div class="dgrid">
+          <div class="dside bad"><div class="dhead"><i></i><span data-l="en">Without agent-skills</span><span data-l="vi">Không có agent-skills</span></div>
+<pre class="dcode"><span class="ln"><span class="err">Looks good to me. Ship it.</span></span></pre>
+            <ul class="dnotes"><li style="--i: 0"><svg class="i"><use href="#i-x"/></svg><span data-l="en">No criteria and no score</span><span data-l="vi">Không tiêu chí, không điểm số</span></li><li style="--i: 1"><svg class="i"><use href="#i-x"/></svg><span data-l="en">The unexplained <code>sudo()</code> goes through</span><span data-l="vi"><code>sudo()</code> không lý do vẫn lọt qua</span></li></ul></div>
+          <div class="dside good"><div class="dhead"><i></i><span data-l="en">With agent-skills</span><span data-l="vi">Có agent-skills</span><small data-l="en">example report</small><small data-l="vi">báo cáo ví dụ</small></div>
+<pre class="dcode"><span class="ln" style="--i: 0"><span class="c">score</span>                   <span class="y">78 / 100</span></span><span class="ln" style="--i: 1">ORM &amp; model methods     26 / 30</span><span class="ln" style="--i: 2">Views &amp; XML             15 / 15</span><span class="ln" style="--i: 3">Performance              <span class="y">6 / 10</span>  search() in a loop <span class="s">:58</span></span><span class="ln" style="--i: 4">Security                 <span class="r">2 / 5</span>   sudo(), no reason <span class="s">:42</span></span><span class="ln" style="--i: 5"> </span><span class="ln" style="--i: 6"><span class="r">blocking 1</span>   <span class="c">suggestions 3</span></span></pre>
+            <ul class="dnotes"><li style="--i: 0"><svg class="i"><use href="#i-check"/></svg><span data-l="en">Weighted criteria for your Odoo version</span><span data-l="vi">Tiêu chí có trọng số theo phiên bản Odoo</span></li><li style="--i: 1"><svg class="i"><use href="#i-check"/></svg><span data-l="en">What blocks the merge, with file and line</span><span data-l="vi">Chỉ rõ cái chặn merge, kèm file và dòng</span></li></ul></div>
+        </div>
+        <p class="dsource" data-l="en">The weights are the agent's own: ORM 30%, views 15%, fields 15%, performance 10%, security 5% and more.</p>
+        <p class="dsource" data-l="vi">Trọng số là của chính agent: ORM 30%, view 15%, field 15%, hiệu năng 10%, bảo mật 5% và các mục khác.</p>
+      </div>
+
+      <div class="dpanel" data-d="commit">
+        <p class="ask"><b data-l="en">You ask</b><b data-l="vi">Bạn hỏi</b><span data-l="en">"Commit this change."</span><span data-l="vi">"Commit thay đổi này."</span></p>
+        <div class="dgrid">
+          <div class="dside bad"><div class="dhead"><i></i><span data-l="en">Without agent-skills</span><span data-l="vi">Không có agent-skills</span></div>
+<pre class="dcode"><span class="ln"><span class="c">$</span> git add <span class="err">.</span></span><span class="ln"><span class="c">$</span> git commit -m "<span class="err">update sale order</span>"</span></pre>
+            <ul class="dnotes"><li style="--i: 0"><svg class="i"><use href="#i-x"/></svg><span data-l="en">Stages every file in the tree</span><span data-l="vi">Stage mọi file trong thư mục</span></li><li style="--i: 1"><svg class="i"><use href="#i-x"/></svg><span data-l="en">No tag, no module, no reason</span><span data-l="vi">Không tag, không module, không lý do</span></li></ul></div>
+          <div class="dside good"><div class="dhead"><i></i><span data-l="en">With agent-skills</span><span data-l="vi">Có agent-skills</span><small data-l="en">example</small><small data-l="vi">ví dụ</small></div>
+<pre class="dcode"><span class="ln" style="--i: 0"><span class="c">$</span> git add sale_extra/models/sale_order.py \</span><span class="ln" style="--i: 1">          sale_extra/views/sale_order_views.xml</span><span class="ln" style="--i: 2"><span class="c">$</span> git commit -F msg</span><span class="ln" style="--i: 3"> </span><span class="ln" style="--i: 4"><span class="g">[IMP] sale_extra: add priority to quotations</span></span><span class="ln" style="--i: 5"> </span><span class="ln" style="--i: 6">Sales sorts quotations by urgency.</span></pre>
+            <ul class="dnotes"><li style="--i: 0"><svg class="i"><use href="#i-check"/></svg><span data-l="en">Staged file by file</span><span data-l="vi">Stage từng file một</span></li><li style="--i: 1"><svg class="i"><use href="#i-check"/></svg><span data-l="en">Odoo's own <code>[TAG] module:</code> format</span><span data-l="vi">Đúng kiểu <code>[TAG] module:</code> của Odoo</span></li></ul></div>
+        </div>
+        <p class="dsource" data-l="en">The rules come from Odoo's git guidelines, which <code>odoo-commit</code> follows.</p>
+        <p class="dsource" data-l="vi">Quy tắc lấy từ hướng dẫn git của Odoo, mà <code>odoo-commit</code> tuân theo.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="band" id="trace">
+    <div class="wrap side">
+      <div>
+        <p class="eyebrow">Trace helper</p>
+        <h2 data-l="en">It checks instead of remembering</h2>
+        <h2 data-l="vi">Kiểm tra thay vì nhớ</h2>
+        <p class="lead" data-l="en"><code>odoo_trace.py</code> parses your Odoo source with Python's <code>ast</code> and answers with an absolute <code>file:line</code>, or NOT FOUND with the closest real names.</p>
+        <p class="lead" data-l="vi"><code>odoo_trace.py</code> phân tích source Odoo bằng <code>ast</code> của Python và trả về <code>file:line</code> tuyệt đối, hoặc NOT FOUND kèm các tên thật gần nhất.</p>
+        <ul class="facts">
+          <li><svg class="i"><use href="#i-check"/></svg><span data-l="en">Read-only, standard library, no network</span><span data-l="vi">Chỉ đọc, thư viện chuẩn, không gọi mạng</span></li>
+          <li><svg class="i"><use href="#i-check"/></svg><span data-l="en">Finds the core even outside the project</span><span data-l="vi">Tìm được core kể cả khi nằm ngoài project</span></li>
+          <li><svg class="i"><use href="#i-check"/></svg><span data-l="en">Exit codes: 0 found, 1 not found, 2 setup error</span><span data-l="vi">Exit code: 0 thấy, 1 không thấy, 2 lỗi cấu hình</span></li>
         </ul>
       </div>
+      <ul class="cmds">
+        <li><span data-l="en">Version, core and roots</span><span data-l="vi">Phiên bản, core và roots</span><code>odoo_trace env</code></li>
+        <li><span data-l="en">Does a field exist, and where?</span><span data-l="vi">Field có tồn tại không, ở đâu?</span><code>odoo_trace field sale.order access_url</code></li>
+        <li><span data-l="en">A method, in super() order</span><span data-l="vi">Một method, theo thứ tự super()</span><code>odoo_trace method sale.order _action_confirm</code></li>
+        <li><span data-l="en">Does an xmlid exist?</span><span data-l="vi">Xmlid có tồn tại không?</span><code>odoo_trace xmlid base.lang_vi_VN</code></li>
+        <li><span data-l="en">Files a module never loads</span><span data-l="vi">File mà module không bao giờ load</span><code>odoo_trace unlisted x_eval</code></li>
+      </ul>
     </div>
   </section>
 
-  <!-- one real task -->
-  <section class="sec" id="task">
-    <span class="label">05 — <span data-l="en">One real task</span><span data-l="vi">Một task thật</span></span>
-    <h2 data-l="en">Same model. Same prompt. Different answer.</h2>
-    <h2 data-l="vi">Cùng model. Cùng prompt. Khác câu trả lời.</h2>
-    <p class="sub" data-l="en">In an Odoo 18 project, with the source and <code>odoo.conf</code> outside the project: <em>"In module x_eval, add a stored computed integer field <code>x_age_days</code> on <code>sale.order.line</code>: days since the line's <code>create_date</code>."</em> A separate grader checked both answers without knowing which was which.</p>
-    <p class="sub" data-l="vi">Trong một project Odoo 18, source và <code>odoo.conf</code> nằm ngoài project: <em>"Trong module x_eval, thêm field integer computed stored <code>x_age_days</code> trên <code>sale.order.line</code>: số ngày kể từ <code>create_date</code> của dòng."</em> Một người chấm độc lập kiểm tra cả hai câu trả lời mà không biết cái nào là cái nào.</p>
-    <div class="tbl rv">
-      <table>
-        <thead><tr><th></th><th data-l="en">Without the skill</th><th data-l="vi">Không có skill</th><th>With <code>odoo-workflow</code></th></tr></thead>
-        <tbody>
-          <tr><td data-l="en">Odoo version</td><td data-l="vi">Phiên bản Odoo</td><td class="bad-c" data-l="en">Guessed: "I assumed Odoo 18 (or 19)"</td><td class="bad-c" data-l="vi">Đoán: "I assumed Odoo 18 (or 19)"</td><td class="ok-c" data-l="en">18.0, read from the core's <code>odoo/release.py</code></td><td class="ok-c" data-l="vi">18.0, đọc từ <code>odoo/release.py</code> của core</td></tr>
-          <tr><td data-l="en">Source read</td><td data-l="vi">Đọc source</td><td class="bad-c" data-l="en">3 tool calls, no <code>file:line</code> anywhere</td><td class="bad-c" data-l="vi">3 lần gọi tool, không có <code>file:line</code> nào</td><td class="ok-c" data-l="en">A Context Brief of 13 cited rows</td><td class="ok-c" data-l="vi">Context Brief 13 dòng, dòng nào cũng có nguồn</td></tr>
-          <tr><td data-l="en">Upgrading a database with lines</td><td data-l="vi">Upgrade database đã có dữ liệu</td><td class="bad-c" data-l="en">Noted that <code>-u</code> recomputes every line in Python</td><td class="bad-c" data-l="vi">Ghi chú rằng <code>-u</code> sẽ tính lại mọi dòng bằng Python</td><td class="ok-c" data-l="en">Version 1.1 and a pre-migration that fills the column in SQL</td><td class="ok-c" data-l="vi">Version 1.1 và pre-migration điền cột bằng SQL</td></tr>
-          <tr><td>Tests</td><td class="bad-c" data-l="en">A command that runs <b>0 tests</b> and still exits 0</td><td class="bad-c" data-l="vi">Lệnh chạy <b>0 test</b> mà vẫn exit 0</td><td class="ok-c" data-l="en">A scratch database, and a log line counting more than 0 tests</td><td class="ok-c" data-l="vi">Database thử, và dòng log đếm được hơn 0 test</td></tr>
-          <tr><td data-l="en">Grader</td><td data-l="vi">Người chấm</td><td class="bad-c" data-l="en">2 of 3 expectations</td><td class="bad-c" data-l="vi">Đạt 2/3 tiêu chí</td><td class="ok-c" data-l="en"><b>3 of 3, preferred</b></td><td class="ok-c" data-l="vi"><b>Đạt 3/3, được chọn</b></td></tr>
-        </tbody>
-      </table>
+  <section class="band alt" id="task">
+    <div class="wrap">
+      <p class="eyebrow" data-l="en">One real task</p><p class="eyebrow" data-l="vi">Một task thật</p>
+      <h2 data-l="en">Same model, same prompt, different result</h2>
+      <h2 data-l="vi">Cùng model, cùng prompt, khác kết quả</h2>
+      <p class="quote" data-l="en">"In module x_eval, add a stored computed integer field <code>x_age_days</code> on <code>sale.order.line</code>: days since the line's <code>create_date</code>." On Odoo 18 with the source outside the project, graded blind.</p>
+      <p class="quote" data-l="vi">"Trong module x_eval, thêm field integer computed stored <code>x_age_days</code> trên <code>sale.order.line</code>: số ngày kể từ <code>create_date</code> của dòng." Trên Odoo 18, source nằm ngoài project, chấm mù.</p>
+      <div class="cmp">
+        <div class="cmp-row"><div></div><div data-l="en">Without the skill</div><div data-l="vi">Không có skill</div><div data-l="en">With odoo-workflow</div><div data-l="vi">Có odoo-workflow</div></div>
+        <div class="cmp-row"><div data-l="en">Odoo version</div><div data-l="vi">Phiên bản</div><div><svg class="i x"><use href="#i-x"/></svg><span data-l="en">Guessed: "I assumed Odoo 18 (or 19)"</span><span data-l="vi">Đoán: "I assumed Odoo 18 (or 19)"</span></div><div><svg class="i v"><use href="#i-check"/></svg><span data-l="en">18.0, read from <code>release.py</code></span><span data-l="vi">18.0, đọc từ <code>release.py</code></span></div></div>
+        <div class="cmp-row"><div data-l="en">Sources</div><div data-l="vi">Nguồn</div><div><svg class="i x"><use href="#i-x"/></svg><span data-l="en">3 tool calls, no <code>file:line</code></span><span data-l="vi">3 lần gọi tool, không có <code>file:line</code></span></div><div><svg class="i v"><use href="#i-check"/></svg><span data-l="en">13 cited rows</span><span data-l="vi">13 dòng có trích dẫn</span></div></div>
+        <div class="cmp-row"><div data-l="en">Existing data</div><div data-l="vi">Dữ liệu cũ</div><div><svg class="i x"><use href="#i-x"/></svg><span data-l="en">Every line recomputed in Python</span><span data-l="vi">Tính lại mọi dòng bằng Python</span></div><div><svg class="i v"><use href="#i-check"/></svg><span data-l="en">A pre-migration fills it in SQL</span><span data-l="vi">Pre-migration điền bằng SQL</span></div></div>
+        <div class="cmp-row"><div>Tests</div><div><svg class="i x"><use href="#i-x"/></svg><span data-l="en">0 tests ran, exit 0</span><span data-l="vi">0 test chạy, vẫn exit 0</span></div><div><svg class="i v"><use href="#i-check"/></svg><span data-l="en">More than 0, on a scratch database</span><span data-l="vi">Hơn 0 test, trên database thử</span></div></div>
+        <div class="cmp-row"><div data-l="en">Grader</div><div data-l="vi">Người chấm</div><div><span data-l="en">2 of 3</span><span data-l="vi">Đạt 2/3</span></div><div><b data-l="en">3 of 3, preferred</b><b data-l="vi">Đạt 3/3, được chọn</b></div></div>
+      </div>
     </div>
   </section>
 
-  <!-- benchmarks -->
-  <section class="sec" id="bench">
-    <span class="label">06 — <span data-l="en">Benchmarks</span><span data-l="vi">Đo lường</span></span>
-    <h2 data-l="en">Measured, not promised.</h2>
-    <h2 data-l="vi">Đo bằng số, không hứa suông.</h2>
-    <p class="sub" data-l="en">On real Odoo 18 and 19 source, with Claude Opus agents, a blind grader, and every per-eval row published in the repository.</p>
-    <p class="sub" data-l="vi">Trên source Odoo 18 và 19 thật, với agent Claude Opus, người chấm mù, và mọi kết quả từng eval đều công khai trong repo.</p>
-    <div class="bench">
-      <div class="card rv"><h3 data-l="en">Trace questions answered</h3><h3 data-l="vi">Câu hỏi trace trả lời đúng</h3><div class="big g">34<small>/34</small></div>
-        <div class="bars"><div class="bar-row"><div><span>grep recipe · zsh</span><span>12/34</span></div><div class="track"><div class="fill" style="--w: 35%"></div></div></div>
-          <div class="bar-row"><div><span>grep recipe · bash</span><span>20/34</span></div><div class="track"><div class="fill" style="--w: 59%"></div></div></div>
-          <div class="bar-row"><div><span>odoo_trace helper</span><span>34/34</span></div><div class="track"><div class="fill g2" style="--w: 100%"></div></div></div></div></div>
-      <div class="card rv"><h3 data-l="en">Expectations passed, realistic setup</h3><h3 data-l="vi">Tiêu chí đạt, tình huống thực tế</h3><div class="big">23<small>/23</small></div>
-        <div class="bars"><div class="bar-row"><div><span data-l="en">without the skill</span><span data-l="vi">không có skill</span><span>21/23</span></div><div class="track"><div class="fill" style="--w: 91%"></div></div></div>
-          <div class="bar-row"><div><span data-l="en">with odoo-workflow</span><span data-l="vi">có odoo-workflow</span><span>23/23</span></div><div class="track"><div class="fill g2" style="--w: 100%"></div></div></div></div></div>
-      <div class="card rv"><h3 data-l="en">Blind grader, 32 pairs</h3><h3 data-l="vi">Chấm mù, 32 cặp</h3><div class="big">16 <small>vs 6</small></div>
-        <div class="bars"><div class="bar-row"><div><span data-l="en">prefers the skill</span><span data-l="vi">chọn có skill</span><span>16</span></div><div class="track"><div class="fill g2" style="--w: 50%"></div></div></div>
-          <div class="bar-row"><div><span data-l="en">ties</span><span data-l="vi">hoà</span><span>10</span></div><div class="track"><div class="fill" style="--w: 31%"></div></div></div>
-          <div class="bar-row"><div><span data-l="en">prefers no skill</span><span data-l="vi">chọn không skill</span><span>6</span></div><div class="track"><div class="fill" style="--w: 19%"></div></div></div></div></div>
-    </div>
-    <p class="note" data-l="en">The honest part: it costs about twice the output tokens, which is wasted on a label change, so trivial edits take a fast path. Neither side shipped broken code on these evals; the gain is grounding: cited sources, the migration a stored field needs, and tests that provably ran. <a href="https://github.com/unclecatvn/agent-skills/blob/main/tests/evals/odoo-workflow/benchmark.md">Every number →</a></p>
-    <p class="note" data-l="vi">Phần thẳng thắn: tốn khoảng gấp đôi token đầu ra, phí nếu chỉ sửa một nhãn, nên các sửa đổi nhỏ đi đường tắt. Trên các eval này không bên nào ship code hỏng; cái được là tính có cơ sở: nguồn được trích dẫn, migration mà field stored cần, và test chạy thật. <a href="https://github.com/unclecatvn/agent-skills/blob/main/tests/evals/odoo-workflow/benchmark.md">Xem toàn bộ số liệu →</a></p>
-  </section>
-
-  <!-- the toolkit -->
-  <section class="sec" id="kit">
-    <span class="label">07 — <span data-l="en">What's inside</span><span data-l="vi">Bên trong có gì</span></span>
-    <h2 data-l="en">One plugin: references, a workflow, two agents.</h2>
-    <h2 data-l="vi">Một plugin: tài liệu, quy trình, hai agent.</h2>
-    <div class="kit">
-      <div class="card rv"><h3 data-l="en">Reference packs</h3><h3 data-l="vi">Gói tài liệu tham chiếu</h3><p data-l="en">One per Odoo version: models, fields, views, OWL, security, controllers, reports, tests, migrations, translations, performance, and what not to use in that version.</p><p data-l="vi">Mỗi phiên bản Odoo một gói: model, field, view, OWL, bảo mật, controller, report, test, migration, dịch thuật, hiệu năng, và những gì không nên dùng ở phiên bản đó.</p>
-        <div class="chips"><span class="chip">odoo-16.0</span><span class="chip">odoo-17.0</span><span class="chip">odoo-18.0</span><span class="chip">odoo-19.0</span></div></div>
-      <div class="card rv"><h3 data-l="en">Workflow and commits</h3><h3 data-l="vi">Quy trình và commit</h3><p data-l="en">The trace-first gate with its read-only helper and a definition of done checked on Odoo 18 and 19; commits in Odoo's own <code>[TAG] module:</code> style.</p><p data-l="vi">Cổng trace-trước kèm helper chỉ-đọc và định nghĩa "xong" đã kiểm trên Odoo 18 và 19; commit theo đúng kiểu <code>[TAG] module:</code> của Odoo.</p>
-        <div class="chips"><span class="chip t">odoo-workflow</span><span class="chip t">odoo-commit</span></div></div>
-      <div class="card rv"><h3 data-l="en">Specialist agents</h3><h3 data-l="vi">Agent chuyên trách</h3><p data-l="en">A tracer that follows entry points, overrides and side effects end to end, and a reviewer that scores security, multi-company, performance and version rules.</p><p data-l="vi">Một agent trace luồng từ đầu đến cuối qua override và side effect, và một agent review chấm điểm bảo mật, đa công ty, hiệu năng và quy tắc theo phiên bản.</p>
-        <div class="chips"><span class="chip">odoo-code-tracer</span><span class="chip">odoo-code-review</span></div></div>
+  <section class="band" id="numbers">
+    <div class="wrap">
+      <p class="eyebrow" data-l="en">Benchmarks</p><p class="eyebrow" data-l="vi">Đo lường</p>
+      <h2 data-l="en">Measured on real Odoo source</h2>
+      <h2 data-l="vi">Đo trên source Odoo thật</h2>
+      <p class="lead" data-l="en">Run on Odoo 18 and 19 with Claude Opus agents and a blind grader.<br> <a href="https://github.com/unclecatvn/agent-skills/blob/main/tests/evals/odoo-workflow/benchmark.md">Every result is published</a>.</p>
+      <p class="lead" data-l="vi">Chạy trên Odoo 18 và 19, với agent Claude Opus và người chấm mù.<br> <a href="https://github.com/unclecatvn/agent-skills/blob/main/tests/evals/odoo-workflow/benchmark.md">Mọi kết quả đều công khai</a>.</p>
+      <div class="grid3">
+        <div class="card"><h3 data-l="en">Trace questions answered</h3><h3 data-l="vi">Câu hỏi trace trả lời đúng</h3><div class="num">34<small>/34</small></div>
+          <div class="bars">
+            <div class="b"><div><span data-l="en">grep recipe, zsh</span><span data-l="vi">cách grep, zsh</span><span>12</span></div><div class="track"><i style="width: 35%"></i></div></div>
+            <div class="b"><div><span data-l="en">grep recipe, bash</span><span data-l="vi">cách grep, bash</span><span>20</span></div><div class="track"><i style="width: 59%"></i></div></div>
+            <div class="b me"><div><span>odoo_trace</span><span>34</span></div><div class="track"><i style="width: 100%"></i></div></div></div></div>
+        <div class="card"><h3 data-l="en">Expectations met</h3><h3 data-l="vi">Tiêu chí đạt</h3><div class="num">23<small>/23</small></div>
+          <div class="bars">
+            <div class="b"><div><span data-l="en">without the skill</span><span data-l="vi">không có skill</span><span>21</span></div><div class="track"><i style="width: 91%"></i></div></div>
+            <div class="b me"><div><span data-l="en">with odoo-workflow</span><span data-l="vi">có odoo-workflow</span><span>23</span></div><div class="track"><i style="width: 100%"></i></div></div></div></div>
+        <div class="card"><h3 data-l="en">Blind grader, 32 pairs</h3><h3 data-l="vi">Chấm mù, 32 cặp</h3><div class="num">16<small> vs 6</small></div>
+          <div class="bars">
+            <div class="b me"><div><span data-l="en">prefers the skill</span><span data-l="vi">chọn có skill</span><span>16</span></div><div class="track"><i style="width: 50%"></i></div></div>
+            <div class="b"><div><span data-l="en">tie</span><span data-l="vi">hoà</span><span>10</span></div><div class="track"><i style="width: 31%"></i></div></div>
+            <div class="b"><div><span data-l="en">prefers no skill</span><span data-l="vi">chọn không skill</span><span>6</span></div><div class="track"><i style="width: 19%"></i></div></div></div></div>
+      </div>
+      <p class="fine" data-l="en">The trade-off: about twice the output tokens, because it reads before it writes. Labels and typos take a fast path.</p>
+      <p class="fine" data-l="vi">Đánh đổi: khoảng gấp đôi token đầu ra, vì nó đọc trước khi viết. Sửa nhãn hay lỗi chính tả thì đi đường tắt.</p>
     </div>
   </section>
 
-  <!-- install -->
-  <section class="sec" id="install">
-    <span class="label">08 — <span data-l="en">Install</span><span data-l="vi">Cài đặt</span></span>
-    <h2 data-l="en">Pick one route.</h2>
-    <h2 data-l="vi">Chọn một cách cài.</h2>
-    <div class="tabs" role="tablist">
-      <button class="tab on" data-tab="cc">Claude Code</button>
-      <button class="tab" data-tab="any"><span data-l="en">Any assistant</span><span data-l="vi">Trợ lý khác</span></button>
-      <button class="tab" data-tab="cli">CLI</button>
-    </div>
-    <div class="panel on" id="tab-cc">
-      <div class="cmd"><span class="pr">$</span><span class="t">claude plugin marketplace add unclecatvn/agent-skills</span><button class="copy" data-copy="claude plugin marketplace add unclecatvn/agent-skills">copy</button></div>
-      <div class="cmd"><span class="pr">$</span><span class="t">claude plugin install agent-skills@unclecat-agent-skills</span><button class="copy" data-copy="claude plugin install agent-skills@unclecat-agent-skills">copy</button></div>
-      <p data-l="en">Skills and agents together, namespaced as <code>agent-skills:odoo-workflow</code>, <code>agent-skills:odoo-18-0</code>, <code>agent-skills:odoo-code-review</code>. Add <code>--scope project</code> to record it in the project.</p>
-      <p data-l="vi">Cài cả skill lẫn agent, với namespace <code>agent-skills:odoo-workflow</code>, <code>agent-skills:odoo-18-0</code>, <code>agent-skills:odoo-code-review</code>. Thêm <code>--scope project</code> để ghi vào project.</p>
-    </div>
-    <div class="panel" id="tab-any">
-      <div class="cmd"><span class="pr">$</span><span class="t">npx skills add unclecatvn/agent-skills</span><button class="copy" data-copy="npx skills add unclecatvn/agent-skills">copy</button></div>
-      <p data-l="en">For Cursor, Codex and other assistants the skills installer supports. Pick <code>odoo-workflow</code> plus the pack for your Odoo version. Skills only: the agents are Claude Code's.</p>
-      <p data-l="vi">Cho Cursor, Codex và các trợ lý khác mà bộ cài skills hỗ trợ. Chọn <code>odoo-workflow</code> và gói đúng phiên bản Odoo của bạn. Chỉ cài skill: agent chỉ có trên Claude Code.</p>
-    </div>
-    <div class="panel" id="tab-cli">
-      <div class="cmd"><span class="pr">$</span><span class="t">npx @unclecat/agent-skills-cli init --ai cursor --skill skills --version odoo-18.0</span><button class="copy" data-copy="npx @unclecat/agent-skills-cli init --ai cursor --skill skills --version odoo-18.0">copy</button></div>
-      <div class="cmd"><span class="pr">$</span><span class="t">npx @unclecat/agent-skills-cli init --ai claude --skill skills --version odoo-workflow</span><button class="copy" data-copy="npx @unclecat/agent-skills-cli init --ai claude --skill skills --version odoo-workflow">copy</button></div>
-      <p data-l="en">Copies one pack to a known location. <code>npx @unclecat/agent-skills-cli versions skills</code> lists them.</p>
-      <p data-l="vi">Chép một gói vào đúng chỗ. <code>npx @unclecat/agent-skills-cli versions skills</code> liệt kê các gói.</p>
+  <section class="band alt" id="install">
+    <div class="wrap side">
+      <div>
+        <p class="eyebrow" data-l="en">Install</p><p class="eyebrow" data-l="vi">Cài đặt</p>
+        <h2 data-l="en">Up and running in a minute</h2>
+        <h2 data-l="vi">Cài xong trong một phút</h2>
+        <p class="lead" data-l="en">Pick the route for your assistant.</p>
+        <p class="lead" data-l="vi">Chọn cách cài hợp với trợ lý của bạn.</p>
+      </div>
+      <div>
+        <div class="seg" role="tablist">
+          <button class="on" data-tab="cc">Claude Code</button>
+          <button data-tab="any"><span data-l="en">Cursor, Codex, others</span><span data-l="vi">Cursor, Codex, khác</span></button>
+          <button data-tab="cli">CLI</button>
+        </div>
+        <div class="panel on" id="tab-cc">
+          <div class="code">
+            <div class="ln"><span class="t">claude plugin marketplace add unclecatvn/agent-skills</span><button class="copy" data-copy="claude plugin marketplace add unclecatvn/agent-skills" aria-label="Copy"><svg class="i"><use href="#i-copy"/></svg></button></div>
+            <div class="ln"><span class="t">claude plugin install agent-skills@unclecat-agent-skills</span><button class="copy" data-copy="claude plugin install agent-skills@unclecat-agent-skills" aria-label="Copy"><svg class="i"><use href="#i-copy"/></svg></button></div>
+          </div>
+          <p data-l="en">Skills and agents together. Add <code>--scope project</code> to record it in the project.</p>
+          <p data-l="vi">Cài cả skill lẫn agent. Thêm <code>--scope project</code> để ghi vào project.</p>
+        </div>
+        <div class="panel" id="tab-any">
+          <div class="code"><div class="ln"><span class="t">npx skills add unclecatvn/agent-skills</span><button class="copy" data-copy="npx skills add unclecatvn/agent-skills" aria-label="Copy"><svg class="i"><use href="#i-copy"/></svg></button></div></div>
+          <p data-l="en">Pick <code>odoo-workflow</code> and the pack for your version. Skills only: the agents need Claude Code.</p>
+          <p data-l="vi">Chọn <code>odoo-workflow</code> và gói đúng phiên bản. Chỉ cài skill: agent cần Claude Code.</p>
+        </div>
+        <div class="panel" id="tab-cli">
+          <div class="code">
+            <div class="ln"><span class="t">npx @unclecat/agent-skills-cli init --ai cursor --skill skills --version odoo-18.0</span><button class="copy" data-copy="npx @unclecat/agent-skills-cli init --ai cursor --skill skills --version odoo-18.0" aria-label="Copy"><svg class="i"><use href="#i-copy"/></svg></button></div>
+            <div class="ln"><span class="t">npx @unclecat/agent-skills-cli init --ai claude --skill skills --version odoo-workflow</span><button class="copy" data-copy="npx @unclecat/agent-skills-cli init --ai claude --skill skills --version odoo-workflow" aria-label="Copy"><svg class="i"><use href="#i-copy"/></svg></button></div>
+          </div>
+          <p data-l="en">Copies one pack to where your assistant reads it; <code>versions skills</code> lists them.</p>
+          <p data-l="vi">Chép một gói vào chỗ trợ lý của bạn đọc; <code>versions skills</code> liệt kê các gói.</p>
+        </div>
+      </div>
     </div>
   </section>
 
-  <!-- faq -->
-  <section class="sec" id="faq">
-    <span class="label">09 — FAQ</span>
-    <h2 data-l="en">Questions.</h2>
-    <h2 data-l="vi">Câu hỏi thường gặp.</h2>
-    <details><summary data-l="en">Is this an Odoo module?</summary><summary data-l="vi">Đây có phải module Odoo không?</summary>
-      <p data-l="en">No. It is instructions for your AI assistant plus a read-only Python helper. Nothing is installed in Odoo, and nothing enforces itself: results depend on the assistant, the model and the checks you let it run.</p>
-      <p data-l="vi">Không. Đây là hướng dẫn cho trợ lý AI cùng một helper Python chỉ-đọc. Không cài gì vào Odoo, cũng không tự cưỡng chế: kết quả phụ thuộc vào trợ lý, model và những bước kiểm tra bạn cho phép nó chạy.</p></details>
-    <details><summary data-l="en">Does it send my code anywhere?</summary><summary data-l="vi">Nó có gửi code của tôi đi đâu không?</summary>
-      <p data-l="en">The trace helper only reads files on your machine and prints to your terminal. It uses the Python standard library and makes no network calls.</p>
-      <p data-l="vi">Trace helper chỉ đọc file trên máy bạn và in ra terminal. Nó chỉ dùng thư viện chuẩn của Python và không gọi mạng.</p></details>
-    <details><summary data-l="en">Which Odoo versions?</summary><summary data-l="vi">Hỗ trợ những phiên bản Odoo nào?</summary>
-      <p data-l="en">16.0, 17.0, 18.0 and 19.0, one reference pack each. The version always comes from your core's <code>odoo/release.py</code>, never from a guess.</p>
-      <p data-l="vi">16.0, 17.0, 18.0 và 19.0, mỗi bản một gói. Phiên bản luôn được đọc từ <code>odoo/release.py</code> của core, không bao giờ đoán.</p></details>
-    <details><summary data-l="en">Isn't it slower?</summary><summary data-l="vi">Như vậy có chậm hơn không?</summary>
-      <p data-l="en">It reads more before it writes: about twice the output tokens and 1.7× the tool calls on the evals. For a label or a typo that's waste, which is why those take a fast path.</p>
-      <p data-l="vi">Nó đọc nhiều hơn trước khi viết: khoảng gấp đôi token đầu ra và 1,7 lần số lần gọi tool trên các eval. Với một nhãn hay lỗi chính tả thì phí, nên những việc đó đi đường tắt.</p></details>
-    <details><summary data-l="en">Is it free?</summary><summary data-l="vi">Có miễn phí không?</summary>
-      <p data-l="en">Yes, MIT licensed. Issues and pull requests are welcome on GitHub.</p>
-      <p data-l="vi">Có, giấy phép MIT. Issue và pull request đều được chào đón trên GitHub.</p></details>
+  <section class="band" id="faq">
+    <div class="wrap side">
+      <div>
+        <p class="eyebrow">FAQ</p>
+        <h2 data-l="en">Frequently asked questions</h2><h2 data-l="vi">Câu hỏi thường gặp</h2>
+        <p class="lead" data-l="en">Something else? Ask on <a href="https://github.com/unclecatvn/agent-skills/issues">GitHub Issues</a>.</p>
+        <p class="lead" data-l="vi">Còn thắc mắc khác? Hỏi trên <a href="https://github.com/unclecatvn/agent-skills/issues">GitHub Issues</a>.</p>
+      </div>
+      <div>
+        <details><summary><span data-l="en">What is Agent Skills for Odoo?</span><span data-l="vi">Agent Skills cho Odoo là gì?</span><svg class="i"><use href="#i-plus"/></svg></summary>
+          <div class="ans" data-l="en">A free, open-source toolkit that makes AI coding assistants such as Claude Code, Cursor and Codex work from your real Odoo source instead of from memory: reference packs for Odoo 16 to 19, the <code>odoo-workflow</code> skill with a read-only trace helper, and two agents, <code>odoo-code-tracer</code> and <code>odoo-code-review</code>. It is not an Odoo module: nothing is installed in your database.</div><div class="ans" data-l="vi">Bộ công cụ miễn phí, mã nguồn mở giúp trợ lý AI như Claude Code, Cursor và Codex làm việc từ source Odoo thật của bạn thay vì theo trí nhớ: gói tài liệu cho Odoo 16 đến 19, skill <code>odoo-workflow</code> kèm helper trace chỉ đọc, và hai agent <code>odoo-code-tracer</code>, <code>odoo-code-review</code>. Đây không phải module Odoo: không cài gì vào database của bạn.</div></details>
+        <details><summary><span data-l="en">How do I use Claude Code with Odoo?</span><span data-l="vi">Dùng Claude Code với Odoo như thế nào?</span><svg class="i"><use href="#i-plus"/></svg></summary>
+          <div class="ans" data-l="en">Install the plugin, then open Claude Code in your Odoo project and ask as usual: the skill starts on Odoo work, and on the first task it finds your Odoo version, core and addons from your <code>odoo.conf</code>.<span class="cmd">claude plugin marketplace add unclecatvn/agent-skills</span><span class="cmd">claude plugin install agent-skills@unclecat-agent-skills</span></div><div class="ans" data-l="vi">Cài plugin, rồi mở Claude Code trong project Odoo và hỏi như bình thường: skill tự chạy khi gặp việc Odoo, và ở task đầu tiên nó tìm phiên bản Odoo, core và addons từ <code>odoo.conf</code> của bạn.<span class="cmd">claude plugin marketplace add unclecatvn/agent-skills</span><span class="cmd">claude plugin install agent-skills@unclecat-agent-skills</span></div></details>
+        <details><summary><span data-l="en">Does it work with Cursor, Codex and other AI assistants?</span><span data-l="vi">Có dùng được với Cursor, Codex và trợ lý AI khác không?</span><svg class="i"><use href="#i-plus"/></svg></summary>
+          <div class="ans" data-l="en">Yes. The skills installer puts the skills in any assistant it supports; pick yours when it asks. The two agents come with the Claude Code plugin only.<span class="cmd">npx skills add unclecatvn/agent-skills</span></div><div class="ans" data-l="vi">Có. Bộ cài skills đưa skill vào mọi trợ lý mà nó hỗ trợ; chọn trợ lý của bạn khi được hỏi. Hai agent chỉ đi kèm plugin Claude Code.<span class="cmd">npx skills add unclecatvn/agent-skills</span></div></details>
+        <details><summary><span data-l="en">Which Odoo versions are supported?</span><span data-l="vi">Hỗ trợ những phiên bản Odoo nào?</span><svg class="i"><use href="#i-plus"/></svg></summary>
+          <div class="ans" data-l="en">Odoo 16.0, 17.0, 18.0 and 19.0, Community and Enterprise. The version is read from your core's <code>odoo/release.py</code>, never assumed, and the matching pack is loaded. The workflow and its helper are checked against the Odoo 18 and 19 source.</div><div class="ans" data-l="vi">Odoo 16.0, 17.0, 18.0 và 19.0, cả Community lẫn Enterprise. Phiên bản được đọc từ <code>odoo/release.py</code> của core, không bao giờ đoán, rồi nạp đúng gói tài liệu. Quy trình và helper được kiểm tra trên source Odoo 18 và 19.</div></details>
+        <details><summary><span data-l="en">What do I need on my machine?</span><span data-l="vi">Cần chuẩn bị gì trên máy?</span><svg class="i"><use href="#i-plus"/></svg></summary>
+          <div class="ans" data-l="en">A local checkout of the Odoo source your project runs, plus enterprise if you use it; Python 3.8 or later for the helper, with only the standard library, so your Odoo virtualenv works; PostgreSQL with the right to create <code>scratch_*</code> databases for the tests; Node.js 18 or later only for the <code>npx</code> routes.</div><div class="ans" data-l="vi">Bản source Odoo mà project đang chạy nằm trên máy, thêm enterprise nếu bạn dùng; Python 3.8 trở lên cho helper, chỉ dùng thư viện chuẩn nên virtualenv của Odoo là đủ; PostgreSQL có quyền tạo database <code>scratch_*</code> để chạy test; Node.js 18 trở lên chỉ khi cài bằng <code>npx</code>.</div></details>
+        <details><summary><span data-l="en">Will it touch my database or send my code anywhere?</span><span data-l="vi">Nó có đụng vào database hay gửi code đi đâu không?</span><svg class="i"><use href="#i-plus"/></svg></summary>
+          <div class="ans" data-l="en">The trace helper only reads files and makes no network calls. Tests run on a throwaway <code>scratch_&lt;module&gt;</code> database that is dropped afterwards, and the assistant is told never to install or upgrade on a named database unless you ask. What your assistant sends to its model is up to the assistant.</div><div class="ans" data-l="vi">Helper trace chỉ đọc file và không gọi mạng. Test chạy trên database <code>scratch_&lt;module&gt;</code> dùng xong bỏ, và trợ lý được dặn không bao giờ cài hay nâng cấp trên database có tên trừ khi bạn yêu cầu. Trợ lý gửi gì cho model là do trợ lý quyết định.</div></details>
+        <details><summary><span data-l="en">How is it better than asking the AI directly?</span><span data-l="vi">Hơn gì so với hỏi AI trực tiếp?</span><svg class="i"><use href="#i-plus"/></svg></summary>
+          <div class="ans" data-l="en">Without it, the assistant answers from memory: fields that don't exist, such as <code>sale.order.delivery_date</code>, xpaths that stop the install, "tests pass" when no test ran. With it, every symbol gets a <code>file:line</code> or NOT FOUND before any code is written, and the change is proven on a scratch database. A blind grader preferred it 16 times to 6 over 32 pairs.</div><div class="ans" data-l="vi">Không có nó, trợ lý trả lời theo trí nhớ: field không tồn tại như <code>sale.order.delivery_date</code>, xpath làm cài module lỗi, "test pass" khi chưa test nào chạy. Có nó, mọi symbol đều có <code>file:line</code> hoặc NOT FOUND trước khi viết code, và thay đổi được kiểm chứng trên database thử. Người chấm mù chọn nó 16 lần, so với 6, trên 32 cặp.</div></details>
+        <details><summary><span data-l="en">How do I update it?</span><span data-l="vi">Cập nhật như thế nào?</span><svg class="i"><use href="#i-plus"/></svg></summary>
+          <div class="ans" data-l="en">Refresh the marketplace, then install the plugin again.<span class="cmd">claude plugin marketplace update unclecat-agent-skills</span><span class="cmd">claude plugin install agent-skills@unclecat-agent-skills</span></div><div class="ans" data-l="vi">Làm mới marketplace, rồi cài lại plugin.<span class="cmd">claude plugin marketplace update unclecat-agent-skills</span><span class="cmd">claude plugin install agent-skills@unclecat-agent-skills</span></div></details>
+        <details><summary><span data-l="en">Is it free?</span><span data-l="vi">Có miễn phí không?</span><svg class="i"><use href="#i-plus"/></svg></summary>
+          <div class="ans" data-l="en">Yes. It is MIT licensed and <a href="https://github.com/unclecatvn/agent-skills">open source on GitHub</a>, where issues and pull requests are welcome.</div><div class="ans" data-l="vi">Có. Giấy phép MIT, <a href="https://github.com/unclecatvn/agent-skills">mã nguồn mở trên GitHub</a>, mọi issue và pull request đều được chào đón.</div></details>
+      </div>
+    </div>
   </section>
 
-  <!-- closing -->
-  <section class="closing">
-    <h2 data-l="en">Stop guessing. <span class="g">Read the source.</span></h2>
-    <h2 data-l="vi">Đừng đoán nữa. <span class="g">Đọc source thật.</span></h2>
-    <div class="cmd"><span class="pr">$</span><span class="t">claude plugin install agent-skills@unclecat-agent-skills</span><button class="copy" data-copy="claude plugin marketplace add unclecatvn/agent-skills && claude plugin install agent-skills@unclecat-agent-skills">copy</button></div>
+  <section class="band tint" id="odoo-debug">
+    <div class="wrap">
+      <div class="od-head">
+        <div class="od-id">
+          <span class="od-logo"><svg class="i"><use href="#i-bug"/></svg></span>
+          <div>
+            <h2>Odoo Debug</h2>
+            <p class="lead" data-l="en">A free Chrome extension that shows why Odoo does what it does, in a panel right on the Odoo page.</p>
+            <p class="lead" data-l="vi">Extension Chrome miễn phí cho bạn thấy vì sao Odoo làm như vậy, ngay trong một panel trên trang Odoo.</p>
+          </div>
+        </div>
+        <div class="ctas">
+          <a class="btn pri" href="https://chromewebstore.google.com/detail/odoo-debug/mfmamdbagelffoedimmjpolhalmngcjk"><svg class="i" style="width: 16px; height: 16px"><use href="#i-chrome"/></svg><span data-l="en">Add to Chrome</span><span data-l="vi">Thêm vào Chrome</span></a>
+          <a class="btn" href="https://odoo-debug.unclecatvn.com/"><span data-l="en">Visit the website</span><span data-l="vi">Xem website</span><svg class="i" style="width: 15px; height: 15px"><use href="#i-ext"/></svg></a>
+        </div>
+      </div>
+      <figure class="od-shot"><div class="bar"><span class="dots"><i></i><i></i><i></i></span></div><img src="https://odoo-debug.unclecatvn.com/screenshots/overview.png" width="2880" height="1800" loading="lazy" referrerpolicy="no-referrer" alt="The Odoo Debug panel open over a sales order: the record's identity and metadata, and its fields with their types."></figure>
+      <div class="od-feats"><div><b>Record</b><h3><span data-l="en">What is this field?</span><span data-l="vi">Field này là gì?</span></h3><p><span data-l="en">Its type, value and module, and what recomputes it.</span><span data-l="vi">Kiểu, giá trị, module của nó, và cái gì tính lại nó.</span></p></div><div><b>View</b><h3><span data-l="en">Why is this field read-only?</span><span data-l="vi">Vì sao field này chỉ đọc?</span></h3><p><span data-l="en">The condition, its value right now, and the view that set it.</span><span data-l="vi">Điều kiện, giá trị lúc này, và view đã đặt ra nó.</span></p></div><div><b>RPC</b><h3><span data-l="en">What did that call send?</span><span data-l="vi">Lệnh gọi đó đã gửi gì?</span></h3><p><span data-l="en">Edit it and send it again right there, or copy it as cURL.</span><span data-l="vi">Sửa rồi gửi lại ngay tại chỗ, hoặc copy thành cURL.</span></p></div><div><b>Security</b><h3><span data-l="en">Why can't this user open it?</span><span data-l="vi">Vì sao user này không mở được?</span></h3><p><span data-l="en">The rule that refuses, and the group that would let them in.</span><span data-l="vi">Rule nào chặn, và group nào sẽ cho phép.</span></p></div><div><b>Translations</b><h3><span data-l="en">Where does this text come from?</span><span data-l="vi">Chữ này từ đâu ra?</span></h3><p><span data-l="en">Pick it on the page: its source, and where to change it.</span><span data-l="vi">Chọn ngay trên trang: nguồn của nó và chỗ để sửa.</span></p></div><div><b>Apps</b><h3><span data-l="en">What will this install bring?</span><span data-l="vi">Cài app này kéo theo gì?</span></h3><p><span data-l="en">Every module it installs and auto-installs.</span><span data-l="vi">Mọi module nó cài và tự cài kèm.</span></p></div><div><b>Menus</b><h3><span data-l="en">Where is that technical screen?</span><span data-l="vi">Màn hình kỹ thuật đó ở đâu?</span></h3><p><span data-l="en">Models, views, rules, crons: one click, no debug mode.</span><span data-l="vi">Model, view, rule, cron: một cú bấm, không cần debug mode.</span></p></div><div><b>Perf</b><h3><span data-l="en">Why is this screen slow?</span><span data-l="vi">Vì sao màn hình này chậm?</span></h3><p><span data-l="en">An N+1, the line running it, and where the time goes.</span><span data-l="vi">Lỗi N+1, dòng code gây ra nó, và thời gian đi đâu.</span></p></div><div><b>Code</b><h3><span data-l="en">What would this change do?</span><span data-l="vi">Thay đổi này sẽ làm gì?</span></h3><p><span data-l="en">A Python dry run: see the result, nothing is saved.</span><span data-l="vi">Chạy thử Python: thấy kết quả, không lưu gì.</span></p></div></div>
+      <p class="od-meta"><span data-l="en">Odoo 18, 19 and 20</span><span data-l="vi">Odoo 18, 19 và 20</span><span>Chrome · Edge · Brave</span><span data-l="en">No backend, no analytics</span><span data-l="vi">Không backend, không analytics</span></p>
+    </div>
+  </section>
+
+  <section class="band">
+    <div class="wrap">
+      <div class="cta">
+        <h2 data-l="en">Stop guessing. Read the source.</h2>
+        <h2 data-l="vi">Đừng đoán. Hãy đọc source.</h2>
+        <p class="sub" data-l="en">Free and open source, for Odoo 16 to 19.</p>
+        <p class="sub" data-l="vi">Miễn phí, mã nguồn mở, cho Odoo 16 đến 19.</p>
+        <div class="install"><span class="t">claude plugin marketplace add unclecatvn/agent-skills</span><button class="copy" data-copy="claude plugin marketplace add unclecatvn/agent-skills && claude plugin install agent-skills@unclecat-agent-skills" aria-label="Copy"><svg class="i"><use href="#i-copy"/></svg></button></div>
+      </div>
+    </div>
   </section>
 </main>
 
@@ -486,69 +872,148 @@
     <a href="https://www.npmjs.com/package/@unclecat/agent-skills-cli">npm</a>
     <a href="https://github.com/unclecatvn/agent-skills/blob/main/CHANGELOG.md">Changelog</a>
     <span class="sp"></span>
-    <a href="https://odoo-debug.unclecatvn.com/"><span data-l="en">Also by UncleCat: Odoo Debug, a Chrome extension →</span><span data-l="vi">Cùng tác giả: Odoo Debug, extension cho Chrome →</span></a>
+    <a href="https://odoo-debug.unclecatvn.com/">Odoo Debug</a>
   </div>
 </footer>
 
 <script>
   const $ = (s, r = document) => r.querySelector(s), $$ = (s, r = document) => [...r.querySelectorAll(s)];
-  const save = (k, v) => { try { localStorage.setItem(k, v); } catch {} };
+  const save = (k, v) => { try { v == null ? localStorage.removeItem(k) : localStorage.setItem(k, v); } catch {} };
+  const root = document.documentElement;
+  const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  // the language and the theme
-  $('#lang').onclick = () => { const l = document.documentElement.lang === 'vi' ? 'en' : 'vi'; document.documentElement.lang = l; save('lang', l); };
-  const themeIcon = () => { const dark = document.documentElement.dataset.theme ? document.documentElement.dataset.theme === 'dark' : !matchMedia('(prefers-color-scheme: light)').matches; $('#theme').textContent = dark ? '☀' : '☾'; return dark; };
-  themeIcon();
-  $('#theme').onclick = () => { const t = themeIcon() ? 'light' : 'dark'; document.documentElement.dataset.theme = t; save('theme', t); themeIcon(); };
+  // the language
+  $('#lang').onclick = () => { const l = root.lang === 'vi' ? 'en' : 'vi'; root.lang = l; save('lang', l); };
+
+  // the theme: system (no attribute), light or dark
+  const pickTheme = (t) => {
+    if (t === 'system') { delete root.dataset.theme; save('theme', null); } else { root.dataset.theme = t; save('theme', t); }
+    $$('[data-theme-pick]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.themePick === t)));
+  };
+  pickTheme(root.dataset.theme || 'system');
+  $$('[data-theme-pick]').forEach((b) => { b.onclick = () => pickTheme(b.dataset.themePick); });
 
   // copy buttons
   for (const b of $$('.copy')) b.onclick = async () => {
     try { await navigator.clipboard.writeText(b.dataset.copy); } catch { const a = document.createElement('textarea'); a.value = b.dataset.copy; document.body.append(a); a.select(); document.execCommand('copy'); a.remove(); }
-    b.textContent = '✓ copied'; b.classList.add('done'); setTimeout(() => { b.textContent = 'copy'; b.classList.remove('done'); }, 1600);
+    b.classList.add('done'); b.querySelector('use').setAttribute('href', '#i-check');
+    setTimeout(() => { b.classList.remove('done'); b.querySelector('use').setAttribute('href', '#i-copy'); }, 1500);
   };
 
   // install tabs
-  for (const t of $$('.tab')) t.onclick = () => { $$('.tab').forEach((x) => x.classList.toggle('on', x === t)); $$('.panel').forEach((p) => p.classList.toggle('on', p.id === `tab-${t.dataset.tab}`)); };
+  for (const t of $$('.seg button')) t.onclick = () => { $$('.seg button').forEach((x) => x.classList.toggle('on', x === t)); $$('.panel').forEach((p) => p.classList.toggle('on', p.id === `tab-${t.dataset.tab}`)); };
 
-  // the hero terminal: odoo_trace's real output on Odoo 18.0 source, typed, one query after another
-  const Q = [
-    ['field sale.order delivery_date', '<span class="bad">VERDICT: NOT FOUND: sale.order.delivery_date</span>; closest fields: <span class="hl">commitment_date (label \'Delivery Date\')</span>, delivery_set, delivery_status, delivery_count', 'delivery_date'],
-    ['field sale.order access_url', 'addons/portal/models/portal_mixin.py:13 portal PortalMixin via=parent portal.mixin Char compute=\'_compute_access_url\'\n<span class="ok">VERDICT: FOUND via parent portal.mixin</span>', 'access_url'],
-    ['xmlid sales_team.group_sale_admin', '<span class="bad">VERDICT: NOT FOUND: sales_team.group_sale_admin</span> (no record/template/menuitem/asset/report/CSV row, not generated); closest in sales_team: <span class="hl">group_sale_salesman, group_sale_manager</span>, pos_sales_team', 'group_sale_admin'],
-    ['field sale.order.line create_date', 'odoo/models.py:288 core MetaModel via=magic Datetime (_log_access defaults to _auto=True on definer addons/sale/models/sale_order_line.py:16; odoo/models.py:285)\n<span class="ok">VERDICT: FOUND magic</span>', 'create_date'],
-    ['model sale.order', 'addons/sale/models/sale_order.py:49 sale SaleOrder define _inherit=[portal.mixin, product.catalog.mixin, mail.thread, mail.activity.mixin, utm.mixin]\n<span class="mut">… 44 extensions: sale_stock, sale_crm, sale_management, delivery, …</span>\n<span class="ok">VERDICT: sale.order defined in sale (addons/sale/models/sale_order.py:49); 44 extensions</span>', 'sale.order'],
+  // the difference: one part at a time, replayed on each switch; it moves on by itself until someone picks a tab
+  const dtabs = $$('#dtabs button'), dpanels = $$('.dpanel');
+  let dcur = 0, dtimer = null, dauto = !still;
+  const showD = (i) => {
+    dcur = i;
+    dtabs.forEach((b, j) => b.setAttribute('aria-selected', String(j === i)));
+    dpanels.forEach((p, j) => { p.classList.toggle('on', j === i); p.classList.remove('play'); });
+    void dpanels[i].offsetWidth; // restart the animation
+    dpanels[i].classList.add('play');
+  };
+  const dnext = () => { clearTimeout(dtimer); if (dauto) dtimer = setTimeout(() => { showD((dcur + 1) % dpanels.length); dnext(); }, 7000); };
+  dtabs.forEach((b, i) => { b.onclick = () => { dauto = false; clearTimeout(dtimer); showD(i); b.scrollIntoView({ block: 'nearest', inline: 'nearest' }); }; });
+  new IntersectionObserver(([e]) => { if (e.isIntersecting) { showD(dcur); dnext(); } else clearTimeout(dtimer); }, { threshold: .35 }).observe($('#diff'));
+
+  // the hero's session: one prompt, sent without the plugin and then with it. The odoo_trace lines are its real
+  // output on Odoo 18.0 source (paths shortened); the replies are condensed.
+  const L = (en, vi) => `<span data-l="en">${en}</span><span data-l="vi">${vi}</span>`;
+  const esc = (t) => t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  const xml = (t) => esc(t).replace(/"([^"]*)"/g, '"<span class="s">$1</span>"').replace(/\[\[(.+?)\]\]/g, '<span class="err">$1</span>');
+  const PROMPT = ['Show the delivery date on the quotation list.', 'Hiện ngày giao hàng trên danh sách báo giá.'];
+  const RUNS = [
+    [
+      ['think', '1s', L('A quotation list is a <code>tree</code> view, and sale.order surely has a <code>delivery_date</code> field.', 'Danh sách báo giá là tree view, và sale.order chắc có field <code>delivery_date</code>.')],
+      ['say', L("I'll add a <code>delivery_date</code> column to the quotation list.", 'Mình sẽ thêm cột <code>delivery_date</code> vào danh sách báo giá.')],
+      ['edit', 'views/sale_order_views.xml', 14, ['<xpath expr="//[[tree]]" position="inside">', '    <field name="[[delivery_date]]"/>', '</xpath>']],
+      ['say', L('Done. The quotation list now shows the delivery date.', 'Xong. Danh sách báo giá đã có cột ngày giao hàng.')],
+      ['fail', L('When you install it', 'Khi bạn cài module'), `$ odoo-bin -u sale_extra<br>Element '&lt;xpath expr="//tree"&gt;' cannot be located in parent view`],
+    ],
+    [
+      ['note', L('Loaded skill', 'Đã nạp skill') + ' <b>odoo-workflow</b>'],
+      ['think', '2s', L('Before writing anything: which Odoo is this, and does sale.order really have a delivery date field?', 'Trước khi viết: đây là Odoo bản nào, và sale.order có thật field ngày giao hàng không?')],
+      ['ran', L('Ran <b>odoo_trace</b> 3 times', 'Chạy <b>odoo_trace</b> 3 lần'), [
+        ['odoo_trace env', '<span class="ok">VERDICT: Odoo 18.0</span>, 2 roots, 650 modules'],
+        ['odoo_trace field sale.order delivery_date', `<span class="no">VERDICT: NOT FOUND</span>: sale.order.delivery_date; closest fields: <span class="hi">commitment_date (label 'Delivery Date')</span>, delivery_set, delivery_status, delivery_count`],
+        ['odoo_trace xmlid sale.view_quotation_tree', '<span class="ok">VERDICT: FOUND</span> sale.view_quotation_tree (addons/sale/views/sale_order_views.xml:205)'],
+      ]],
+      ['ran', L('Read', 'Đã đọc') + ' <b>sale_order_views.xml</b>', [['', '131  &lt;field name="commitment_date" <span class="hi">optional="hide"</span>/&gt;']]],
+      ['brief', [['version', '18.0', 'odoo/release.py'], ['delivery_date', '<span class="no">NOT FOUND</span>', 'odoo_trace'], ['commitment_date', 'Datetime', 'sale/models/sale_order.py:103'], ['quotation list', 'view_quotation_tree', 'sale/views/sale_order_views.xml:205']]],
+      ['say', L('Odoo 18.0 has no <code>delivery_date</code>. The field labelled Delivery Date is <code>commitment_date</code>, and the quotation list already has it as an optional column, hidden. I only need to show it.', 'Odoo 18.0 không có <code>delivery_date</code>. Field có nhãn Delivery Date là <code>commitment_date</code>, và danh sách báo giá đã có sẵn nó dưới dạng cột tuỳ chọn, đang ẩn. Chỉ cần cho nó hiện ra.')],
+      ['edit', 'views/sale_order_views.xml', 14, ['<field name="commitment_date" position="attributes">', '    <attribute name="optional">show</attribute>', '</field>']],
+      ['note', L('Next: install it on a scratch database and run the tests.', 'Tiếp theo: cài lên database thử và chạy test.')],
+    ],
   ];
-  const out = $('#out'), qs = $('#queries');
-  const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  let cur = 0, timer = null, auto = true;
-  Q.forEach(([cmd, , label], i) => { const b = document.createElement('button'); b.className = 'q'; b.textContent = label; b.onclick = () => { auto = false; run(i); }; qs.append(b); });
-  function run(i) {
-    clearTimeout(timer); cur = i;
-    $$('.q', qs).forEach((b, j) => b.classList.toggle('on', j === i));
-    const [cmd, res] = Q[i], line = `odoo_trace ${cmd}`;
-    let k = still ? line.length : 0;
-    const step = () => {
-      out.innerHTML = `<span class="pr">$</span> ${line.slice(0, k)}${k < line.length ? '<span class="caret"></span>' : ''}`;
-      if (k < line.length) { k += 1; timer = setTimeout(step, 28); return; }
-      timer = setTimeout(() => {
-        out.innerHTML = `<span class="pr">$</span> ${line}\n${res}\n<span class="pr">$</span> <span class="caret"></span>`;
-        if (auto) timer = setTimeout(() => run((cur + 1) % Q.length), 4200);
-      }, still ? 0 : 380);
+  const ITEM = {
+    note: (t) => `<div class="step">${t}</div>`,
+    say: (t) => `<p class="say">${t}</p>`,
+    think: (secs, t) => `<details class="step" open><summary>${L(`Thought for ${secs}`, `Suy nghĩ ${secs}`)}</summary><div class="step-b th">${t}</div></details>`,
+    ran: (head, rows) => `<details class="step" open><summary>${head}</summary><div class="step-b">${rows.map(([cmd, res]) => `<div class="tr">${cmd ? `<div class="c">$ ${cmd}</div>` : ''}${res}</div>`).join('')}</div></details>`,
+    edit: (f, at, lines) => `<details class="step" open><summary>${L('Edited', 'Đã sửa')} <b>${f.split('/').pop()}</b> <span class="plus">+${lines.length}</span></summary><div class="card-code"><div class="path">sale_extra/${f}</div><pre>${lines.map((l, k) => `<span class="ln add"><b>${at + k}</b>${xml(l)}</span>`).join('')}</pre></div></details>`,
+    brief: (rows) => `<div class="brief"><div><span>Context Brief</span><span></span><span></span></div>${rows.map((r) => `<div>${r.map((c) => `<span>${c}</span>`).join('')}</div>`).join('')}</div>`,
+    fail: (when, t) => `<div class="fail"><small>${when}</small>${t}</div>`,
+  };
+  const PAUSE = { note: 600, think: 900, say: 700, ran: 1000, edit: 900, brief: 900, fail: 1300 };
+  const log = $('#log'), busy = $('#busy'), typed = $('#typed'), go = $('#go'), plug = $('#plug'), spin = $('#spin');
+  const sessions = $$('.app-side .sess:not(.dim)');
+  let sTimer = null, sAuto = !still;
+  const add = (html) => { busy.insertAdjacentHTML('beforebegin', html); log.scrollTo({ top: log.scrollHeight, behavior: still ? 'auto' : 'smooth' }); };
+  const idle = () => { typed.innerHTML = `<span class="ph">${L('Describe a task or ask a question', 'Mô tả một việc hoặc đặt câu hỏi')}</span>`; };
+  const working = (on) => { busy.hidden = !on; spin.classList.toggle('on', on); };
+  function play(m) {
+    clearTimeout(sTimer);
+    sessions.forEach((b, j) => b.setAttribute('aria-selected', String(j === m)));
+    plug.className = m ? 'skill on' : 'skill';
+    plug.innerHTML = `<i></i>agent-skills ${m ? L('on', 'bật') : L('off', 'tắt')}`;
+    $$('#log > :not(#busy)').forEach((e) => e.remove()); working(false);
+    const [en, vi] = PROMPT, run = RUNS[m];
+    let k = 0;
+    const type = () => {
+      if (still) k = 1;
+      typed.innerHTML = L(esc(en.slice(0, Math.round(k * en.length))), esc(vi.slice(0, Math.round(k * vi.length)))) + (k < 1 ? '<span class="caret"></span>' : '');
+      go.classList.add('on');
+      if (k < 1) { k = Math.min(1, k + 1 / 44); sTimer = setTimeout(type, 30); return; }
+      sTimer = setTimeout(send, still ? 0 : 500);
     };
-    step();
+    const send = () => { idle(); go.classList.remove('on'); add(`<div class="you">${L(esc(en), esc(vi))}</div>`); working(true); step(0); };
+    const step = (i) => {
+      if (i === run.length) {
+        working(false);
+        if (sAuto) sTimer = setTimeout(() => play(1 - m), m ? 7000 : 3800);
+        return;
+      }
+      const [kind, ...args] = run[i];
+      sTimer = setTimeout(() => { add(ITEM[kind](...args)); step(i + 1); }, still ? 0 : PAUSE[kind]);
+    };
+    idle(); sTimer = setTimeout(type, still ? 0 : 600);
   }
-  run(0);
+  sessions.forEach((b, j) => { b.onclick = () => { sAuto = false; play(j); }; });
+  play(0);
 
-  // the film: plays muted while on screen; the sound button unmutes
-  const v = $('#video'), snd = $('#sound');
-  snd.onclick = () => { v.muted = !v.muted; if (!v.muted) v.play(); snd.firstChild.textContent = v.muted ? '🔇 ' : '🔊 '; };
+  // the workflow: the packet walks the seven steps and pauses on each to show what it produced; gates hold longer
+  const fsteps = $$('#flow .ftrack button'), fpanels = $$('#flow .fpanel'), ftrack = $('#flow .ftrack');
+  let fcur = 0, ftimer = null, fauto = !still;
+  const showF = (i) => {
+    fcur = i;
+    ftrack.style.setProperty('--p', String(i / (fsteps.length - 1)));
+    fsteps.forEach((b, j) => { b.setAttribute('aria-selected', String(j === i)); b.classList.toggle('past', j < i); });
+    fpanels.forEach((p, j) => { p.classList.toggle('on', j === i); p.classList.remove('play'); });
+    void fpanels[i].offsetWidth; // restart the animation
+    fpanels[i].classList.add('play');
+  };
+  const fnext = () => { clearTimeout(ftimer); if (fauto) ftimer = setTimeout(() => { showF((fcur + 1) % fsteps.length); fnext(); }, fsteps[fcur].classList.contains('gate') ? 4200 : 3200); };
+  fsteps.forEach((b, i) => { b.onclick = () => { fauto = false; clearTimeout(ftimer); showF(i); }; });
+  new IntersectionObserver(([e]) => { if (e.isIntersecting) { showF(fcur); fnext(); } else clearTimeout(ftimer); }, { threshold: .35 }).observe($('#flow'));
+
+  // the video: muted while it plays on screen; the button turns the sound on and off
+  const v = $('#vid'), snd = $('#sound');
+  snd.onclick = () => { v.muted = !v.muted; if (!v.muted) v.play(); snd.querySelector('use').setAttribute('href', v.muted ? '#i-mute' : '#i-vol'); };
   new IntersectionObserver(([e]) => { if (e.isIntersecting && !still) v.play().catch(() => {}); else v.pause(); }, { threshold: .4 }).observe(v);
 
-  // reveal on scroll
-  const io = new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }), { threshold: .15 });
-  $$('.rv').forEach((n) => io.observe(n));
-
-  // the star count, if GitHub answers
-  fetch('https://api.github.com/repos/unclecatvn/agent-skills').then((r) => r.ok ? r.json() : null).then((d) => { if (d?.stargazers_count != null) $('#stars').textContent = `★ ${d.stargazers_count}`; }).catch(() => {});
+  // the star count, when GitHub answers
+  fetch('https://api.github.com/repos/unclecatvn/agent-skills').then((r) => (r.ok ? r.json() : null)).then((d) => { if (d?.stargazers_count != null) $('#stars').textContent = `★ ${d.stargazers_count}`; }).catch(() => {});
 </script>
 </body>
 </html>
