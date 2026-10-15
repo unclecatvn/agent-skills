@@ -1,6 +1,6 @@
 <div align="center">
 
-![Agent Skills — kiến thức chuyên sâu theo từng phiên bản cho phát triển Odoo, hỗ trợ Odoo 16–19](lib/image/hero.png)
+https://github.com/user-attachments/assets/a6f73c3a-7253-4621-b72e-511e2e57cb3a
 
 # Agent Skills
 
